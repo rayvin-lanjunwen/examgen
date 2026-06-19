@@ -38,10 +38,22 @@ if str(_SRC) not in sys.path:
 from examgen.web.app import app  # noqa: E402, F401
 '''
 
-# scf_bootstrap — 兜底启动脚本
-BOOTSTRAP = '''#!/bin/bash
-python -m uvicorn main:app --host 0.0.0.0 --port 9000
-'''
+# scf_bootstrap — 兜底启动脚本（必须用 LF 行尾）
+BOOTSTRAP = '#!/bin/bash\npython -m uvicorn main:app --host 0.0.0.0 --port 9000\n'
+
+
+def _add_to_zip(zf, arcname, data_or_path):
+    """写入 ZIP，并为 scf_bootstrap 设置 Unix 可执行权限。"""
+    info = zipfile.ZipInfo(arcname)
+    if arcname == "scf_bootstrap":
+        info.external_attr = 0o755 << 16  # 可执行权限
+    else:
+        info.external_attr = 0o644 << 16
+    if isinstance(data_or_path, bytes):
+        zf.writestr(info, data_or_path)
+    else:
+        with open(data_or_path, "rb") as f:
+            zf.writestr(info, f.read())
 
 
 def build():
@@ -56,10 +68,9 @@ def build():
     # 1. 写入 main.py
     (BUILD_DIR / "main.py").write_text(MAIN_PY, encoding="utf-8")
 
-    # 2. 写入 scf_bootstrap
+    # 2. 写入 scf_bootstrap（LF 行尾，直接写 bytes）
     bootstrap_path = BUILD_DIR / "scf_bootstrap"
-    bootstrap_path.write_text(BOOTSTRAP, encoding="utf-8")
-    bootstrap_path.chmod(0o755)
+    bootstrap_path.write_bytes(BOOTSTRAP.encode("utf-8"))
 
     # 3. 复制 src/examgen（排除 __pycache__ 和 .egg-info）
     src_dst = BUILD_DIR / "src" / "examgen"
@@ -83,13 +94,13 @@ def build():
         check=True,
     )
 
-    # 5. 打包 ZIP
+    # 5. 打包 ZIP（使用 _add_to_zip 确保权限正确）
     print("正在打包...")
     with zipfile.ZipFile(ZIP_PATH, "w", zipfile.ZIP_DEFLATED) as zf:
         for file in sorted(BUILD_DIR.rglob("*")):
             if file.is_file():
                 arcname = file.relative_to(BUILD_DIR)
-                zf.write(file, arcname)
+                _add_to_zip(zf, str(arcname), file)
 
     # 6. 清理临时目录
     shutil.rmtree(BUILD_DIR)
