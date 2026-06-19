@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExamGen - 试卷生成器</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="page-title">
+      <h1>ExamGen</h1>
+      <p>从 Markdown 生成离线 HTML 试卷</p>
+    </div>
+
+    <div class="card">
+      <!-- 拖拽上传区 -->
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-zone-icon">&#128196;</div>
+        <div class="drop-zone-text">
+          拖拽 .md 文件到此处，或 <strong id="browseLink">点击选择文件</strong>
+        </div>
+        <input type="file" class="file-input" id="fileInput" accept=".md,.markdown">
+      </div>
+
+      <!-- 已选文件信息 -->
+      <div class="file-info" id="fileInfo">
+        <span class="file-info-name" id="fileName"></span>
+        <button class="file-info-remove" id="fileRemove" title="移除文件">&times;</button>
+      </div>
+
+      <!-- 可选参数 -->
+      <button class="params-toggle" id="paramsToggle">
+        <span class="arrow">&#9654;</span> 可选参数
+      </button>
+      <div class="params-panel" id="paramsPanel">
+        <div class="form-row">
+          <label for="titleInput">试卷标题覆盖</label>
+          <input type="text" id="titleInput" placeholder="留空则使用 .md 中的标题">
+        </div>
+        <div class="form-row-inline">
+          <div class="form-row">
+            <label for="timeInput">考试时间（分钟）</label>
+            <input type="number" id="timeInput" placeholder="留空则使用默认值" min="1">
+          </div>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="shuffleCheck">
+          <label for="shuffleCheck">随机打乱题目顺序</label>
+        </div>
+        <div class="checkbox-row">
+          <input type="checkbox" id="optionShuffleCheck">
+          <label for="optionShuffleCheck">随机打乱选项顺序</label>
+        </div>
+      </div>
+
+      <!-- 生成按钮 -->
+      <button class="btn-generate" id="generateBtn">生成并下载试卷</button>
+
+      <!-- 状态提示 -->
+      <div class="status" id="statusArea"></div>
+    </div>
+
+    <div class="footer">ExamGen v0.1.0</div>
+  </div>
+
+  <script>
+    /* ── 配置：API 地址 ────────────────────────────────────
+     *  部署后将下面的地址改为云函数 SCF 的公网 URL
+     *  例如：https://xxx.ap-guangzhou.scf.tencentcloudapi.com
+     *  如果前端和后端同域部署，可留空使用相对路径 "/generate"
+     */
+    var API_BASE = "";
+
+    /* ── DOM ─────────────────────────────────────────────── */
+    var dropZone      = document.getElementById("dropZone");
+    var fileInput     = document.getElementById("fileInput");
+    var browseLink    = document.getElementById("browseLink");
+    var fileInfo      = document.getElementById("fileInfo");
+    var fileName      = document.getElementById("fileName");
+    var fileRemove    = document.getElementById("fileRemove");
+    var paramsToggle  = document.getElementById("paramsToggle");
+    var paramsPanel   = document.getElementById("paramsPanel");
+    var generateBtn   = document.getElementById("generateBtn");
+    var statusArea    = document.getElementById("statusArea");
+    var selectedFile  = null;
+
+    /* ── 文件选择 ────────────────────────────────────────── */
+    browseLink.addEventListener("click", function (e) {
+      e.stopPropagation();
+      fileInput.click();
+    });
+
+    dropZone.addEventListener("click", function () {
+      fileInput.click();
+    });
+
+    dropZone.addEventListener("dragover", function (e) {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+
+    dropZone.addEventListener("dragleave", function () {
+      dropZone.classList.remove("dragover");
+    });
+
+    dropZone.addEventListener("drop", function (e) {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      var files = e.dataTransfer.files;
+      if (files.length > 0) {
+        setFile(files[0]);
+      }
+    });
+
+    fileInput.addEventListener("change", function () {
+      if (fileInput.files.length > 0) {
+        setFile(fileInput.files[0]);
+      }
+    });
+
+    fileRemove.addEventListener("click", function () {
+      clearFile();
+    });
+
+    function setFile(file) {
+      if (!file.name.match(/\.md$/i) && !file.name.match(/\.markdown$/i)) {
+        showStatus("请选择 .md 文件", "error");
+        return;
+      }
+      selectedFile = file;
+      fileName.textContent = file.name + " (" + formatSize(file.size) + ")";
+      fileInfo.classList.add("show");
+      hideStatus();
+    }
+
+    function clearFile() {
+      selectedFile = null;
+      fileInput.value = "";
+      fileInfo.classList.remove("show");
+      hideStatus();
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + " B";
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+      return (bytes / 1024 / 1024).toFixed(1) + " MB";
+    }
+
+    /* ── 参数面板展开/收起 ───────────────────────────────── */
+    paramsToggle.addEventListener("click", function () {
+      paramsToggle.classList.toggle("open");
+      paramsPanel.classList.toggle("show");
+    });
+
+    /* ── 提交生成 ────────────────────────────────────────── */
+    generateBtn.addEventListener("click", function () {
+      if (!selectedFile) {
+        showStatus("请先选择 .md 文件", "error");
+        return;
+      }
+
+      var formData = new FormData();
+      formData.append("file", selectedFile);
+
+      var title = document.getElementById("titleInput").value.trim();
+      if (title) formData.append("title", title);
+
+      var time = document.getElementById("timeInput").value.trim();
+      if (time) formData.append("time", time);
+
+      if (document.getElementById("shuffleCheck").checked) {
+        formData.append("shuffle", "1");
+      }
+      if (document.getElementById("optionShuffleCheck").checked) {
+        formData.append("option_shuffle", "1");
+      }
+
+      showStatus("正在生成试卷…", "loading");
+      generateBtn.disabled = true;
+
+      fetch(API_BASE + "/generate", {
+        method: "POST",
+        body: formData,
+      })
+        .then(function (resp) {
+          if (!resp.ok) {
+            return resp.text().then(function (text) {
+              throw new Error(text || "服务器返回错误 (" + resp.status + ")");
+            });
+          }
+          var cd = resp.headers.get("Content-Disposition") || "";
+          var match = cd.match(/filename="?([^";\n]+)"?/);
+          var fname = match ? match[1] : "exam.html";
+          return resp.blob().then(function (blob) {
+            return { blob: blob, name: fname };
+          });
+        })
+        .then(function (data) {
+          var url = URL.createObjectURL(data.blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = data.name;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+
+          showStatus("生成成功！文件已开始下载。", "success");
+        })
+        .catch(function (err) {
+          showStatus("生成失败：" + err.message, "error");
+        })
+        .finally(function () {
+          generateBtn.disabled = false;
+        });
+    });
+
+    /* ── 状态提示 ────────────────────────────────────────── */
+    function showStatus(msg, type) {
+      statusArea.textContent = msg;
+      statusArea.className = "status show " + type;
+    }
+    function hideStatus() {
+      statusArea.className = "status";
+    }
+  </script>
+</body>
+</html>

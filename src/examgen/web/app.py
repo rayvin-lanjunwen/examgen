@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -20,6 +21,15 @@ _TEMPLATE_DIR = _WEB_DIR / "templates"
 _STATIC_DIR = _WEB_DIR / "static"
 
 app = FastAPI(title="ExamGen", version=__version__)
+
+# CORS — 允许前端跨域调用
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 templates = Jinja2Templates(directory=str(_TEMPLATE_DIR))
 
 # 挂载静态文件
