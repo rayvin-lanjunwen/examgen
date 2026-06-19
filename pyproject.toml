@@ -1,0 +1,37 @@
+[project]
+name = "examgen"
+version = "0.1.0"
+description = "Generate offline HTML exams from Markdown"
+requires-python = ">=3.9"
+dependencies = [
+    "click",
+    "jinja2",
+    "python-frontmatter",
+    "mistune",
+    "pyyaml",
+    "fastapi",
+    "uvicorn",
+    "python-multipart",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[project.scripts]
+examgen = "examgen.cli:main"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+examgen = [
+    "templates/default/**/*",
+    "web/templates/**/*",
+    "web/static/**/*",
+]

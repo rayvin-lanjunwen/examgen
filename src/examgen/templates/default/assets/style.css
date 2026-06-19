@@ -1,0 +1,216 @@
+/* ── CSS 变量 ────────────────────────────────────────── */
+:root {
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-correct: #16a34a;
+  --color-correct-bg: #dcfce7;
+  --color-wrong: #dc2626;
+  --color-wrong-bg: #fee2e2;
+  --color-border: #e2e8f0;
+  --color-bg: #f8fafc;
+  --color-card: #ffffff;
+  --color-text: #1e293b;
+  --color-text-secondary: #64748b;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* ── 全局 ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+/* ── 容器 ────────────────────────────────────────────── */
+.exam-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+/* ── 头部 ────────────────────────────────────────────── */
+.exam-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--color-border);
+}
+.exam-title {
+  font-size: 1.75rem;
+  margin-bottom: 12px;
+}
+.exam-info {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+}
+#countdown {
+  font-weight: 700;
+  color: var(--color-wrong);
+}
+
+/* ── 题目卡片 ────────────────────────────────────────── */
+.question-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+  transition: border-color 0.2s;
+}
+.question-card:hover {
+  border-color: var(--color-primary);
+}
+.question-header {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.question-type {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: #eff6ff;
+  color: var(--color-primary);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.question-score {
+  float: right;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+/* ── 选项 ────────────────────────────────────────────── */
+.options-list {
+  list-style: none;
+  padding: 0;
+}
+.option-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.option-item:hover {
+  background: #f1f5f9;
+  border-color: var(--color-primary);
+}
+.option-item input[type="radio"],
+.option-item input[type="checkbox"] {
+  margin-right: 10px;
+  margin-top: 3px;
+  accent-color: var(--color-primary);
+}
+.option-item.correct {
+  background: var(--color-correct-bg);
+  border-color: var(--color-correct);
+}
+.option-item.wrong {
+  background: var(--color-wrong-bg);
+  border-color: var(--color-wrong);
+}
+
+/* ── 填空 & 简答 ────────────────────────────────────── */
+.fill-input, .essay-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+.fill-input:focus, .essay-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+}
+.essay-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+.fill-input.correct { border-color: var(--color-correct); background: var(--color-correct-bg); }
+.fill-input.wrong   { border-color: var(--color-wrong);   background: var(--color-wrong-bg); }
+
+/* ── 解析 ────────────────────────────────────────────── */
+.explanation {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: #fffbeb;
+  border-left: 3px solid #f59e0b;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 0.9rem;
+  color: #92400e;
+  display: none;
+}
+.explanation.show { display: block; }
+
+/* ── 得分区域 ────────────────────────────────────────── */
+.score-area {
+  text-align: center;
+  margin-top: 32px;
+  padding: 24px;
+  background: var(--color-card);
+  border: 2px solid var(--color-primary);
+  border-radius: var(--radius);
+}
+.score-area h2 { margin-bottom: 8px; }
+#score-display {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.pass { color: var(--color-correct); }
+.fail { color: var(--color-wrong); }
+
+/* ── 按钮 ────────────────────────────────────────────── */
+.exam-actions {
+  text-align: center;
+  margin-top: 24px;
+}
+.btn {
+  padding: 10px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin: 0 8px;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: var(--color-primary);
+  color: #fff;
+}
+.btn-primary:hover { background: var(--color-primary-hover); }
+.btn-secondary {
+  background: #e2e8f0;
+  color: var(--color-text);
+}
+.btn-secondary:hover { background: #cbd5e1; }
+
+/* ── 工具类 ──────────────────────────────────────────── */
+.hidden { display: none !important; }
+
+/* ── 打印样式 ────────────────────────────────────────── */
+@media print {
+  .exam-actions, .score-area { display: none !important; }
+  .btn { display: none !important; }
+  .explanation.show { display: block; }
+  .question-card { break-inside: avoid; }
+  body { background: #fff; }
+}
