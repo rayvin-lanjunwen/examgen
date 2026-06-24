@@ -21,6 +21,8 @@ function buildNavSidebar(questions) {
     navList.appendChild(li);
   }
   progressText.textContent = "0/" + questions.length;
+  // 初始化书签系统
+  if (typeof initBookmarks === "function") initBookmarks();
 }
 
 /* ── 滚动高亮当前题目 ──────────────────────────────── */

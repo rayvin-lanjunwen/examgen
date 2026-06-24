@@ -31,18 +31,15 @@ function isCorrect(q, userAns) {
   if (q.qtype === QT.FILL) {
     var parts = q.answer.split("|").map(norm);
     var userParts = userAns.split("|").map(norm);
-    // 移除尾部空元素（由 collectAnswers 拼接产生）
     while (userParts.length > 0 && userParts[userParts.length - 1] === "") {
       userParts.pop();
     }
-    // 单个空 + 多个可接受答案：答对一个即可
     if (userParts.length === 1) {
       for (var i = 0; i < parts.length; i++) {
         if (userParts[0] === parts[i]) return true;
       }
       return false;
     }
-    // 多个空：逐个比对
     if (parts.length !== userParts.length) return false;
     for (var j = 0; j < parts.length; j++) {
       if (parts[j] !== userParts[j]) return false;
@@ -50,6 +47,39 @@ function isCorrect(q, userAns) {
     return true;
   }
   return norm(userAns) === norm(q.answer);
+}
+
+/* ── 简答关键词半自动判分 ──────────────────────────── */
+function scoreEssayByKeywords(q, userAns) {
+  if (!userAns || !q.explanation) {
+    return { score: 0, keywords: [], matched: [], suggestion: "" };
+  }
+  // 从解析中提取关键词：以 "关键词:" 或 "关键词：" 开头的行
+  var kwMatch = q.explanation.match(/关键词[:：]\s*(.+)/i);
+  if (!kwMatch) return { score: 0, keywords: [], matched: [], suggestion: "" };
+
+  var keywords = kwMatch[1].split(/[,，、\s]+/).filter(function(k) { return k.length > 0; });
+  if (keywords.length === 0) return { score: 0, keywords: [], matched: [], suggestion: "" };
+
+  var userLower = userAns.toLowerCase();
+  var matched = [];
+  for (var i = 0; i < keywords.length; i++) {
+    if (userLower.indexOf(keywords[i].toLowerCase()) !== -1) {
+      matched.push(keywords[i]);
+    }
+  }
+
+  var score = 0;
+  var maxScore = q.score || 0;
+  if (keywords.length > 0 && maxScore > 0) {
+    score = Math.round(maxScore * matched.length / keywords.length);
+  }
+
+  var suggestion = matched.length === 0
+    ? "未匹配到关键词，建议人工评估"
+    : "匹配 " + matched.length + "/" + keywords.length + " 个关键词，建议 " + score + " 分";
+
+  return { score: score, keywords: keywords, matched: matched, suggestion: suggestion };
 }
 
 /* ── 判分高亮 ───────────────────────────────────────── */
@@ -207,6 +237,10 @@ function buildReviewList() {
 
     reviewList.appendChild(item);
   }
+  // 附加书签标记
+  if (typeof enhanceReviewListWithBookmarks === "function") {
+    enhanceReviewListWithBookmarks();
+  }
 }
 
 /* ── 提交答卷 ───────────────────────────────────────── */
@@ -266,27 +300,13 @@ function onSubmit() {
 
   disableInputs();
   submitBtn.classList.add("hidden");
+  clearSavedAnswers();
 
   // 如果有简答题，进入批阅模式；否则直接显示结果
   if (hasEssayQuestions()) {
     enterGradingMode();
   } else {
-    scoreArea.classList.remove("hidden");
-    animateScore(0, totalScore, maxScore);
-    var pct = totalJudged > 0 ? Math.round(correctCount / totalJudged * 100) : 0;
-    animateRing(pct);
-    buildReviewList();
-    updateNavResults();
-    if (EXAM_META.passing_score != null) {
-      if (totalScore >= EXAM_META.passing_score) {
-        passStatus.className = "pass";
-        passStatus.textContent = "恭喜，你已通过考试！";
-      } else {
-        passStatus.className = "fail";
-        passStatus.textContent = "未达到及格线 (" + EXAM_META.passing_score + " 分)，继续努力！";
-      }
-    }
-    resetBtn.classList.remove("hidden");
+    showFinalScore(totalScore, maxScore, totalJudged, correctCount);
   }
 
   // 停止计时
@@ -338,9 +358,52 @@ function onReset() {
   // 清理批阅面板
   var gps = container.querySelectorAll(".grading-panel");
   for (var p = 0; p < gps.length; p++) { gps[p].remove(); }
+  // 重置书签
+  bookmarkedSet.clear();
+  var bookmarks = document.querySelectorAll(".nav-bookmark");
+  for (var bi = 0; bi < bookmarks.length; bi++) { bookmarks[bi].textContent = "☆"; bookmarks[bi].classList.remove("active"); }
+  var bmCards = container.querySelectorAll(".question-card.bookmarked");
+  for (var bc = 0; bc < bmCards.length; bc++) { bmCards[bc].classList.remove("bookmarked"); }
   updateProgress();
   if (EXAM_META && EXAM_META.time) {
     startCountdown(EXAM_META.time * 60);
   }
   window.scrollTo({ top: 0, behavior: "smooth" });
+  clearSavedAnswers();
+}
+
+/* ── 显示最终得分 + 打印按钮 ─────────────────────── */
+function showFinalScore(totalScore, maxScore, totalJudged, correctCount) {
+  scoreArea.classList.remove("hidden");
+  animateScore(0, totalScore, maxScore);
+  var pct = totalJudged > 0 ? Math.round(correctCount / totalJudged * 100) : 0;
+  animateRing(pct);
+  buildReviewList();
+  updateNavResults();
+  if (EXAM_META.passing_score != null) {
+    if (totalScore >= EXAM_META.passing_score) {
+      passStatus.className = "pass";
+      passStatus.textContent = "恭喜，你已通过考试！";
+    } else {
+      passStatus.className = "fail";
+      passStatus.textContent = "未达到及格线 (" + EXAM_META.passing_score + " 分)，继续努力！";
+    }
+  }
+  resetBtn.classList.remove("hidden");
+  addPrintBtn();
+}
+
+/* ── 打印成绩单按钮 ──────────────────────────────── */
+function addPrintBtn() {
+  var existing = document.getElementById("printReportBtn");
+  if (existing) return;
+  var btn = document.createElement("button");
+  btn.id = "printReportBtn";
+  btn.className = "btn btn-outline";
+  btn.textContent = "打印成绩单";
+  btn.style.marginLeft = "10px";
+  btn.addEventListener("click", function () {
+    window.print();
+  });
+  resetBtn.parentNode.insertBefore(btn, resetBtn.nextSibling);
 }

@@ -24,8 +24,17 @@ function enterGradingMode() {
   for (var i = 0; i < examResults.length; i++) {
     var r = examResults[i];
     if (r.correct !== null) continue;
-    gradingScores[r.id] = 0;
-    gradingMaxScores[r.id] = r.score || findExamData(r.id).score || 5;
+    // 关键词预判分
+    var q = findExamData(r.id);
+    var userAns = "";
+    var ta = container.querySelector('.essay-textarea[data-qid="' + r.id + '"]');
+    if (ta) userAns = ta.value;
+    var kwResult = scoreEssayByKeywords(q, userAns);
+    gradingScores[r.id] = kwResult.score;
+    gradingMaxScores[r.id] = r.score || q.score || 5;
+    if (kwResult.keywords.length > 0) {
+      r._kwResult = kwResult;
+    }
     gradingEssayOrder.push(r.id);
   }
 
@@ -229,7 +238,15 @@ function updateLeftPanelActive(qid) {
   // 更新分数
   var el = document.getElementById("glpEsScore_" + qid);
   if (el) {
-    el.textContent = (gradingScores[qid] || 0) + "/" + (gradingMaxScores[qid] || 5);
+    var kwSuggestion = "";
+    var r = null;
+    for (var j = 0; j < examResults.length; j++) {
+      if (examResults[j].id == qid) { r = examResults[j]; break; }
+    }
+    if (r && r._kwResult && r._kwResult.keywords.length > 0) {
+      kwSuggestion = " (" + r._kwResult.matched.length + "/" + r._kwResult.keywords.length + " 关键词)";
+    }
+    el.textContent = (gradingScores[qid] || 0) + "/" + (gradingMaxScores[qid] || 5) + kwSuggestion;
   }
 }
 
@@ -350,6 +367,8 @@ function onGradingDone() {
   if (gradingRightPanel) gradingRightPanel.classList.add("hidden");
   resetBtn.classList.remove("hidden");
   gradingActive = false;
+  addPrintBtn();
+  clearSavedAnswers();
 
   reRenderMath();
   computeRealtimeScore();
