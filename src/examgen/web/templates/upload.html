@@ -33,10 +33,11 @@
     </div>
 
     <div class="card">
-      <!-- 模板提示 -->
-      <div class="template-hint">
-        <span>&#128161;</span>
-        <span>首次使用？<a href="#" id="downloadTemplate">下载示例模板</a> 参考格式</span>
+      <!-- 文档链接 -->
+      <div class="doc-links">
+        <a href="#" id="downloadSpec" class="doc-link">&#128214; 规范说明</a>
+        <a href="#" id="downloadPrompt" class="doc-link">&#128221; 出卷提示词</a>
+        <a href="#" id="downloadTemplate" class="doc-link">&#128196; 示例模板</a>
       </div>
 
       <!-- 拖拽上传区 -->
@@ -195,23 +196,37 @@
       paramsPanel.classList.toggle("show");
     });
 
-    /* ── 模板下载 ────────────────────────────────────────── */
-    document.getElementById("downloadTemplate").addEventListener("click", function (e) {
-      e.preventDefault();
-      fetch('/api/template')
+    /* ── 文档下载 ────────────────────────────────────────── */
+    function downloadDoc(apiPath, fileName) {
+      fetch(apiPath)
         .then(function (r) { return r.text(); })
-        .then(function (template) {
-          var blob = new Blob([template], { type: "text/markdown" });
+        .then(function (content) {
+          var blob = new Blob([content], { type: "text/markdown" });
           var url = URL.createObjectURL(blob);
           var a = document.createElement("a");
           a.href = url;
-          a.download = "exam-template.md";
+          a.download = fileName;
           a.click();
           URL.revokeObjectURL(url);
         })
         .catch(function () {
-          showStatus("无法加载模板，请检查网络", "error");
+          showStatus("无法加载文档，请检查网络", "error");
         });
+    }
+
+    document.getElementById("downloadTemplate").addEventListener("click", function (e) {
+      e.preventDefault();
+      downloadDoc("/api/template", "exam-template.md");
+    });
+
+    document.getElementById("downloadPrompt").addEventListener("click", function (e) {
+      e.preventDefault();
+      downloadDoc("/api/prompt", "exam-prompt.md");
+    });
+
+    document.getElementById("downloadSpec").addEventListener("click", function (e) {
+      e.preventDefault();
+      downloadDoc("/api/spec", "exam-spec.md");
     });
 
     /* ── 提交生成（先预览） ─────────────────────────────── */

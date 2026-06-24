@@ -31,6 +31,16 @@ def _load_template_sample() -> str:
 
 _SAMPLE_TEMPLATE = _load_template_sample()
 
+# 读取文档文件
+def _load_doc(name: str) -> str:
+    doc_path = _PROJECT_ROOT / "docs" / name
+    if doc_path.exists():
+        return doc_path.read_text(encoding="utf-8")
+    return ""
+
+_PROMPT_DOC = _load_doc("prompt.md")
+_SPEC_DOC = _load_doc("spec.md")
+
 app = FastAPI(title="ExamGen", version=__version__)
 
 # CORS — 允许前端跨域调用
@@ -71,6 +81,24 @@ async def template_sample():
     """返回示例模板 Markdown 内容（纯文本）。"""
     return Response(
         content=_SAMPLE_TEMPLATE,
+        media_type="text/plain; charset=utf-8",
+    )
+
+
+@app.get("/api/prompt")
+async def prompt_doc():
+    """返回出卷提示词文档（纯文本）。"""
+    return Response(
+        content=_PROMPT_DOC,
+        media_type="text/plain; charset=utf-8",
+    )
+
+
+@app.get("/api/spec")
+async def spec_doc():
+    """返回题目源文件规范文档（纯文本）。"""
+    return Response(
+        content=_SPEC_DOC,
         media_type="text/plain; charset=utf-8",
     )
 
