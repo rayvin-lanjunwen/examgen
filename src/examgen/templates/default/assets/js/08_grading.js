@@ -463,11 +463,6 @@ function onGradingDone() {
   if (gradingRightPanel) gradingRightPanel.classList.add("hidden");
   var sheet = document.getElementById("gradingSheet");
   if (sheet) { sheet.classList.remove("open"); sheet.classList.add("hidden"); }
-
-  // 隐藏侧栏，让成绩单独占一屏
-  if (sidebarEl) { sidebarEl.classList.add("hidden"); }
-  if (mainContentEl) { mainContentEl.style.marginLeft = "0"; }
-
   resetBtn.classList.remove("hidden");
   gradingActive = false;
   addPrintBtn();

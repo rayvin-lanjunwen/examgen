@@ -464,10 +464,6 @@ function onReset() {
   // 隐藏题型汇总
   if (scoreTypeSummary) { scoreTypeSummary.innerHTML = ""; scoreTypeSummary.classList.add("hidden"); }
 
-  // 恢复侧栏
-  if (sidebarEl) { sidebarEl.classList.remove("hidden"); }
-  if (mainContentEl) { mainContentEl.style.marginLeft = ""; }
-
   scoreArea.classList.add("hidden");
   passStatus.textContent = "";
   passStatus.className = "";
