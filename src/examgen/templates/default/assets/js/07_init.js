@@ -34,16 +34,27 @@ document.addEventListener("DOMContentLoaded", function () {
   var collapseBtn = document.getElementById("sidebarCollapseBtn");
   var sidebar = document.getElementById("sidebar");
   var mainContent = document.querySelector(".main-content");
+  var expandBtn = document.getElementById("sidebarExpandBtn");
   if (collapseBtn && sidebar) {
     collapseBtn.addEventListener("click", function () {
       sidebar.classList.toggle("collapsed");
       if (sidebar.classList.contains("collapsed")) {
         collapseBtn.innerHTML = "&#9654;";
         mainContent.style.marginLeft = "0";
+        if (expandBtn) expandBtn.classList.remove("hidden");
       } else {
         collapseBtn.innerHTML = "&#9664;";
         mainContent.style.marginLeft = "";
+        if (expandBtn) expandBtn.classList.add("hidden");
       }
+    });
+  }
+  if (expandBtn) {
+    expandBtn.addEventListener("click", function () {
+      sidebar.classList.remove("collapsed");
+      collapseBtn.innerHTML = "&#9664;";
+      mainContent.style.marginLeft = "";
+      expandBtn.classList.add("hidden");
     });
   }
 

@@ -113,6 +113,30 @@ body {
 .sidebar.collapsed { transform: translateX(calc(-1 * var(--sidebar-width))); }
 .sidebar.collapsed + .main-content { margin-left: 0; }
 .sidebar.collapsed .sidebar-collapse-btn { transform: rotate(180deg); }
+
+/* ── 桌面端侧栏收起后的恢复按钮 ────────────────── */
+.sidebar-expand-btn {
+  position: fixed;
+  top: calc(var(--timer-bar-h) + 10px);
+  left: 6px;
+  z-index: 105;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 0 6px 6px 0;
+  width: 28px;
+  height: 52px;
+  font-size: 0.75rem;
+  color: var(--color-text);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s;
+}
+.sidebar-expand-btn:hover { background: var(--color-sidebar-hover); }
+.sidebar-expand-btn.hidden { display: none; }
 .sidebar-progress {
   padding: 10px 18px;
   border-bottom: 1px solid var(--color-sidebar-border);
@@ -1276,6 +1300,7 @@ body {
 }
 
 @media (max-width: 900px) {
+  .sidebar-expand-btn { display: none !important; }
   .mobile-topbar { display: flex; }
   .sidebar-overlay { display: block; opacity: 0; pointer-events: none; }
   .sidebar-overlay.show { opacity: 1; pointer-events: auto; }
