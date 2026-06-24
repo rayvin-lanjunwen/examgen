@@ -213,7 +213,7 @@ $$
 
 - **格式规范**：[docs/spec.md](docs/spec.md) — 完整的 Markdown 格式标准 + 常见错误排查
 - **出卷提示词**：[docs/prompt.md](docs/prompt.md) — 提供给 AI 的出卷要求模板
-- **示例模板**：[tests/fixtures/sample.md](tests/fixtures/sample.md) — 可直接复制使用的示范文件
+- **示例模板**：[docs/sample.md](docs/sample.md) — 可直接复制使用的示范文件
 
 ## 开发指南
 
@@ -253,14 +253,14 @@ examgen/
 │               ├── 08_grading.js       # 简答题批阅（关键词判分 + 翻题）
 │               └── 09_bookmarks.js     # 题目标记/收藏系统
 ├── tests/
-│   ├── fixtures/sample.md              # 标准模板（解析 + 展示用）
-│   ├── test_parser.py                  # 含公式保留、ParseError 测试
+│   ├── test_parser.py                # 含公式保留、ParseError 测试
 │   ├── test_normalizer.py
 │   ├── test_transformer.py
 │   └── test_generator.py
 └── docs/
-    ├── spec.md                         # 题目源文件规范
-    └── prompt.md                       # AI 出卷提示词
+    ├── spec.md                       # 题目源文件规范
+    ├── prompt.md                     # AI 出卷提示词
+    └── sample.md                     # 示例模板（可复制的试卷）
 ```
 
 ### 运行测试
