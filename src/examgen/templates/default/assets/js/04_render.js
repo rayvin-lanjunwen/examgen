@@ -38,10 +38,12 @@ function buildQuestionCard(q) {
 
   var header = document.createElement("div");
   header.className = "question-header";
+  // 填空题：标题只显示题号+分值，题干在 buildFillInput 中完整渲染
+  var headerTopic = (q.qtype === QT.FILL) ? '' : '<span class="topic-md">' + mdToHTML(q.topic) + '</span>';
   header.innerHTML =
     '<span class="question-type" data-type="' + q.qtype + '">' + TYPE_LABELS[q.qtype] + '</span>' +
     '<span class="question-number">' + q.id + '.</span>' +
-    '<span class="topic-md">' + mdToHTML(q.topic) + '</span>' +
+    headerTopic +
     '<span class="question-score">' + (q.score || 0) + ' 分</span>';
   card.appendChild(header);
 
@@ -111,13 +113,33 @@ function buildOptions(q) {
   return ul;
 }
 
-/* ── 填空题：将题干中的 ____ 替换为内联输入框 ─────── */
+/* ── 填空题：将题干中的 ____ 或 ** 替换为内联输入框 ─── */
 function buildFillInput(q) {
   var wrap = document.createElement("div");
   wrap.className = "fill-wrap";
 
-  // 按 ____ 拆分题干，交替插入 input
+  // 支持两种空位标记：____ 和 **
   var topic = q.topic || "";
+
+  // 保护 LaTeX 公式，防止 ** 替换破坏公式内容
+  var fillMathBlocks = [];
+  topic = topic.replace(/\$\$([\s\S]*?)\$\$/g, function (match) {
+    fillMathBlocks.push(match);
+    return "\uFFF0M" + (fillMathBlocks.length - 1) + "M\uFFF0";
+  });
+  topic = topic.replace(/\$([^$]+?)\$/g, function (match) {
+    fillMathBlocks.push(match);
+    return "\uFFF0M" + (fillMathBlocks.length - 1) + "M\uFFF0";
+  });
+
+  // 先统一把 ** 转成 ____
+  topic = topic.replace(/\*\*/g, "____");
+
+  // 恢复公式
+  topic = topic.replace(/\uFFF0M(\d+)M\uFFF0/g, function (_, idx) {
+    return fillMathBlocks[parseInt(idx)];
+  });
+
   var parts = topic.split("____");
   for (var i = 0; i < parts.length; i++) {
     if (i > 0) {

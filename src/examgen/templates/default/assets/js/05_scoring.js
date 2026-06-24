@@ -31,9 +31,21 @@ function isCorrect(q, userAns) {
   if (q.qtype === QT.FILL) {
     var parts = q.answer.split("|").map(norm);
     var userParts = userAns.split("|").map(norm);
+    // 移除尾部空元素（由 collectAnswers 拼接产生）
+    while (userParts.length > 0 && userParts[userParts.length - 1] === "") {
+      userParts.pop();
+    }
+    // 单个空 + 多个可接受答案：答对一个即可
+    if (userParts.length === 1) {
+      for (var i = 0; i < parts.length; i++) {
+        if (userParts[0] === parts[i]) return true;
+      }
+      return false;
+    }
+    // 多个空：逐个比对
     if (parts.length !== userParts.length) return false;
-    for (var i = 0; i < parts.length; i++) {
-      if (parts[i] !== userParts[i]) return false;
+    for (var j = 0; j < parts.length; j++) {
+      if (parts[j] !== userParts[j]) return false;
     }
     return true;
   }
@@ -44,6 +56,11 @@ function isCorrect(q, userAns) {
 function highlightResult(q, userAns, correct) {
   var card = container.querySelector('.question-card[data-qid="' + q.id + '"]');
   if (!card) return;
+  
+  // 为每道题添加可见的正确答案展示
+  var existing = card.querySelector(".answer-display");
+  if (existing) existing.remove();
+  
   if (q.qtype === QT.SINGLE || q.qtype === QT.MULTIPLE || q.qtype === QT.JUDGE) {
     var items = card.querySelectorAll(".option-item");
     for (var i = 0; i < items.length; i++) {
@@ -56,9 +73,23 @@ function highlightResult(q, userAns, correct) {
     var inps = card.querySelectorAll(".fill-inline");
     for (var j = 0; j < inps.length; j++) {
       inps[j].classList.add(correct ? "correct" : "wrong");
-      if (!correct) inps[j].title = "正确答案：" + q.answer;
+      if (!correct && j === 0) {
+        inps[j].title = "正确答案：" + q.answer;
+      }
     }
   }
+  
+  // 可见的正确答案显示（所有题型）
+  var answerDiv = document.createElement("div");
+  answerDiv.className = "answer-display";
+  if (correct) {
+    answerDiv.classList.add("answer-display--correct");
+    answerDiv.innerHTML = '<span class="answer-display-icon correct-icon">&#10003;</span> 回答正确';
+  } else {
+    answerDiv.classList.add("answer-display--wrong");
+    answerDiv.innerHTML = '<span class="answer-display-icon wrong-icon">&#10007;</span> 正确答案：' + escapeHTML(q.answer);
+  }
+  card.appendChild(answerDiv);
 }
 
 function highlightEssay(q) {
@@ -132,11 +163,30 @@ function buildReviewList() {
     var iconCls = r.correct === null ? "essay" : (r.correct ? "correct" : "wrong");
     var iconText = r.correct === null ? "?" : (r.correct ? "✓" : "✗");
 
+    // 批阅模式中的简答题显示当前评分
+    var scoreText;
+    if (r.correct === null) {
+      var gs = gradingScores[r.id];
+      if (gs !== undefined && gs > 0) {
+        scoreText = gs + "分";
+        iconCls = "correct";
+        iconText = "✓";
+      } else if (gs !== undefined && gs === 0) {
+        scoreText = "0分";
+        iconCls = "wrong";
+        iconText = "✗";
+      } else {
+        scoreText = "待评";
+      }
+    } else {
+      scoreText = r.score + "分";
+    }
+
     item.innerHTML =
       '<span class="review-icon ' + iconCls + '">' + iconText + '</span>' +
       '<span class="review-qid">#' + r.id + '</span>' +
       '<span class="review-topic">' + escapeHTML(r.topic.substring(0, 40)) + '</span>' +
-      '<span class="review-score">' + (r.correct === null ? "待评" : r.score + "分") + '</span>';
+      '<span class="review-score">' + scoreText + '</span>';
 
     reviewList.appendChild(item);
   }
@@ -168,6 +218,7 @@ function onSubmit() {
     if (!confirm(confirmMsg)) return;
   }
 
+  // 收集答案、构建 examResults
   var results = collectAnswers();
   var totalScore = 0;
   var maxScore = 0;
@@ -182,46 +233,44 @@ function onSubmit() {
 
     if (q.qtype === QT.ESSAY) {
       highlightEssay(q);
-      examResults.push({ id: q.id, correct: null, score: 0, topic: q.topic, qtype: q.qtype });
+      examResults.push({ id: q.id, correct: null, score: score, topic: q.topic, qtype: q.qtype });
     } else {
       maxScore += score;
       totalJudged++;
       var correct = isCorrect(q, userAns);
       if (correct) { totalScore += score; correctCount++; }
       highlightResult(q, userAns, correct);
-      examResults.push({ id: q.id, correct: correct, score: correct ? score : 0, topic: q.topic, qtype: q.qtype });
+      examResults.push({ id: q.id, correct: correct, score: score, topic: q.topic, qtype: q.qtype });
     }
 
     var expEl = container.querySelector('.explanation[data-qid="' + q.id + '"]');
     if (expEl) expEl.classList.add("show");
   }
 
-  // 显示得分（带滚动动画）
-  scoreArea.classList.remove("hidden");
-  animateScore(0, totalScore, maxScore);
-
-  // 环形图
-  var pct = totalJudged > 0 ? Math.round(correctCount / totalJudged * 100) : 0;
-  animateRing(pct);
-
-  // 逐题回顾
-  buildReviewList();
-
-  // 及格状态
-  if (EXAM_META.passing_score != null) {
-    if (totalScore >= EXAM_META.passing_score) {
-      passStatus.className = "pass";
-      passStatus.textContent = "恭喜，你已通过考试！";
-    } else {
-      passStatus.className = "fail";
-      passStatus.textContent = "未达到及格线 (" + EXAM_META.passing_score + " 分)，继续努力！";
-    }
-  }
-
   disableInputs();
   submitBtn.classList.add("hidden");
-  resetBtn.classList.remove("hidden");
-  scoreArea.scrollIntoView({ behavior: "smooth" });
+
+  // 如果有简答题，进入批阅模式；否则直接显示结果
+  if (hasEssayQuestions()) {
+    enterGradingMode();
+  } else {
+    scoreArea.classList.remove("hidden");
+    animateScore(0, totalScore, maxScore);
+    var pct = totalJudged > 0 ? Math.round(correctCount / totalJudged * 100) : 0;
+    animateRing(pct);
+    buildReviewList();
+    updateNavResults();
+    if (EXAM_META.passing_score != null) {
+      if (totalScore >= EXAM_META.passing_score) {
+        passStatus.className = "pass";
+        passStatus.textContent = "恭喜，你已通过考试！";
+      } else {
+        passStatus.className = "fail";
+        passStatus.textContent = "未达到及格线 (" + EXAM_META.passing_score + " 分)，继续努力！";
+      }
+    }
+    resetBtn.classList.remove("hidden");
+  }
 
   // 停止计时
   if (countdownTimer) clearInterval(countdownTimer);
@@ -247,12 +296,29 @@ function onReset() {
   for (var m = 0; m < exps.length; m++) { exps[m].classList.remove("show"); }
   var refs = container.querySelectorAll(".essay-reference.show");
   for (var n = 0; n < refs.length; n++) { refs[n].classList.remove("show"); }
+  // 清除答案显示
+  var ads = container.querySelectorAll(".answer-display");
+  for (var a = 0; a < ads.length; a++) { ads[a].remove(); }
+  // 重置导航栏
+  var navItems = navList.querySelectorAll(".nav-item.nav-correct, .nav-item.nav-wrong, .nav-item.nav-essay");
+  for (var na = 0; na < navItems.length; na++) {
+    navItems[na].classList.remove("nav-correct", "nav-wrong", "nav-essay");
+    var nd = navItems[na].querySelector(".nav-done");
+    if (nd) nd.classList.remove("done");
+  }
 
   scoreArea.classList.add("hidden");
   passStatus.textContent = "";
   passStatus.className = "";
   submitBtn.classList.remove("hidden");
   resetBtn.classList.add("hidden");
+  if (gradingBar) gradingBar.classList.add("hidden");
+  gradingScores = {};
+  gradingActive = false;
+
+  // 清理批阅面板
+  var gps = container.querySelectorAll(".grading-panel");
+  for (var p = 0; p < gps.length; p++) { gps[p].remove(); }
   updateProgress();
   if (EXAM_META && EXAM_META.time) {
     startCountdown(EXAM_META.time * 60);

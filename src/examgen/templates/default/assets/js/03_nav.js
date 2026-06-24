@@ -77,3 +77,28 @@ function updateProgress() {
   progressFill.style.width = pct + "%";
   progressText.textContent = answered + "/" + total;
 }
+
+/* ── 提交后更新导航栏对错状态 ─────────────────────── */
+function updateNavResults() {
+  for (var i = 0; i < examResults.length; i++) {
+    var r = examResults[i];
+    var navItem = navList.querySelector('.nav-item[data-qid="' + r.id + '"]');
+    if (!navItem) continue;
+    // 清除旧状态
+    navItem.classList.remove("nav-correct", "nav-wrong", "nav-essay");
+    var navDone = navItem.querySelector(".nav-done");
+    if (!navDone) continue;
+    navDone.classList.add("done");
+    if (r.correct === true) {
+      navItem.classList.add("nav-correct");
+      navDone.textContent = "✓";
+    } else if (r.correct === false) {
+      navItem.classList.add("nav-wrong");
+      navDone.textContent = "✗";
+    } else {
+      // 简答题（待评）
+      navItem.classList.add("nav-essay");
+      navDone.textContent = "?";
+    }
+  }
+}

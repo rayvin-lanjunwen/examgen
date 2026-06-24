@@ -13,6 +13,29 @@ import frontmatter
 
 from examgen.models import ExamMeta, Option, Question, QuestionType
 
+
+# ── ParseError：结构化错误信息 ────────────────────────────────────────────
+
+class ParseError(Exception):
+    """解析错误，携带结构化信息便于前端展示。
+
+    Attributes
+    ----------
+    message : str
+        人类可读的错误描述。
+    field : str or None
+        出错的字段名或区块（如 ``"time"``、``"第 3 题"``）。
+    suggestion : str or None
+        修复建议。
+    """
+
+    def __init__(self, message: str, field: Optional[str] = None, suggestion: Optional[str] = None):
+        super().__init__(message)
+        self.message = message
+        self.field = field
+        self.suggestion = suggestion
+
+
 # ── 题型中文标识 → QuestionType 映射 ──────────────────────────────────────
 _QTYPE_MAP: dict[str, QuestionType] = {
     "单选": QuestionType.SINGLE,
@@ -49,21 +72,74 @@ _FIELD_START_CACHE: dict[str, re.Pattern] = {}
 # ── ExamMeta 构建 ─────────────────────────────────────────────────────────
 
 
+# ── 常见的 YAML 字段名错误映射 ──────────────────────────────────────────
+_YAML_ALIASES: dict[str, str] = {
+    "course": "subject",
+    "score": "total_score",
+}
+
+
+def _validate_yaml_meta(meta: dict) -> None:
+    """预检 YAML 元数据的常见错误，给出具体修复建议。"""
+    # 检查常见字段名错误
+    for wrong, correct in _YAML_ALIASES.items():
+        if wrong in meta:
+            raise ParseError(
+                f"YAML 字段名错误：`{wrong}` 不是有效字段",
+                field=wrong,
+                suggestion=f"请将 `{wrong}` 改为 `{correct}`",
+            )
+
+    # 检查 time 字段类型
+    if "time" in meta:
+        try:
+            int(meta["time"])
+        except (ValueError, TypeError):
+            raise ParseError(
+                f"YAML 字段 `time` 的值 `{meta['time']}` 无效",
+                field="time",
+                suggestion="`time` 必须是纯整数（分钟），如 `90`，不能带单位（不要写成 `90分钟` 或 `90min`）",
+            )
+
+    # 检查 total_score 字段类型
+    if "total_score" in meta:
+        try:
+            float(meta["total_score"])
+        except (ValueError, TypeError):
+            raise ParseError(
+                f"YAML 字段 `total_score` 的值 `{meta['total_score']}` 无效",
+                field="total_score",
+                suggestion="`total_score` 必须是数字，如 `100`",
+            )
+
+
 def _build_exam_meta(meta: dict) -> ExamMeta:
     """Build an ExamMeta instance from a raw metadata dict."""
-    if "title" not in meta or not meta["title"]:
-        raise ValueError("Front matter 必须包含 'title' 字段")
+    _validate_yaml_meta(meta)
 
-    return ExamMeta(
-        title=str(meta["title"]),
-        subject=str(meta["subject"]) if meta.get("subject") else None,
-        time=int(meta["time"]) if meta.get("time") is not None else None,
-        total_score=float(meta["total_score"]) if meta.get("total_score") is not None else None,
-        default_score=float(meta.get("default_score", 1.0)),
-        shuffle=bool(meta.get("shuffle", False)),
-        option_shuffle=bool(meta.get("option_shuffle", False)),
-        passing_score=float(meta["passing_score"]) if meta.get("passing_score") is not None else None,
-    )
+    if "title" not in meta or not meta["title"]:
+        raise ParseError(
+            "Front matter 缺少必填字段",
+            field="title",
+            suggestion="请在 YAML 中填写 `title: 试卷标题`",
+        )
+
+    try:
+        return ExamMeta(
+            title=str(meta["title"]),
+            subject=str(meta["subject"]) if meta.get("subject") else None,
+            time=int(meta["time"]) if meta.get("time") is not None else None,
+            total_score=float(meta["total_score"]) if meta.get("total_score") is not None else None,
+            default_score=float(meta.get("default_score", 1.0)),
+            shuffle=bool(meta.get("shuffle", False)),
+            option_shuffle=bool(meta.get("option_shuffle", False)),
+            passing_score=float(meta["passing_score"]) if meta.get("passing_score") is not None else None,
+        )
+    except (ValueError, TypeError) as e:
+        raise ParseError(
+            f"YAML 元数据解析失败：{e}",
+            suggestion="请检查 front matter 中各字段的值类型是否正确",
+        ) from e
 
 
 # ── 题目正文拆分（按 ^#?\d+.\s*[ 切分 + 提取 ## 分区）─────────────────
@@ -111,9 +187,30 @@ def _split_questions(raw_text: str) -> List[Tuple[str, Optional[str]]]:
 def _strip_leading_backslash(line: str) -> str:
     """移除 AI 生成常见的反斜杠转义（``\\#``、``\\-``、``\\[``、``\\]``、``\\.``）。
 
-    不会影响 LaTeX 公式中的反斜杠（如 ``\\frac``）。
+    ``\\#`` / ``\\-`` / ``\\.`` 全局替换（不影响 LaTeX 公式）。
+    ``\\[`` / ``\\]`` 在行首/行尾出现且内容不含 LaTeX 命令时才去转义。
     """
-    return line.replace("\\#", "#").replace("\\-", "-").replace("\\[", "[").replace("\\]", "]").replace("\\.", ".")
+    line = line.replace("\\#", "#").replace("\\-", "-").replace("\\.", ".")
+
+    # \[...\] 包围的内容：不含 \字母 才是 AI 转义，含则为 LaTeX 公式
+    stripped = line.lstrip()
+    if stripped.startswith("\\[") and stripped.endswith("\\]"):
+        inner = stripped[2:-2]
+        if not re.search(r"\\[a-zA-Z]", inner):
+            indent = line[: len(line) - len(stripped)]
+            line = indent + "[" + inner + "]"
+    elif stripped.startswith("\\["):
+        after = stripped[2:]
+        if not re.search(r"\\[a-zA-Z]", after):
+            indent = line[: len(line) - len(stripped)]
+            line = indent + "[" + after
+    elif stripped.endswith("\\]"):
+        before = stripped[:-2]
+        if not re.search(r"\\[a-zA-Z]", before):
+            indent = line[: len(line) - len(stripped)]
+            line = indent + before + "]"
+
+    return line
 
 
 def _parse_content_blocks(block: str) -> dict[str, str]:
@@ -217,6 +314,9 @@ def _parse_question_block(
     block: str, index: int, section: Optional[str] = None
 ) -> Question:
     """从单个题目区块中解析 Question 对象，兼容新旧两种格式。"""
+    qid = index + 1
+    field_tag = f"第 {qid} 题"
+
     # 先尝试新格式按 #标记 切分
     blocks = _parse_content_blocks(block)
 
@@ -224,13 +324,19 @@ def _parse_question_block(
     first_line = _strip_leading_backslash(block.split("\n")[0].strip())
     m_first = _RE_FIRST_LINE.search(first_line)
     if not m_first:
-        raise ValueError(f"无法解析题目首行，区块内容:\n{block[:200]}")
+        raise ParseError(
+            f"{field_tag} 的首行格式无效",
+            field=field_tag,
+            suggestion="题目首行应为 `#题号. [题型]`，如 `#1. [单选]`。请检查是否有反斜杠转义或缺少题型标记",
+        )
 
     type_str = m_first.group(2).strip()
 
     if type_str not in _QTYPE_MAP:
-        raise ValueError(
-            f"未知题型标识: [{type_str}]，合法值: {list(_QTYPE_MAP.keys())}"
+        raise ParseError(
+            f"{field_tag} 的题型标识 `[{type_str}]` 无效",
+            field=field_tag,
+            suggestion=f"合法题型: {list(_QTYPE_MAP.keys())}",
         )
     qtype = _QTYPE_MAP[type_str]
 
@@ -264,13 +370,20 @@ def _parse_question_block(
 
     # 5) 分值 — 新格式优先
     score_val = blocks.get("分值", "") or _extract_multiline_field(block, "分值")
-    score: Optional[float] = float(score_val) if score_val else None
+    try:
+        score: Optional[float] = float(score_val) if score_val else None
+    except (ValueError, TypeError):
+        raise ParseError(
+            f"{field_tag} 的 `分值` 格式无效：`{score_val}`",
+            field=field_tag,
+            suggestion="分值应为纯数字，如 `2` 或 `2.5`",
+        )
 
     # 6) 解析 — 新格式优先
     explanation = blocks.get("解析", "") or _extract_multiline_field(block, "解析")
 
     return Question(
-        id=index + 1,
+        id=qid,
         qtype=qtype,
         topic=topic,
         options=options,
@@ -302,16 +415,69 @@ def parse_exam_file(file_path: str) -> Tuple[ExamMeta, List[Question]]:
     if not path.exists():
         raise FileNotFoundError(f"文件不存在: {file_path}")
 
-    post = frontmatter.load(str(path))
-    meta = _build_exam_meta(post.metadata)
-    questions = _parse_questions(post.content)
+    try:
+        post = frontmatter.load(str(path))
+    except Exception as e:
+        raise ParseError(
+            f"YAML front matter 解析失败：{e}",
+            suggestion="请确保文件以 `---` 开头和结尾，中间为有效的 YAML 键值对",
+        ) from e
+
+    try:
+        meta = _build_exam_meta(post.metadata)
+    except ParseError:
+        raise
+    except Exception as e:
+        raise ParseError(
+            f"YAML 元数据处理失败：{e}",
+            suggestion="请检查 front matter 中各字段的值类型是否正确",
+        ) from e
+
+    try:
+        questions = _parse_questions(post.content)
+    except ParseError:
+        raise
+    except Exception as e:
+        raise ParseError(
+            f"题目正文解析失败：{e}",
+            suggestion="请检查题目格式是否符合规范",
+        ) from e
 
     return meta, questions
 
 
 def parse_exam_text(md_text: str) -> Tuple[ExamMeta, List[Question]]:
     """从 Markdown 字符串直接解析，无需文件路径。"""
-    post = frontmatter.loads(md_text)
-    meta = _build_exam_meta(post.metadata)
-    questions = _parse_questions(post.content)
+    try:
+        post = frontmatter.loads(md_text)
+    except Exception as e:
+        raise ParseError(
+            f"YAML front matter 解析失败：{e}",
+            suggestion="请确保文件以 `---` 开头和结尾，中间为有效的 YAML 键值对",
+        ) from e
+
+    try:
+        meta = _build_exam_meta(post.metadata)
+    except ParseError:
+        raise
+    except Exception as e:
+        raise ParseError(
+            f"YAML 元数据处理失败：{e}",
+            suggestion="请检查 front matter 中各字段的值类型是否正确",
+        ) from e
+
+    try:
+        questions = _parse_questions(post.content)
+    except ParseError:
+        raise
+    except Exception as e:
+        raise ParseError(
+            f"题目正文解析失败：{e}",
+            suggestion="请检查题目格式是否符合规范",
+        ) from e
+
     return meta, questions
+
+# ── Expose ParseError in module namespace ─────────────────────────────────
+
+__all__ = ["parse_exam_file", "parse_exam_text", "ParseError"]

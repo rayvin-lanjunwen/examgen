@@ -1,18 +1,19 @@
 """ExamGen Web UI — FastAPI 应用。"""
 
+import json
 from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from examgen import __version__
 from examgen.core.generator import generate_html
 from examgen.core.normalizer import normalize_questions
-from examgen.core.parser import parse_exam_text
+from examgen.core.parser import ParseError, parse_exam_text
 from examgen.core.transformer import apply_transforms
 
 # 目录
@@ -87,22 +88,44 @@ async def generate(
     content = await file.read()
     md_text = content.decode("utf-8")
 
-    # 核心流程
-    meta, questions = parse_exam_text(md_text)
-    questions = normalize_questions(questions, meta)
+    try:
+        # 核心流程
+        meta, questions = parse_exam_text(md_text)
+        questions = normalize_questions(questions, meta)
 
-    # 命令行覆盖参数
-    if title:
-        meta.title = title
-    if time is not None:
-        meta.time = time
-    if shuffle == "1":
-        meta.shuffle = True
-    if option_shuffle == "1":
-        meta.option_shuffle = True
+        # 命令行覆盖参数
+        if title:
+            meta.title = title
+        if time is not None:
+            meta.time = time
+        if shuffle == "1":
+            meta.shuffle = True
+        if option_shuffle == "1":
+            meta.option_shuffle = True
 
-    questions = apply_transforms(questions, meta)
-    html = generate_html(questions, meta)
+        questions = apply_transforms(questions, meta)
+        html = generate_html(questions, meta)
+
+    except ParseError as e:
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": True,
+                "message": e.message,
+                "field": e.field,
+                "suggestion": e.suggestion,
+            },
+        )
+    except Exception as e:
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": True,
+                "message": f"生成失败：{e}",
+                "field": None,
+                "suggestion": "请检查文件格式是否符合 ExamGen 规范",
+            },
+        )
 
     # 返回 HTML 文件下载
     filename = "exam.html"

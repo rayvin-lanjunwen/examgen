@@ -235,7 +235,19 @@
       fetch("/generate", { method: "POST", body: formData })
         .then(function (resp) {
           if (!resp.ok) {
-            return resp.text().then(function (text) { throw new Error(text || "服务器返回错误 (" + resp.status + ")"); });
+            return resp.json().then(function (data) {
+              if (data && data.message) {
+                var msg = '<div class="error-title">' + escapeHTML(data.message) + '</div>';
+                if (data.field) {
+                  msg += '<div class="error-field">出错的字段/位置：<code>' + escapeHTML(data.field) + '</code></div>';
+                }
+                if (data.suggestion) {
+                  msg += '<div class="error-suggestion">' + escapeHTML(data.suggestion) + '</div>';
+                }
+                throw new Error(msg);
+              }
+              return resp.text().then(function (text) { throw new Error(text || "服务器返回错误 (" + resp.status + ")"); });
+            });
           }
           var cd = resp.headers.get("Content-Disposition") || "";
           var match = cd.match(/filename="?([^";\n]+)"?/);
@@ -254,7 +266,8 @@
           });
         })
         .catch(function (err) {
-          showStatus("生成失败：" + err.message, "error");
+          statusArea.innerHTML = '<div class="error-block">' + err.message + '</div>';
+          statusArea.className = "status show error";
         })
         .finally(function () {
           generateBtn.disabled = false;

@@ -272,6 +272,13 @@ body {
 .status.error   { background: var(--color-error-bg); color: #991b1b; border: 1px solid var(--color-error); }
 .status.loading { background: #eff6ff; color: #1e40af; border: 1px solid #3b82f6; }
 
+/* ── 结构化错误展示 ──────────────────────────────────── */
+.error-block { text-align: left; word-break: break-word; }
+.error-block .error-title { font-weight: 600; margin-bottom: 6px; font-size: 0.95rem; }
+.error-block .error-field { font-size: 0.85rem; margin-bottom: 4px; opacity: 0.9; }
+.error-block .error-field code { background: rgba(153,27,27,0.12); padding: 1px 5px; border-radius: 3px; font-family: "Consolas", monospace; font-size: 0.85rem; }
+.error-block .error-suggestion { font-size: 0.85rem; margin-top: 6px; padding: 6px 8px; background: rgba(153,27,27,0.08); border-left: 3px solid #b91c1c; border-radius: 2px; color: #7f1d1d; }
+
 .status.loading::before {
   content: ""; display: inline-block; width: 15px; height: 15px;
   border: 2.5px solid #3b82f6; border-top-color: transparent; border-radius: 50%;

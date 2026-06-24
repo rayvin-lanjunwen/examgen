@@ -17,34 +17,34 @@ class TestDefaultScore:
         """score 为 None 时应填充 meta.default_score。"""
         q = Question(id=1, qtype=QuestionType.SINGLE, topic="t", answer="A",
                      options=[Option("A", "a")], score=None)
-        normalize_questions([q], _meta())
-        assert q.score == 2.0
+        result = normalize_questions([q], _meta())
+        assert result[0].score == 2.0
 
     def test_existing_score_kept(self):
         """已有分值不被覆盖。"""
         q = Question(id=1, qtype=QuestionType.SINGLE, topic="t", answer="A",
                      options=[Option("A", "a")], score=5.0)
-        normalize_questions([q], _meta())
-        assert q.score == 5.0
+        result = normalize_questions([q], _meta())
+        assert result[0].score == 5.0
 
 
 class TestJudgeOptions:
     def test_judge_options_auto(self):
         """判断题无选项时自动添加 A.正确 / B.错误。"""
         q = Question(id=1, qtype=QuestionType.JUDGE, topic="t", answer="A")
-        normalize_questions([q], _meta())
-        assert len(q.options) == 2
-        assert q.options[0].label == "A"
-        assert q.options[0].text == "正确"
-        assert q.options[1].label == "B"
-        assert q.options[1].text == "错误"
+        result = normalize_questions([q], _meta())
+        assert len(result[0].options) == 2
+        assert result[0].options[0].label == "A"
+        assert result[0].options[0].text == "正确"
+        assert result[0].options[1].label == "B"
+        assert result[0].options[1].text == "错误"
 
     def test_judge_options_not_overwritten(self):
         """判断题已有选项时不覆盖。"""
         q = Question(id=1, qtype=QuestionType.JUDGE, topic="t", answer="A",
                      options=[Option("A", "对"), Option("B", "错")])
-        normalize_questions([q], _meta())
-        assert q.options[0].text == "对"
+        result = normalize_questions([q], _meta())
+        assert result[0].options[0].text == "对"
 
 
 class TestAnswerNormalization:
@@ -52,21 +52,21 @@ class TestAnswerNormalization:
         """答案小写转大写。"""
         q = Question(id=1, qtype=QuestionType.SINGLE, topic="t", answer="a",
                      options=[Option("A", "x")])
-        normalize_questions([q], _meta())
-        assert q.answer == "A"
+        result = normalize_questions([q], _meta())
+        assert result[0].answer == "A"
 
     def test_multiple_choice_remove_commas(self):
         """多选题答案逗号分隔符移除。"""
         q = Question(id=1, qtype=QuestionType.MULTIPLE, topic="t", answer="A,B,C",
                      options=[Option("A", "a"), Option("B", "b"), Option("C", "c")])
-        normalize_questions([q], _meta())
-        assert q.answer == "ABC"
+        result = normalize_questions([q], _meta())
+        assert result[0].answer == "ABC"
 
     def test_fill_answer_uppercase(self):
         """填空题答案也会被大写（如变量名）。"""
         q = Question(id=1, qtype=QuestionType.FILL, topic="t", answer="print")
-        normalize_questions([q], _meta())
-        assert q.answer == "PRINT"
+        result = normalize_questions([q], _meta())
+        assert result[0].answer == "PRINT"
 
 
 class TestInvalidAnswer:

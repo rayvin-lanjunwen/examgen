@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
   renderQuestions(EXAM_DATA);
   submitBtn.addEventListener("click", onSubmit);
   resetBtn.addEventListener("click", onReset);
+  if (gradingDoneBtn) gradingDoneBtn.addEventListener("click", onGradingDone);
 
   if (EXAM_META && EXAM_META.time) {
     startCountdown(EXAM_META.time * 60);
@@ -13,7 +14,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   container.addEventListener("change", updateProgress);
   container.addEventListener("input",  updateProgress);
-  window.addEventListener("scroll", highlightCurrentNav);
+  window.addEventListener("scroll", function () {
+    highlightCurrentNav();
+    if (gradingActive) updateGradingFocus();
+  });
 
   // CDN 加载失败检测
   setTimeout(function () {

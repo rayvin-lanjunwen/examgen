@@ -79,8 +79,45 @@
           <button id="submit-btn" class="btn btn-primary">提交答卷</button>
           <button id="reset-btn" class="btn btn-secondary hidden">重新作答</button>
         </div>
+
+        <!-- 批阅操作栏 -->
+        <div class="grading-bar hidden" id="gradingBar">
+          <div class="grading-bar-info">
+            <span class="grading-progress-text" id="gradingProgressText">已评 0/0 题</span>
+            <span class="grading-score-live" id="gradingScoreLive">总分 0 / 0</span>
+          </div>
+          <div class="grading-bar-types" id="gradingTypeBreakdown"></div>
+          <button class="btn btn-primary" id="gradingDoneBtn" disabled>完成批阅</button>
+        </div>
       </div>
     </main>
+
+    <!-- 批阅左面板（悬浮） -->
+    <aside class="grading-left-panel hidden" id="gradingLeftPanel">
+      <div class="grading-left-header">批阅面板</div>
+      <div class="grading-left-stats">
+        <div class="grading-left-stat">
+          <span class="grading-left-stat-label">实时总分</span>
+          <span class="grading-left-stat-value" id="glpScore">0 / 0</span>
+        </div>
+        <div class="grading-left-stat">
+          <span class="grading-left-stat-label">待批阅</span>
+          <span class="grading-left-stat-value" id="glpPending">0 题</span>
+        </div>
+        <div class="grading-left-essay-list" id="glpEssayList"></div>
+      </div>
+    </aside>
+
+    <!-- 批阅右面板（悬浮分值选择） -->
+    <aside class="grading-right-panel hidden" id="gradingRightPanel">
+      <div class="grading-right-header">第 <span id="grpQid">-</span> 题</div>
+      <div class="grading-score-cur" id="grpScore">0</div>
+      <div class="grading-input-row">
+        <input type="number" class="grading-input" id="grpInput" min="0" max="0" value="0">
+        <span class="grading-input-max" id="grpMax">/ 0 分</span>
+      </div>
+      <div class="grading-score-buttons" id="grpButtons"></div>
+    </aside>
 
     <!-- 右下角悬浮计时气泡（最后5分钟显示） -->
     <div class="timer-bubble hidden" id="timerBubble">
