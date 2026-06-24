@@ -79,7 +79,7 @@ function highlightResult(q, userAns, correct) {
     }
   }
   
-  // 可见的正确答案显示（所有题型）
+  // 可见的正确答案显示（所有题型），放在解析之前
   var answerDiv = document.createElement("div");
   answerDiv.className = "answer-display";
   if (correct) {
@@ -87,9 +87,26 @@ function highlightResult(q, userAns, correct) {
     answerDiv.innerHTML = '<span class="answer-display-icon correct-icon">&#10003;</span> 回答正确';
   } else {
     answerDiv.classList.add("answer-display--wrong");
-    answerDiv.innerHTML = '<span class="answer-display-icon wrong-icon">&#10007;</span> 正确答案：' + escapeHTML(q.answer);
+    answerDiv.innerHTML = '<span class="answer-display-icon wrong-icon">&#10007;</span> 正确答案：<span class="answer-display-text">' + mdToHTML(q.answer) + '</span>';
   }
-  card.appendChild(answerDiv);
+  
+  // 插入到解析之前（如果存在），否则追加到末尾
+  var explanation = card.querySelector(".explanation");
+  if (explanation) {
+    card.insertBefore(answerDiv, explanation);
+  } else {
+    card.appendChild(answerDiv);
+  }
+  
+  // 渲染答案中的公式
+  if (typeof renderMathInElement !== "undefined") {
+    renderMathInElement(answerDiv, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$",  right: "$",  display: false }
+      ]
+    });
+  }
 }
 
 function highlightEssay(q) {
