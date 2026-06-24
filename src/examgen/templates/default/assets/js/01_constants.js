@@ -32,6 +32,7 @@ var passStatus = document.getElementById("pass-status");
 var progressFill = document.getElementById("progressFill");
 var progressText = document.getElementById("progressText");
 var reviewList = document.getElementById("reviewList");
+var navResult  = document.getElementById("navResult");
 var timerBar   = document.getElementById("timerBarInner");
 var timerBubble = document.getElementById("timerBubble");
 var bubbleFill = document.getElementById("bubbleFill");

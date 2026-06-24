@@ -120,6 +120,42 @@ body {
   font-size: 0.72rem;
   color: var(--color-sidebar-text-dim);
 }
+/* ── 导航结果摘要 ──────────────────────────────────── */
+.nav-result {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-sidebar-border);
+}
+.nav-result.hidden { display: none; }
+.nav-result-score {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-align: center;
+  margin-bottom: 8px;
+  padding: 6px 0;
+  background: var(--color-sidebar-active);
+  border-radius: 6px;
+}
+.nav-result-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.nav-result-type {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+}
+.nav-result-type-label {
+  color: var(--color-sidebar-text-dim);
+}
+.nav-result-type-count {
+  font-weight: 600;
+  color: var(--color-sidebar-text);
+}
 .nav-list {
   list-style: none;
   flex: 1;

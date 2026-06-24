@@ -306,6 +306,8 @@ function onReset() {
     var nd = navItems[na].querySelector(".nav-done");
     if (nd) nd.classList.remove("done");
   }
+  // 隐藏结果摘要
+  if (navResult) navResult.classList.add("hidden");
 
   scoreArea.classList.add("hidden");
   passStatus.textContent = "";
