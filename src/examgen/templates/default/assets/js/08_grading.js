@@ -50,6 +50,16 @@ function enterGradingMode() {
   // 构建右面板的快捷分值按钮
   buildRightPanelButtons();
 
+  // 绑定上一题/下一题按钮
+  var prevBtn = document.getElementById("grpPrevBtn");
+  var nextBtn = document.getElementById("grpNextBtn");
+  if (prevBtn) {
+    prevBtn.addEventListener("click", function () { navigateGradingQuestion(-1); });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener("click", function () { navigateGradingQuestion(1); });
+  }
+
   // 默认聚焦第一道简答题
   switchGradingQuestion(gradingEssayOrder[0]);
 
@@ -147,8 +157,25 @@ function switchGradingQuestion(qid) {
     if (active) active.classList.add("selected");
   }
 
+  // 更新上一题/下一题按钮状态
+  var idx = gradingEssayOrder.indexOf(qid);
+  var prevBtn = document.getElementById("grpPrevBtn");
+  var nextBtn = document.getElementById("grpNextBtn");
+  if (prevBtn) prevBtn.disabled = (idx <= 0);
+  if (nextBtn) nextBtn.disabled = (idx >= gradingEssayOrder.length - 1);
+
   // 更新左面板活跃项
   updateLeftPanelActive(qid);
+}
+
+/* ── 批阅上一题 / 下一题 ────────────────────────────── */
+function navigateGradingQuestion(direction) {
+  if (!gradingCurrentQid) return;
+  var idx = gradingEssayOrder.indexOf(gradingCurrentQid);
+  if (idx < 0) return;
+  var newIdx = idx + direction;
+  if (newIdx < 0 || newIdx >= gradingEssayOrder.length) return;
+  focusEssayQuestion(gradingEssayOrder[newIdx]);
 }
 
 function setGradingScoreUI(qid, score) {
