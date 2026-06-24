@@ -346,7 +346,11 @@ function fillScoreTypeSummary() {
     html += '<span class="score-type-item"><span class="sts-label">' + TYPE_ABBR[tt] + '：</span><span class="sts-count">' + ts.correct + '/' + ts.total + '</span></span>';
   }
   el.innerHTML = html;
-  el.classList.remove("hidden");
+  if (html) {
+    el.classList.remove("hidden");
+  } else {
+    el.classList.add("hidden");
+  }
 }
 
 /* ── 提交答卷 ───────────────────────────────────────── */

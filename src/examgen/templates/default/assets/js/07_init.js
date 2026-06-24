@@ -22,6 +22,7 @@ document.addEventListener("DOMContentLoaded", function () {
   window.addEventListener("scroll", function () {
     highlightCurrentNav();
     if (gradingActive) updateGradingFocus();
+    _currentFocusQid = null; // 清除焦点缓存，下次按键时重新计算
   });
 
   // 恢复已保存的答案
@@ -99,20 +100,29 @@ document.addEventListener("DOMContentLoaded", function () {
       if (mtbProgress) mtbProgress.textContent = progressText.textContent;
     };
   }
-  // 提交按钮
+  // 提交按钮（批阅模式感知）
   if (mtbSubmitBtn) {
-    mtbSubmitBtn.addEventListener("click", function () { onSubmit(); });
+    mtbSubmitBtn.addEventListener("click", function () {
+      if (gradingActive) {
+        onGradingDone();
+      } else {
+        onSubmit();
+      }
+    });
   }
-  // 提交后隐藏交卷按钮
+  // 提交后隐藏交卷按钮（非批阅时）
   var origSubmit = onSubmit;
   onSubmit = function() {
     origSubmit();
-    if (mtbSubmitBtn) mtbSubmitBtn.classList.add("hidden");
+    if (mtbSubmitBtn && !gradingActive) mtbSubmitBtn.classList.add("hidden");
   };
   var origReset = onReset;
   onReset = function() {
     origReset();
-    if (mtbSubmitBtn) mtbSubmitBtn.classList.remove("hidden");
+    if (mtbSubmitBtn) {
+      mtbSubmitBtn.textContent = "交卷";
+      mtbSubmitBtn.classList.remove("hidden");
+    }
   };
 
   // 触摸手势：左滑/右滑切换题目

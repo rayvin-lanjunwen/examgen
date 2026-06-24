@@ -73,12 +73,6 @@ function enterGradingMode() {
   if (mtbSubmitBtn) {
     mtbSubmitBtn.textContent = "完成批阅";
     mtbSubmitBtn.classList.remove("hidden");
-    mtbSubmitBtn.removeAttribute("data-submit");
-    mtbSubmitBtn.setAttribute("data-grading", "1");
-    // 重新绑定
-    var newBtn = mtbSubmitBtn.cloneNode(true);
-    mtbSubmitBtn.parentNode.replaceChild(newBtn, mtbSubmitBtn);
-    newBtn.addEventListener("click", function () { onGradingDone(); });
   }
 
   // 构建右面板的快捷分值按钮
@@ -470,12 +464,11 @@ function onGradingDone() {
   addPrintBtn();
   clearSavedAnswers();
 
-  // 手机端：恢复交卷按钮
+  // 手机端：恢复交卷按钮（由 onReset 统一处理）
   var mtbSubmitBtn = document.getElementById("mtbSubmitBtn");
   if (mtbSubmitBtn) {
     mtbSubmitBtn.textContent = "交卷";
     mtbSubmitBtn.classList.add("hidden");
-    mtbSubmitBtn.removeAttribute("data-grading");
   }
   // 计算总分用于打印成绩单
   var reportTotal = 0; var reportMax = 0;

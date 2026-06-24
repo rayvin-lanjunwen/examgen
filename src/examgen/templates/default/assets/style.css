@@ -1386,6 +1386,11 @@ body {
   .question-header { gap: 3px; }
   .exam-container { padding: 0 6px 60px; }
   .btn { padding: 10px 18px; font-size: 0.85rem; }
+  .score-total { font-size: 1.3rem; }
+  .ring-percent { font-size: 1rem; }
+  .score-type-item { font-size: 0.72rem; }
+  .review-item { padding: 6px 8px; font-size: 0.78rem; }
+  .score-area { padding: 14px 10px; }
 }
 
 /* ── 打印样式（成绩单模式）────────────────────────── */
