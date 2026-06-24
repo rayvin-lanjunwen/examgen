@@ -10,10 +10,6 @@
 - **路径清理** — 删除 `tests/fixtures/sample.md`，测试和 Web 路由统一指向 `docs/sample.md`
 - `docs/spec.md` — 精简为纯语法参考（无题量分布、检查清单、关键词建议等非格式内容）
 - `docs/prompt.md` — 精简为角色定义 + 参考答案/解析要求 + 质量准则 + 检查清单，格式规则只引用 spec.md
-- **文档补充** — spec.md 和 prompt.md 增加 LaTeX 命令必须小写的规则（`\times` 而非 `\TIMES`）
-
-### 修复
-- **批阅完成死锁** — `essayGraded` 只统计 `r.correct === null` 的简答，但 `onGradingDone` 后 `correct` 变为 `true/false`，导致"批阅中…"永不消失。修复：补上 `correct === true/false` 情况下对简答的统计
 
 ---
 

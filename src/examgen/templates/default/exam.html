@@ -71,6 +71,8 @@
 
         <!-- 得分区域 -->
         <div id="score-area" class="score-area hidden">
+          <div class="score-total" id="score-display">0 / 0 分</div>
+          <div id="pass-status"></div>
           <div class="score-ring-container">
             <svg class="score-ring" viewBox="0 0 120 120">
               <defs>
@@ -87,9 +89,6 @@
               <span class="ring-label">正确率</span>
             </div>
           </div>
-          <h2>考试结果</h2>
-          <p id="score-display">0 / 0 分</p>
-          <div id="pass-status"></div>
           <div class="score-type-summary hidden" id="scoreTypeSummary"></div>
           <div class="review-list" id="reviewList"></div>
         </div>
@@ -111,18 +110,6 @@
         </div>
       </div>
     </main>
-
-    <!-- 打印成绩单页（仅打印时可见） -->
-    <div class="print-report hidden" id="printReport">
-      <div class="print-report-header">
-        <h1>{{ meta.title }}</h1>
-        {% if meta.subject %}<p class="print-report-subject">{{ meta.subject }}</p>{% endif %}
-      </div>
-      <div class="print-report-score" id="printReportScore">0 / 0 分</div>
-      <div class="print-report-pass" id="printReportPass"></div>
-      <div class="print-report-types" id="printReportTypes"></div>
-      <div class="print-report-list" id="printReportList"></div>
-    </div>
 
     <!-- 批阅左面板（悬浮） -->
     <aside class="grading-left-panel hidden" id="gradingLeftPanel">

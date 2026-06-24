@@ -62,6 +62,7 @@ function enterGradingMode() {
     if (gradingLeftPanel) gradingLeftPanel.classList.remove("hidden");
     if (gradingRightPanel) gradingRightPanel.classList.remove("hidden");
   }
+  scoreArea.classList.remove("hidden");
   resetBtn.classList.add("hidden");
 
   // 进入批阅时隐藏未答题提示
@@ -363,13 +364,9 @@ function computeRealtimeScore() {
     var userS = 0;
     if (r.correct === true) {
       userS = maxS;
-      if (r.qtype === QT.ESSAY) essayGraded++;
     } else if (r.correct === null) {
       userS = gradingScores[r.id] || 0;
       if (gradingScores[r.id] !== undefined) essayGraded++;
-    } else if (r.correct === false) {
-      // 已批阅但得0分的简答
-      if (r.qtype === QT.ESSAY && gradingScores[r.id] !== undefined) essayGraded++;
     }
     totalUser += userS;
 
@@ -411,7 +408,39 @@ function computeRealtimeScore() {
     if (el) el.textContent = (gradingScores[qid] || 0) + "/" + (gradingMaxScores[qid] || 5);
   }
 
+  // 结果面板
+  animateScore(0, totalUser, totalMax);
+  var totalJudged = 0;
+  var correctCount = 0;
+  for (var m = 0; m < examResults.length; m++) {
+    var rr = examResults[m];
+    if (rr.correct !== null || gradingScores[rr.id] !== undefined) {
+      totalJudged++;
+      var s = (rr.correct === true) ? (rr.score || 0) : (gradingScores[rr.id] || 0);
+      if ((rr.correct === true) || s > 0) correctCount++;
+    }
+  }
+  var pct = totalJudged > 0 ? Math.round(correctCount / totalJudged * 100) : 0;
+  animateRing(pct);
+
+  if (EXAM_META.passing_score != null) {
+    if (essayGraded === gradingEssayOrder.length) {
+      if (totalUser >= EXAM_META.passing_score) {
+        passStatus.className = "pass";
+        passStatus.textContent = "恭喜，你已通过考试！";
+      } else {
+        passStatus.className = "fail";
+        passStatus.textContent = "未达到及格线 (" + EXAM_META.passing_score + " 分)，继续努力！";
+      }
+    } else {
+      passStatus.className = "";
+      passStatus.textContent = "批阅中…";
+    }
+  }
+
+  buildReviewList();
   updateNavResults();
+  fillScoreTypeSummary();
 }
 
 /* ── 完成批阅 ────────────────────────────────────────── */
@@ -432,7 +461,6 @@ function onGradingDone() {
   if (sheet) { sheet.classList.remove("open"); sheet.classList.add("hidden"); }
   resetBtn.classList.remove("hidden");
   gradingActive = false;
-  addPrintBtn();
   clearSavedAnswers();
 
   // 手机端：恢复交卷按钮（由 onReset 统一处理）
@@ -441,16 +469,7 @@ function onGradingDone() {
     mtbSubmitBtn.textContent = "交卷";
     mtbSubmitBtn.classList.add("hidden");
   }
-  // 计算总分用于打印成绩单
-  var reportTotal = 0; var reportMax = 0;
-  for (var i = 0; i < examResults.length; i++) {
-    var rr = examResults[i];
-    reportMax += rr.score || 0;
-    if (rr.correct === true) reportTotal += rr.score || 0;
-    else if (gradingScores[rr.id]) reportTotal += gradingScores[rr.id];
-  }
-  fillPrintReport(reportTotal, reportMax);
-
+  fillScoreTypeSummary();
   reRenderMath();
   computeRealtimeScore();
   updateNavResults();
