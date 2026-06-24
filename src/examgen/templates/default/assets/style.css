@@ -1139,15 +1139,57 @@ body {
 .hidden { display: none !important; }
 
 /* ── 响应式 ──────────────────────────────────────────── */
+/* 手机端汉堡菜单 + 侧栏滑入 ────────────────────── */
+.hamburger-btn {
+  display: none;
+  position: fixed;
+  top: calc(var(--timer-bar-h) + 6px);
+  left: 8px;
+  z-index: 200;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  font-size: 1.3rem;
+  color: var(--color-text);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 190;
+  transition: opacity 0.3s;
+}
+
 @media (max-width: 900px) {
-  .sidebar { transform: translateX(-100%); }
-  .sidebar.open { transform: translateX(0); }
+  .hamburger-btn { display: flex; }
+  .sidebar-overlay { display: block; opacity: 0; pointer-events: none; }
+  .sidebar-overlay.show { opacity: 1; pointer-events: auto; }
+
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 2px 0 16px rgba(0,0,0,0.15);
+    z-index: 195;
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+  .sidebar.collapsed { transform: translateX(-100%); }
+
   .main-content { margin-left: 0; }
-  .exam-container { padding: 0 14px 40px; }
+  .exam-container { padding: 0 14px 60px; }
   .banner-content { padding: 24px 16px 20px; }
   .exam-title { font-size: 1.4rem; }
-  .question-card { padding: 18px 16px; }
-  .option-label { padding: 10px 12px; }
+  .question-card { padding: 18px 14px; }
+  .option-label { padding: 12px 14px; }
   .timer-bubble { bottom: 16px; right: 16px; width: 72px; height: 72px; }
   .timer-bubble-text { font-size: 0.9rem; }
 }

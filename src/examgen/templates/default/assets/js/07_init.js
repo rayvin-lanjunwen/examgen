@@ -47,6 +47,39 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+  // 手机端汉堡菜单
+  var hamburgerBtn = document.getElementById("hamburgerBtn");
+  var sidebarOverlay = document.getElementById("sidebarOverlay");
+  if (hamburgerBtn && sidebar) {
+    hamburgerBtn.addEventListener("click", function () {
+      var isOpen = sidebar.classList.contains("open");
+      if (isOpen) {
+        sidebar.classList.remove("open");
+        sidebarOverlay.classList.remove("show");
+        hamburgerBtn.textContent = "\u2630";
+      } else {
+        sidebar.classList.remove("collapsed");
+        sidebar.classList.add("open");
+        sidebarOverlay.classList.add("show");
+        hamburgerBtn.textContent = "\u2715";
+      }
+    });
+    // 点击遮罩关闭
+    sidebarOverlay.addEventListener("click", function () {
+      sidebar.classList.remove("open");
+      sidebarOverlay.classList.remove("show");
+      hamburgerBtn.textContent = "\u2630";
+    });
+    // 点击导航项后自动关闭（手机端）
+    navList.addEventListener("click", function (e) {
+      if (e.target.closest(".nav-item") && window.innerWidth <= 900) {
+        sidebar.classList.remove("open");
+        sidebarOverlay.classList.remove("show");
+        hamburgerBtn.textContent = "\u2630";
+      }
+    });
+  }
+
   // CDN 加载失败检测
   setTimeout(function () {
     var warnings = [];
