@@ -21,8 +21,8 @@ YAML 元数据
 | `time` | int | 否 | — | 考试时长（分钟），**纯数字不含单位**，如 `90` 而非 `90分钟` |
 | `total_score` | float | 否 | — | 试卷总分（注意不是 `score`） |
 | `default_score` | float | 否 | `1.0` | 未指定分值时默认分，**建议填写** |
-| `shuffle` | bool | 否 | `false` | 打乱题目顺序 |
-| `option_shuffle` | bool | 否 | `false` | 打乱选项顺序 |
+| `shuffle` | bool | 否 | `false` | 在每个 `## 分区` 内打乱题目顺序（保持分区之间的相对顺序） |
+| `option_shuffle` | bool | 否 | `false` | 打乱选项顺序，答案字母自动映射同步 |
 | `passing_score` | float | 否 | — | 及格分，**建议填写**（如 `60`） |
 
 ### YAML 常见错误
