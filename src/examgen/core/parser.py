@@ -22,7 +22,7 @@ _QTYPE_MAP: dict[str, QuestionType] = {
     "简答": QuestionType.ESSAY,
 }
 
-# 题目首行正则：支持新格式 #1. [题型] 和旧格式 1. [题型] 题干
+# 题目首行正则：支持 #1. [题型] 和 1. [题型] 题干
 _RE_FIRST_LINE = re.compile(
     r"^#?(\d+)\.\s*\[([^\]]+)\]\s*(.*)$",
     re.MULTILINE,
@@ -30,7 +30,7 @@ _RE_FIRST_LINE = re.compile(
 # 选项行：- A. text  /  - B. text
 _RE_OPTION = re.compile(r"^-\s+([A-Z])\.\s*(.+)$", re.MULTILINE)
 
-# 题目起始标记（支持新旧格式）：^#?\d+.\s*[
+# 题目起始标记（支持新旧格式）
 _RE_Q_START = re.compile(r"^#?\d+\.\s*\[", re.MULTILINE)
 
 # 分区标题：## 标题内容
@@ -39,6 +39,7 @@ _RE_SECTION = re.compile(r"^##\s+(.+)$", re.MULTILINE)
 # 字段标记行 — 新旧格式通用
 #   新格式：#答案  /  #分值  /  #解析  /  #题干  /  #图片  /  #表格  /  #选项
 #   旧格式：答案： /  分值： /  解析：
+#   容错：也接受 \#答案 等带反斜杠转义的写法（AI 生成常见错误）
 _RE_FIELD_MARKER_NEW = re.compile(r"^#(答案|解析|分值|题干|图片|表格|选项)\s*$")
 _RE_FIELD_MARKER_LEGACY = re.compile(r"^(答案|解析|分值)[：:]\s*(.*)$")
 
@@ -73,7 +74,8 @@ def _split_questions(raw_text: str) -> List[Tuple[str, Optional[str]]]:
 
     返回 ``[(题目区块文本, 所属分区标题或 None), ...]``。
     """
-    text = raw_text.strip()
+    # 容错：移除 AI 生成常见反斜杠转义（\#、\-、\\.、\\[ 等）
+    text = _strip_leading_backslash(raw_text.strip())
 
     # 收集所有题目起始位置
     q_positions: List[int] = [m.start() for m in _RE_Q_START.finditer(text)]
@@ -106,6 +108,14 @@ def _split_questions(raw_text: str) -> List[Tuple[str, Optional[str]]]:
 # ── 内容区块划分 ──────────────────────────────────────────────────────────
 
 
+def _strip_leading_backslash(line: str) -> str:
+    """移除 AI 生成常见的反斜杠转义（``\\#``、``\\-``、``\\[``、``\\]``、``\\.``）。
+
+    不会影响 LaTeX 公式中的反斜杠（如 ``\\frac``）。
+    """
+    return line.replace("\\#", "#").replace("\\-", "-").replace("\\[", "[").replace("\\]", "]").replace("\\.", ".")
+
+
 def _parse_content_blocks(block: str) -> dict[str, str]:
     """将题目区块按 ``#标记`` 行切分，返回 ``{标记名: 内容}`` 字典。
 
@@ -114,8 +124,10 @@ def _parse_content_blocks(block: str) -> dict[str, str]:
     lines = block.split("\n")
     result: dict[str, str] = {}
 
-    # 检测是否使用新格式
-    has_new_markers = any(_RE_FIELD_MARKER_NEW.match(ln) for ln in lines)
+    # 检测是否使用新格式（容错：先剥离反斜杠再检测）
+    has_new_markers = any(
+        _RE_FIELD_MARKER_NEW.match(_strip_leading_backslash(ln)) for ln in lines
+    )
 
     if not has_new_markers:
         # 旧格式：不回退到 block-level 处理，返回空让 _parse_question_block 走 legacy 路径
@@ -127,6 +139,8 @@ def _parse_content_blocks(block: str) -> dict[str, str]:
     in_comment = False  # 跳过 HTML 注释块 <!-- ... -->
 
     for line in lines:
+        normalized = _strip_leading_backslash(line)
+
         # 跳过 HTML 注释块
         if in_comment:
             if "-->" in line:
@@ -138,11 +152,11 @@ def _parse_content_blocks(block: str) -> dict[str, str]:
             continue
 
         # 遇到分区标题或下一题起始符则提前终止（跳过当前题目首行）
-        if (_RE_SECTION.match(line) or _RE_Q_START.match(line)) and current_field is not None:
+        if (_RE_SECTION.match(normalized) or _RE_Q_START.match(normalized)) and current_field is not None:
             result[current_field] = "\n".join(current_lines).strip()
             break
 
-        m = _RE_FIELD_MARKER_NEW.match(line)
+        m = _RE_FIELD_MARKER_NEW.match(normalized)
         if m:
             # 保存上一个区块
             if current_field is not None:
@@ -206,8 +220,8 @@ def _parse_question_block(
     # 先尝试新格式按 #标记 切分
     blocks = _parse_content_blocks(block)
 
-    # 1) 提取题型
-    first_line = block.split("\n")[0].strip()
+    # 1) 提取题型（容错：剥离首行反斜杠）
+    first_line = _strip_leading_backslash(block.split("\n")[0].strip())
     m_first = _RE_FIRST_LINE.search(first_line)
     if not m_first:
         raise ValueError(f"无法解析题目首行，区块内容:\n{block[:200]}")
@@ -235,14 +249,14 @@ def _parse_question_block(
     if extra_parts:
         topic = topic + "\n\n" + "\n\n".join(extra_parts) if topic else "\n\n".join(extra_parts)
 
-    # 3) 提取选项
+    # 3) 提取选项（容错：剥离选项行反斜杠）
     options: List[Option] = []
-    if "选项" in blocks:
-        for m_opt in _RE_OPTION.finditer(blocks["选项"]):
-            options.append(Option(label=m_opt.group(1), text=m_opt.group(2).strip()))
-    else:
-        # 旧格式：从整个 block 中提取
-        for m_opt in _RE_OPTION.finditer(block):
+    option_source = blocks.get("选项", "") if "选项" in blocks else block
+    # 逐行剥离反斜杠后匹配
+    for line in option_source.split("\n"):
+        stripped = _strip_leading_backslash(line)
+        m_opt = _RE_OPTION.match(stripped)
+        if m_opt:
             options.append(Option(label=m_opt.group(1), text=m_opt.group(2).strip()))
 
     # 4) 答案 — 新格式优先
