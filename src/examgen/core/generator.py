@@ -43,7 +43,7 @@ def generate_html(
 
     # 读取 CSS / JS 文件内容，内联到 HTML 中
     style_content = _read_asset(tpl_dir / "assets" / "style.css")
-    script_content = _read_asset(tpl_dir / "assets" / "script.js")
+    script_content = _read_js_bundle(tpl_dir / "assets")
 
     # 准备模板变量
     meta_dict = asdict(meta)
@@ -78,4 +78,24 @@ def _read_asset(path: Path) -> str:
     """读取资源文件内容，不存在时返回空字符串。"""
     if path.exists():
         return path.read_text(encoding="utf-8")
+    return ""
+
+
+def _read_js_bundle(assets_dir: Path) -> str:
+    """读取 assets/js/ 目录下所有 .js 文件并合并。
+
+    优先从 ``assets/js/*.js`` 读取（按文件名排序拼接）；
+    若目录不存在则回退到 ``assets/script.js`` 单文件模式。
+    """
+    js_dir = assets_dir / "js"
+    if js_dir.is_dir():
+        parts: list[str] = []
+        for f in sorted(js_dir.glob("*.js")):
+            parts.append(f.read_text(encoding="utf-8"))
+        return "\n".join(parts)
+
+    # 回退兼容：旧的单文件模式
+    legacy = assets_dir / "script.js"
+    if legacy.exists():
+        return legacy.read_text(encoding="utf-8")
     return ""

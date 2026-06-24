@@ -1,12 +1,13 @@
 """校验、补全 Question 列表中的缺失与不规范字段。"""
 
+from dataclasses import replace
 from typing import List
 
 from examgen.models import ExamMeta, Option, Question, QuestionType
 
 
 def normalize_questions(questions: List[Question], meta: ExamMeta) -> List[Question]:
-    """对题目列表做就地校验与补全。
+    """对题目列表做校验与补全，返回新的题目列表，不修改原对象。
 
     处理内容：
     1. score 为 None 时，填充 meta.default_score
@@ -15,29 +16,35 @@ def normalize_questions(questions: List[Question], meta: ExamMeta) -> List[Quest
     4. 多选题答案中的逗号分隔符移除（如 "A,B,C" → "ABC"）
     5. 验证单选答案长度=1、多选答案≥1、判断答案为A或B
     """
+    result: List[Question] = []
     for q in questions:
+        # 从原对象创建副本
+        normalized = replace(q)
+
         # 1) 分值补全
-        if q.score is None:
-            q.score = meta.default_score
+        if normalized.score is None:
+            normalized.score = meta.default_score
 
         # 2) 判断题自动补选项
-        if q.qtype == QuestionType.JUDGE and not q.options:
-            q.options = [
+        if normalized.qtype == QuestionType.JUDGE and not normalized.options:
+            normalized.options = [
                 Option(label="A", text="正确"),
                 Option(label="B", text="错误"),
             ]
 
         # 3) 答案大写
-        q.answer = q.answer.upper()
+        normalized.answer = normalized.answer.upper()
 
         # 4) 多选题移除逗号分隔符
-        if q.qtype == QuestionType.MULTIPLE:
-            q.answer = q.answer.replace(",", "")
+        if normalized.qtype == QuestionType.MULTIPLE:
+            normalized.answer = normalized.answer.replace(",", "")
 
         # 5) 答案合理性校验
-        _validate_answer(q)
+        _validate_answer(normalized)
 
-    return questions
+        result.append(normalized)
+
+    return result
 
 
 def _validate_answer(q: Question) -> None:

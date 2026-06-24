@@ -19,6 +19,16 @@ from examgen.core.transformer import apply_transforms
 _WEB_DIR = Path(__file__).resolve().parent
 _TEMPLATE_DIR = _WEB_DIR / "templates"
 _STATIC_DIR = _WEB_DIR / "static"
+_PROJECT_ROOT = _WEB_DIR.parent.parent.parent
+
+# 读取示例模板，如果不存在则返回空串
+def _load_template_sample() -> str:
+    sample_path = _PROJECT_ROOT / "tests" / "fixtures" / "sample.md"
+    if sample_path.exists():
+        return sample_path.read_text(encoding="utf-8")
+    return ""
+
+_SAMPLE_TEMPLATE = _load_template_sample()
 
 app = FastAPI(title="ExamGen", version=__version__)
 
@@ -44,10 +54,23 @@ async def startup():
 @app.get("/")
 async def index(request: Request):
     """渲染上传页面。"""
-    return templates.TemplateResponse(
+    response = templates.TemplateResponse(
         request=request,
         name="upload.html",
         context={"version": __version__},
+    )
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+
+@app.get("/api/template")
+async def template_sample():
+    """返回示例模板 Markdown 内容（纯文本）。"""
+    return Response(
+        content=_SAMPLE_TEMPLATE,
+        media_type="text/plain; charset=utf-8",
     )
 
 

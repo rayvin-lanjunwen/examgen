@@ -28,6 +28,7 @@ class Question:
     options: List[Option] = field(default_factory=list)
     answer: str = ""
     score: Optional[float] = None
+    section: Optional[str] = None
     explanation: Optional[str] = None
 
 

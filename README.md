@@ -173,13 +173,11 @@ examgen/
 │           ├── style.css          # 试卷样式表（内联）
 │           └── script.js          # 答题交互逻辑（内联）
 ├── tests/
-│   ├── fixtures/sample.md         # 测试用试卷样本
+│   ├── fixtures/sample.md         # 官方标准模板
 │   ├── test_parser.py
 │   ├── test_normalizer.py
 │   ├── test_transformer.py
 │   └── test_generator.py
-├── examples/
-│   └── demo-quiz.md               # 示例试卷
 └── docs/
     └── spec.md                    # 题目源文件规范
 ```

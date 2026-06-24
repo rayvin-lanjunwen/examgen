@@ -1,9 +1,0 @@
-click
-jinja2
-python-frontmatter
-mistune
-pyyaml
-fastapi
-uvicorn
-python-multipart
-mangum

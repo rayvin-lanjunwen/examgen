@@ -4,37 +4,91 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ meta.title }}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css" onerror="this.remove()">
   <style>
-    {{ style_content }}
+    {{ style_content | safe }}
   </style>
 </head>
 <body>
-  <div class="exam-container">
-    <!-- 头部：试卷信息 -->
-    <header class="exam-header">
-      <h1 class="exam-title">{{ meta.title }}</h1>
-      <div class="exam-info">
-        {% if meta.subject %}<span class="info-item">科目：{{ meta.subject }}</span>{% endif %}
-        {% if meta.time %}<span class="info-item">考试时间：<span id="countdown">{{ meta.time }}</span> 分钟</span>{% endif %}
-        {% if meta.total_score %}<span class="info-item">总分：{{ meta.total_score }} 分</span>{% endif %}
-        {% if meta.passing_score %}<span class="info-item">及格分：{{ meta.passing_score }} 分</span>{% endif %}
-      </div>
-    </header>
+  <div class="app-layout">
 
-    <!-- 题目列表，由 JS 动态渲染 -->
-    <div id="questions-container"></div>
-
-    <!-- 得分区域 -->
-    <div id="score-area" class="score-area hidden">
-      <h2>考试结果</h2>
-      <p id="score-display"></p>
-      <div id="pass-status"></div>
+    <!-- 顶部计时条 -->
+    <div class="timer-bar" id="timerBar">
+      <div class="timer-bar-inner" id="timerBarInner"></div>
     </div>
 
-    <!-- 操作按钮 -->
-    <div class="exam-actions">
-      <button id="submit-btn" class="btn btn-primary">提交答卷</button>
-      <button id="reset-btn" class="btn btn-secondary hidden">重新作答</button>
+    <!-- 侧边导航栏 -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-icon">&#9776;</span>
+        <span>题目导航</span>
+      </div>
+      <div class="sidebar-progress">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <span class="progress-text" id="progressText">0/0</span>
+      </div>
+      <ul class="nav-list" id="navList"></ul>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+      <div class="exam-container">
+        <!-- 渐变横幅头部 -->
+        <header class="exam-banner">
+          <div class="banner-bg"></div>
+          <div class="banner-content">
+            <h1 class="exam-title">{{ meta.title }}</h1>
+            <div class="exam-info">
+              {% if meta.subject %}<span class="info-item"><span class="info-icon">&#128218;</span> {{ meta.subject }}</span>{% endif %}
+              {% if meta.time %}<span class="info-item"><span class="info-icon">&#9200;</span> <span id="countdown">{{ meta.time }}</span> 分钟</span>{% endif %}
+              {% if meta.total_score %}<span class="info-item"><span class="info-icon">&#127942;</span> {{ meta.total_score }} 分</span>{% endif %}
+              {% if meta.passing_score %}<span class="info-item"><span class="info-icon">&#9989;</span> 及格：{{ meta.passing_score }} 分</span>{% endif %}
+            </div>
+          </div>
+        </header>
+
+        <!-- 题目列表 -->
+        <div id="questions-container"></div>
+
+        <!-- 得分区域 -->
+        <div id="score-area" class="score-area hidden">
+          <div class="score-ring-container">
+            <svg class="score-ring" viewBox="0 0 120 120">
+              <defs>
+                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#6366f1"/>
+                  <stop offset="100%" stop-color="#a855f7"/>
+                </linearGradient>
+              </defs>
+              <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+              <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52" stroke-dasharray="0 327"></circle>
+            </svg>
+            <div class="score-ring-text">
+              <span class="ring-percent" id="ringPercent">0%</span>
+              <span class="ring-label">正确率</span>
+            </div>
+          </div>
+          <h2>考试结果</h2>
+          <p id="score-display">0 / 0 分</p>
+          <div id="pass-status"></div>
+          <div class="review-list" id="reviewList"></div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="exam-actions">
+          <button id="submit-btn" class="btn btn-primary">提交答卷</button>
+          <button id="reset-btn" class="btn btn-secondary hidden">重新作答</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- 右下角悬浮计时气泡（最后5分钟显示） -->
+    <div class="timer-bubble hidden" id="timerBubble">
+      <svg class="timer-bubble-ring" viewBox="0 0 80 80">
+        <circle class="bubble-bg" cx="40" cy="40" r="36"></circle>
+        <circle class="bubble-fill" id="bubbleFill" cx="40" cy="40" r="36"></circle>
+      </svg>
+      <span class="timer-bubble-text" id="bubbleText">05:00</span>
     </div>
   </div>
 
@@ -42,8 +96,11 @@
     const EXAM_DATA = {{ questions | tojson | safe }};
     const EXAM_META = {{ meta_dict | tojson | safe }};
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.js" onerror="window._katexFailed=1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/contrib/auto-render.min.js" onerror="window._katexFailed=1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js" onerror="window._markedFailed=1"></script>
   <script>
-    {{ script_content }}
+    {{ script_content | safe }}
   </script>
 </body>
 </html>

@@ -9,3 +9,21 @@ build/
 venv/
 .env
 .pytest_cache/
+
+# 调试输出 / 构建产物
+*.txt
+!requirements.txt
+*.html
+!src/**/*.html
+
+# 部署相关（按需添加回来）
+scf/
+_scf_build/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
