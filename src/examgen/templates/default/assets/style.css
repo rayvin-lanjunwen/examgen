@@ -1133,17 +1133,6 @@ body {
 }
 .grading-sheet-nav-btn:disabled { opacity: 0.3; }
 
-/* ── 手机端成绩区域纵向流 ───────────────────────── */
-@media (max-width: 900px) {
-  .score-area { padding: 24px 14px; }
-  .score-ring-container { margin-bottom: 2px; }
-  .score-ring { width: 90px; height: 90px; }
-  .score-area h2 { font-size: 1.1rem; }
-  #score-display { font-size: 1.1rem; }
-  .review-list { max-height: none; }
-  .review-item { padding: 10px 12px; }
-}
-
 /* ── 响应式：窄屏隐藏左右批阅面板 ── */
 @media (max-width: 900px) {
   /* 隐藏桌面端悬浮批阅面板，使用底部 sheet 替代 */
@@ -1311,23 +1300,76 @@ body {
     box-shadow: 2px 0 16px rgba(0,0,0,0.15);
     z-index: 195;
   }
-  .sidebar.open {
-    transform: translateX(0);
-  }
+  .sidebar.open { transform: translateX(0); }
   .sidebar.collapsed { transform: translateX(-100%); }
 
   .main-content { margin-left: 0; padding-top: 44px; }
-  .exam-container { padding: 0 14px 60px; }
-  .banner-content { padding: 24px 16px 20px; }
-  .exam-title { font-size: 1.4rem; }
-  .question-card { padding: 18px 14px; }
-  .option-label { padding: 12px 14px; }
-  .timer-bubble { bottom: 16px; right: 16px; width: 72px; height: 72px; }
-  .timer-bubble-text { font-size: 0.9rem; }
+  .exam-container { padding: 0 10px 80px; }
+
+  /* 横幅缩小 */
+  .banner-content { padding: 20px 14px 16px; }
+  .exam-banner { margin: 0 -10px; border-radius: 0; }
+  .exam-title { font-size: 1.25rem; margin-bottom: 4px; }
+  .exam-info { gap: 10px; flex-wrap: wrap; font-size: 0.82rem; }
+  .info-item { font-size: 0.78rem; padding: 3px 0; }
+  .section-divider { margin: 10px 0; font-size: 0.82rem; }
+  .section-divider-text { font-size: 0.82rem; }
+
+  /* 题目卡片 */
+  .question-card { padding: 14px 12px; margin-bottom: 12px; }
+  .question-header { flex-wrap: wrap; gap: 4px; }
+  .question-type { font-size: 0.65rem; padding: 2px 7px; }
+  .question-number { font-size: 0.88rem; }
+  .question-score { font-size: 0.75rem; }
+
+  /* 选项放大触控区 */
+  .option-label { padding: 13px 12px; font-size: 0.92rem; border-radius: 10px; }
+  .option-circle { width: 22px; height: 22px; min-width: 22px; }
+  .option-circle::after { width: 10px; height: 10px; }
+
+  /* 填空/简答输入 */
+  .fill-inline { font-size: 0.9rem; padding: 8px 10px; min-width: 80px; }
+  .essay-textarea { font-size: 0.9rem; padding: 12px; min-height: 100px; }
+
+  /* 解析/参考答案 */
+  .explanation { padding: 12px 14px; font-size: 0.82rem; }
+  .essay-reference { padding: 12px 14px; font-size: 0.82rem; }
+  .answer-display { font-size: 0.8rem; padding: 8px 12px; }
+
+  /* 成绩区域 */
+  .score-area { padding: 20px 12px; margin-top: 20px; }
+  .score-ring-container { margin-bottom: 2px; }
+  .score-ring { width: 80px; height: 80px; }
+  .score-area h2 { font-size: 1.1rem; margin: 4px 0; }
+  #score-display { font-size: 1.1rem; }
+  .review-list { max-height: none; }
+  .review-item { padding: 8px 10px; font-size: 0.82rem; }
+  .review-qid { font-size: 0.78rem; }
+  .review-score { font-size: 0.75rem; }
+  .exam-actions { padding: 0 10px; }
+  .btn { padding: 12px 20px; font-size: 0.9rem; }
+
+  /* 计时器 */
+  .timer-bar-inner { height: 4px; }
+  .timer-bubble { bottom: 12px; right: 12px; width: 64px; height: 64px; }
+  .timer-bubble-text { font-size: 0.8rem; }
+
+  /* 批阅底部栏 */
+  .grading-bar { padding: 10px 12px; font-size: 0.82rem; gap: 8px; flex-wrap: wrap; }
+  .grading-bar .btn { padding: 8px 14px; font-size: 0.8rem; }
+
+  /* CDN 提示 */
+  .cdn-fallback-banner { font-size: 0.8rem; padding: 10px 12px; }
 }
 @media (max-width: 480px) {
-  .exam-info { flex-direction: column; gap: 8px; }
-  .btn { padding: 12px 24px; font-size: 0.9rem; }
+  .exam-info { flex-direction: column; gap: 6px; }
+  .banner-content { padding: 16px 12px 12px; }
+  .exam-title { font-size: 1.15rem; }
+  .question-card { padding: 12px 10px; }
+  .option-label { padding: 12px 10px; font-size: 0.88rem; }
+  .question-header { gap: 3px; }
+  .exam-container { padding: 0 6px 60px; }
+  .btn { padding: 10px 18px; font-size: 0.85rem; }
 }
 
 /* ── 打印样式（成绩单模式）────────────────────────── */
