@@ -1139,26 +1139,58 @@ body {
 .hidden { display: none !important; }
 
 /* ── 响应式 ──────────────────────────────────────────── */
-/* 手机端汉堡菜单 + 侧栏滑入 ────────────────────── */
-.hamburger-btn {
+/* 手机端顶部操作栏 ─────────────────────────────── */
+.mobile-topbar {
   display: none;
   position: fixed;
-  top: calc(var(--timer-bar-h) + 6px);
-  left: 8px;
-  z-index: 200;
+  top: var(--timer-bar-h);
+  left: 0; right: 0;
+  height: 44px;
+  z-index: 185;
   background: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  width: 38px;
-  height: 38px;
-  font-size: 1.3rem;
-  color: var(--color-text);
+  border-bottom: 1px solid var(--color-border);
+  padding: 0 8px;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.mtb-hamburger {
+  width: 34px; height: 34px;
+  border: none;
+  background: var(--color-bg);
+  border-radius: 7px;
+  font-size: 1.1rem;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  color: var(--color-text);
+  flex-shrink: 0;
+  padding: 0;
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
 }
+.mtb-progress {
+  flex: 1;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.mtb-submit {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--color-primary);
+  color: #fff;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.mtb-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+.mtb-submit.hidden { display: none; }
+
+/* 手机端遮罩 */
 .sidebar-overlay {
   display: none;
   position: fixed;
@@ -1169,7 +1201,7 @@ body {
 }
 
 @media (max-width: 900px) {
-  .hamburger-btn { display: flex; }
+  .mobile-topbar { display: flex; }
   .sidebar-overlay { display: block; opacity: 0; pointer-events: none; }
   .sidebar-overlay.show { opacity: 1; pointer-events: auto; }
 
@@ -1184,7 +1216,7 @@ body {
   }
   .sidebar.collapsed { transform: translateX(-100%); }
 
-  .main-content { margin-left: 0; }
+  .main-content { margin-left: 0; padding-top: 44px; }
   .exam-container { padding: 0 14px 60px; }
   .banner-content { padding: 24px 16px 20px; }
   .exam-title { font-size: 1.4rem; }

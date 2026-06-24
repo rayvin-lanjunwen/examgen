@@ -47,38 +47,62 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // 手机端汉堡菜单
-  var hamburgerBtn = document.getElementById("hamburgerBtn");
+  // 手机端顶部操作栏
+  var topbar = document.getElementById("mobileTopbar");
+  var mtbHamburger = document.getElementById("mtbHamburgerBtn");
+  var mtbSubmitBtn = document.getElementById("mtbSubmitBtn");
+  var mtbProgress = document.getElementById("mtbProgress");
   var sidebarOverlay = document.getElementById("sidebarOverlay");
-  if (hamburgerBtn && sidebar) {
-    hamburgerBtn.addEventListener("click", function () {
+  if (mtbHamburger && sidebar) {
+    mtbHamburger.addEventListener("click", function () {
       var isOpen = sidebar.classList.contains("open");
       if (isOpen) {
         sidebar.classList.remove("open");
         sidebarOverlay.classList.remove("show");
-        hamburgerBtn.textContent = "\u2630";
+        mtbHamburger.textContent = "\u2630";
       } else {
         sidebar.classList.remove("collapsed");
         sidebar.classList.add("open");
         sidebarOverlay.classList.add("show");
-        hamburgerBtn.textContent = "\u2715";
+        mtbHamburger.textContent = "\u2715";
       }
     });
-    // 点击遮罩关闭
     sidebarOverlay.addEventListener("click", function () {
       sidebar.classList.remove("open");
       sidebarOverlay.classList.remove("show");
-      hamburgerBtn.textContent = "\u2630";
+      mtbHamburger.textContent = "\u2630";
     });
-    // 点击导航项后自动关闭（手机端）
     navList.addEventListener("click", function (e) {
       if (e.target.closest(".nav-item") && window.innerWidth <= 900) {
         sidebar.classList.remove("open");
         sidebarOverlay.classList.remove("show");
-        hamburgerBtn.textContent = "\u2630";
+        mtbHamburger.textContent = "\u2630";
       }
     });
   }
+  // 同步进度到顶栏
+  if (mtbProgress) {
+    var origUpdateProgress = updateProgress;
+    updateProgress = function() {
+      origUpdateProgress();
+      if (mtbProgress) mtbProgress.textContent = progressText.textContent;
+    };
+  }
+  // 提交按钮
+  if (mtbSubmitBtn) {
+    mtbSubmitBtn.addEventListener("click", function () { onSubmit(); });
+  }
+  // 提交后隐藏交卷按钮
+  var origSubmit = onSubmit;
+  onSubmit = function() {
+    origSubmit();
+    if (mtbSubmitBtn) mtbSubmitBtn.classList.add("hidden");
+  };
+  var origReset = onReset;
+  onReset = function() {
+    origReset();
+    if (mtbSubmitBtn) mtbSubmitBtn.classList.remove("hidden");
+  };
 
   // CDN 加载失败检测
   setTimeout(function () {
