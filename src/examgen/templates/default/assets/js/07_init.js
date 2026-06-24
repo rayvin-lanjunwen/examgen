@@ -104,6 +104,26 @@ document.addEventListener("DOMContentLoaded", function () {
     if (mtbSubmitBtn) mtbSubmitBtn.classList.remove("hidden");
   };
 
+  // 触摸手势：左滑/右滑切换题目
+  var touchStartX = 0, touchStartY = 0;
+  container.addEventListener("touchstart", function (e) {
+    if (e.touches.length === 1) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+  container.addEventListener("touchend", function (e) {
+    if (!touchStartX) return;
+    var dx = (e.changedTouches[0].clientX - touchStartX);
+    var dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+    touchStartX = 0;
+    // 水平滑动 > 60px 且大于垂直滑动
+    if (Math.abs(dx) < 60 || dy > Math.abs(dx) * 0.7) return;
+    var qid = getFocusedQid();
+    if (!qid) return;
+    navigateQuestion(qid, dx < 0 ? 1 : -1);
+  });
+
   // CDN 加载失败检测
   setTimeout(function () {
     var warnings = [];

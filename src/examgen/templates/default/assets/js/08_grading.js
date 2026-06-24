@@ -51,13 +51,25 @@ function enterGradingMode() {
 
   // 显示面板
   if (gradingBar) gradingBar.classList.remove("hidden");
-  if (gradingLeftPanel) gradingLeftPanel.classList.remove("hidden");
-  if (gradingRightPanel) gradingRightPanel.classList.remove("hidden");
+  if (window.innerWidth <= 900) {
+    // 手机端：显示底部 sheet，隐藏左右悬浮面板
+    var sheet = document.getElementById("gradingSheet");
+    if (sheet) {
+      sheet.classList.remove("hidden");
+      setTimeout(function () { sheet.classList.add("open"); }, 50);
+    }
+  } else {
+    if (gradingLeftPanel) gradingLeftPanel.classList.remove("hidden");
+    if (gradingRightPanel) gradingRightPanel.classList.remove("hidden");
+  }
   scoreArea.classList.remove("hidden");
   resetBtn.classList.add("hidden");
 
   // 构建右面板的快捷分值按钮
   buildRightPanelButtons();
+
+  // 手机端底部 Sheet 构建
+  buildGradingSheetButtons();
 
   // 绑定上一题/下一题按钮
   var prevBtn = document.getElementById("grpPrevBtn");
@@ -68,6 +80,11 @@ function enterGradingMode() {
   if (nextBtn) {
     nextBtn.addEventListener("click", function () { navigateGradingQuestion(1); });
   }
+  // 底部 sheet 翻题
+  var gsPrev = document.getElementById("gsPrevBtn");
+  var gsNext = document.getElementById("gsNextBtn");
+  if (gsPrev) gsPrev.addEventListener("click", function () { navigateGradingQuestion(-1); });
+  if (gsNext) gsNext.addEventListener("click", function () { navigateGradingQuestion(1); });
 
   // 默认聚焦第一道简答题
   switchGradingQuestion(gradingEssayOrder[0]);
@@ -80,6 +97,34 @@ function enterGradingMode() {
   // 滚动到第一道简答题
   var firstCard = container.querySelector('.question-card[data-qid="' + gradingEssayOrder[0] + '"]');
   if (firstCard) firstCard.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+/* ── 构建手机端底部 Sheet 分值按钮 ───────────────── */
+function buildGradingSheetButtons() {
+  var gsButtons = document.getElementById("gsButtons");
+  if (!gsButtons) return;
+  var globalMax = 0;
+  for (var i = 0; i < gradingEssayOrder.length; i++) {
+    var m = gradingMaxScores[gradingEssayOrder[i]] || 5;
+    if (m > globalMax) globalMax = m;
+  }
+  var html = "";
+  for (var s = 0; s <= globalMax; s++) {
+    var label = s === globalMax ? s + "(满)" : (s === 0 ? "0" : s);
+    html += '<button class="grading-score-btn" data-score="' + s + '">' + label + '</button>';
+  }
+  gsButtons.innerHTML = html;
+
+  gsButtons.querySelectorAll(".grading-score-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var score = parseInt(this.getAttribute("data-score"));
+      var qid = gradingCurrentQid;
+      if (!qid) return;
+      var max = gradingMaxScores[qid] || 5;
+      if (score > max) score = max;
+      setGradingScoreUI(qid, score);
+    });
+  });
 }
 
 /* ── 构建右面板的快捷分值按钮 ────────────────────────── */
@@ -172,6 +217,30 @@ function switchGradingQuestion(qid) {
   var nextBtn = document.getElementById("grpNextBtn");
   if (prevBtn) prevBtn.disabled = (idx <= 0);
   if (nextBtn) nextBtn.disabled = (idx >= gradingEssayOrder.length - 1);
+  // 底部 sheet
+  var gsPrev = document.getElementById("gsPrevBtn");
+  var gsNext = document.getElementById("gsNextBtn");
+  if (gsPrev) gsPrev.disabled = (idx <= 0);
+  if (gsNext) gsNext.disabled = (idx >= gradingEssayOrder.length - 1);
+
+  // 更新底部 sheet 显示
+  var gsQid = document.getElementById("gsQid");
+  var gsScore = document.getElementById("gsScore");
+  if (gsQid) gsQid.textContent = qid;
+  if (gsScore) gsScore.textContent = cur + " / " + max;
+
+  // 高亮 sheet 中的按钮
+  var gsButtons = document.getElementById("gsButtons");
+  if (gsButtons) {
+    gsButtons.querySelectorAll(".grading-score-btn").forEach(function (b) {
+      b.classList.remove("selected");
+      var bs = parseInt(b.getAttribute("data-score"));
+      if (bs > max) { b.style.opacity = "0.3"; b.style.pointerEvents = "none"; }
+      else { b.style.opacity = ""; b.style.pointerEvents = ""; }
+    });
+    var active = gsButtons.querySelector('.grading-score-btn[data-score="' + cur + '"]');
+    if (active) active.classList.add("selected");
+  }
 
   // 更新左面板活跃项
   updateLeftPanelActive(qid);
@@ -197,6 +266,10 @@ function setGradingScoreUI(qid, score) {
     if (grpScoreEl) grpScoreEl.textContent = score;
     if (grpInp && parseInt(grpInp.value) !== score) grpInp.value = score;
 
+    // 同步底部 sheet
+    var gsScore = document.getElementById("gsScore");
+    if (gsScore) gsScore.textContent = score + " / " + (gradingMaxScores[qid] || 5);
+
     // 按钮
     var grpButtons = document.getElementById("grpButtons");
     if (grpButtons) {
@@ -205,6 +278,14 @@ function setGradingScoreUI(qid, score) {
       });
       var active = grpButtons.querySelector('.grading-score-btn[data-score="' + score + '"]');
       if (active) active.classList.add("selected");
+    }
+    var gsButtons = document.getElementById("gsButtons");
+    if (gsButtons) {
+      gsButtons.querySelectorAll(".grading-score-btn").forEach(function (b) {
+        b.classList.remove("selected");
+      });
+      var a2 = gsButtons.querySelector('.grading-score-btn[data-score="' + score + '"]');
+      if (a2) a2.classList.add("selected");
     }
   }
 
@@ -365,6 +446,8 @@ function onGradingDone() {
   if (gradingBar) gradingBar.classList.add("hidden");
   if (gradingLeftPanel) gradingLeftPanel.classList.add("hidden");
   if (gradingRightPanel) gradingRightPanel.classList.add("hidden");
+  var sheet = document.getElementById("gradingSheet");
+  if (sheet) { sheet.classList.remove("open"); sheet.classList.add("hidden"); }
   resetBtn.classList.remove("hidden");
   gradingActive = false;
   addPrintBtn();

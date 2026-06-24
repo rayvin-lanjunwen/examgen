@@ -1047,12 +1047,87 @@ body {
   cursor: not-allowed;
 }
 
+/* ── 手机端批阅底部 Sheet ────────────────────────── */
+.grading-sheet {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 200;
+  background: var(--color-card);
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.12);
+  padding: 8px 16px 16px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+.grading-sheet.open { transform: translateY(0); }
+.grading-sheet.hidden { display: none; }
+.grading-sheet-handle {
+  width: 36px; height: 4px;
+  background: #d1d5db;
+  border-radius: 2px;
+  margin: 6px auto 10px;
+}
+.grading-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.grading-sheet-score {
+  color: var(--color-primary);
+  font-size: 1rem;
+}
+.grading-sheet-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.grading-sheet-buttons .grading-score-btn {
+  min-width: 40px;
+  height: 34px;
+  font-size: 0.85rem;
+}
+.grading-sheet-nav {
+  display: flex;
+  gap: 8px;
+}
+.grading-sheet-nav-btn {
+  flex: 1;
+  padding: 10px 0;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.grading-sheet-nav-btn:disabled { opacity: 0.3; }
+
+/* ── 手机端成绩区域纵向流 ───────────────────────── */
+@media (max-width: 900px) {
+  .score-area { padding: 24px 14px; }
+  .score-ring-container { margin-bottom: 2px; }
+  .score-ring { width: 90px; height: 90px; }
+  .score-area h2 { font-size: 1.1rem; }
+  #score-display { font-size: 1.1rem; }
+  .review-list { max-height: none; }
+  .review-item { padding: 10px 12px; }
+}
+
 /* ── 响应式：窄屏隐藏左右批阅面板 ── */
 @media (max-width: 900px) {
+  /* 隐藏桌面端悬浮批阅面板，使用底部 sheet 替代 */
   .grading-left-panel,
   .grading-right-panel {
     display: none !important;
   }
+  .grading-sheet { display: block; }
 }
 
 /* ── 悬浮计时气泡（毛玻璃 + 脉冲）───────────────────── */

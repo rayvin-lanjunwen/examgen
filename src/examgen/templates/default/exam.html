@@ -151,6 +151,20 @@
       </div>
     </aside>
 
+    <!-- 手机端批阅底部 Sheet -->
+    <div class="grading-sheet hidden" id="gradingSheet">
+      <div class="grading-sheet-handle"></div>
+      <div class="grading-sheet-header">
+        <span>第 <span id="gsQid">-</span> 题</span>
+        <span class="grading-sheet-score" id="gsScore">0 / 0</span>
+      </div>
+      <div class="grading-sheet-buttons" id="gsButtons"></div>
+      <div class="grading-sheet-nav">
+        <button class="btn grading-sheet-nav-btn" id="gsPrevBtn" disabled>&#9664;</button>
+        <button class="btn grading-sheet-nav-btn" id="gsNextBtn" disabled>&#9654;</button>
+      </div>
+    </div>
+
     <!-- 右下角悬浮计时气泡（最后5分钟显示） -->
     <div class="timer-bubble hidden" id="timerBubble">
       <svg class="timer-bubble-ring" viewBox="0 0 80 80">
