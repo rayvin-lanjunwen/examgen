@@ -30,6 +30,23 @@ document.addEventListener("DOMContentLoaded", function () {
   // 键盘快捷键
   document.addEventListener("keydown", onKeyDown);
 
+  // 侧边栏折叠/展开
+  var collapseBtn = document.getElementById("sidebarCollapseBtn");
+  var sidebar = document.getElementById("sidebar");
+  var mainContent = document.querySelector(".main-content");
+  if (collapseBtn && sidebar) {
+    collapseBtn.addEventListener("click", function () {
+      sidebar.classList.toggle("collapsed");
+      if (sidebar.classList.contains("collapsed")) {
+        collapseBtn.innerHTML = "&#9654;";
+        mainContent.style.marginLeft = "0";
+      } else {
+        collapseBtn.innerHTML = "&#9664;";
+        mainContent.style.marginLeft = "";
+      }
+    });
+  }
+
   // CDN 加载失败检测
   setTimeout(function () {
     var warnings = [];

@@ -39,21 +39,29 @@ function toggleBookmark(qid, silent) {
 }
 
 function updateBookmarkUI(qid, active) {
+  // 侧边栏图标
   var navItem = navList.querySelector('.nav-item[data-qid="' + qid + '"]');
-  if (!navItem) return;
-  var bm = navItem.querySelector(".nav-bookmark");
-  if (bm) {
-    bm.textContent = active ? "★" : "☆";
-    bm.title = active ? "已标记，点击取消" : "点击标记为待复查";
-    if (active) bm.classList.add("active");
-    else bm.classList.remove("active");
+  if (navItem) {
+    var bm = navItem.querySelector(".nav-bookmark");
+    if (bm) {
+      bm.textContent = active ? "★" : "☆";
+      bm.title = active ? "已标记，点击取消" : "点击标记为待复查";
+      if (active) bm.classList.add("active");
+      else bm.classList.remove("active");
+    }
   }
 
-  // 题卡高亮
+  // 题卡图标
   var card = container.querySelector('.question-card[data-qid="' + qid + '"]');
   if (card) {
     if (active) card.classList.add("bookmarked");
     else card.classList.remove("bookmarked");
+    var cardBm = card.querySelector(".question-bookmark");
+    if (cardBm) {
+      cardBm.textContent = active ? "★" : "☆";
+      if (active) cardBm.classList.add("active");
+      else cardBm.classList.remove("active");
+    }
   }
 
   // 成绩界面复盘列表

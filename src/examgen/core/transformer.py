@@ -17,7 +17,8 @@ def apply_transforms(questions: List[Question], meta: ExamMeta) -> List[Question
     """根据 ExamMeta 配置对题目列表做变换。
 
     处理内容：
-    1. meta.shuffle 为 True 时，随机打乱题目顺序。
+    1. meta.shuffle 为 True 时，在每个 ``## 分区`` 内随机打乱题目顺序，
+       保持分区之间的顺序不变。
     2. meta.option_shuffle 为 True 时，对单选/多选/判断题随机打乱选项顺序，
        并同步更新 answer 中的字母映射。
 
@@ -27,9 +28,9 @@ def apply_transforms(questions: List[Question], meta: ExamMeta) -> List[Question
     """
     result = list(questions)  # 浅拷贝列表
 
-    # 1) 题目顺序打乱
+    # 1) 题目顺序打乱（按分区分别打乱，维持分区顺序）
     if meta.shuffle:
-        random.shuffle(result)
+        result = _shuffle_within_sections(result)
 
     # 2) 选项顺序打乱
     if meta.option_shuffle:
@@ -37,6 +38,30 @@ def apply_transforms(questions: List[Question], meta: ExamMeta) -> List[Question
             _shuffle_options(q) if q.qtype in _OPTION_SHUFFLEABLE and q.options else q
             for q in result
         ]
+
+    return result
+
+
+def _shuffle_within_sections(questions: List[Question]) -> List[Question]:
+    """在每个分区内随机打乱题目顺序，保持分区之间的顺序不变。"""
+    sections: List[tuple] = []  # [(questions_in_section, ...)]
+    current: List[Question] = []
+    last_section = None
+
+    for q in questions:
+        sec = q.section if q.section else "__none__"
+        if sec != last_section and len(current) > 0:
+            sections.append(current)
+            current = []
+        current.append(q)
+        last_section = sec
+    if len(current) > 0:
+        sections.append(current)
+
+    result: List[Question] = []
+    for group in sections:
+        random.shuffle(group)
+        result.extend(group)
 
     return result
 

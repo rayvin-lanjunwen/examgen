@@ -22,10 +22,15 @@
       <div class="sidebar-header">
         <span class="sidebar-icon">&#9776;</span>
         <span>题目导航</span>
+        <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="折叠/展开导航栏">&#9664;</button>
       </div>
       <div class="sidebar-progress">
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
         <span class="progress-text" id="progressText">0/0</span>
+      </div>
+      <div class="nav-unanswered hidden" id="navUnanswered">
+        <div class="nav-unanswered-title">未作答</div>
+        <div class="nav-unanswered-list" id="navUnansweredList"></div>
       </div>
       <div class="nav-result hidden" id="navResult"></div>
       <ul class="nav-list" id="navList"></ul>
@@ -92,6 +97,18 @@
         </div>
       </div>
     </main>
+
+    <!-- 打印成绩单页（仅打印时可见） -->
+    <div class="print-report hidden" id="printReport">
+      <div class="print-report-header">
+        <h1>{{ meta.title }}</h1>
+        {% if meta.subject %}<p class="print-report-subject">{{ meta.subject }}</p>{% endif %}
+      </div>
+      <div class="print-report-score" id="printReportScore">0 / 0 分</div>
+      <div class="print-report-pass" id="printReportPass"></div>
+      <div class="print-report-types" id="printReportTypes"></div>
+      <div class="print-report-list" id="printReportList"></div>
+    </div>
 
     <!-- 批阅左面板（悬浮） -->
     <aside class="grading-left-panel hidden" id="gradingLeftPanel">

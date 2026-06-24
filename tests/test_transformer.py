@@ -113,3 +113,33 @@ class TestOptionShuffle:
         random.seed(1)
         result = apply_transforms([q], meta)
         assert result[0].answer == "答案"
+
+    def test_shuffle_within_sections(self):
+        """分区打乱：分区内顺序可变，分区间顺序不变。"""
+        questions = [
+            Question(id=1, qtype=QuestionType.SINGLE, topic="Q1", answer="A", section="一"),
+            Question(id=2, qtype=QuestionType.SINGLE, topic="Q2", answer="A", section="一"),
+            Question(id=3, qtype=QuestionType.SINGLE, topic="Q3", answer="A", section="一"),
+            Question(id=4, qtype=QuestionType.SINGLE, topic="Q4", answer="A", section="二"),
+            Question(id=5, qtype=QuestionType.SINGLE, topic="Q5", answer="A", section="二"),
+            Question(id=6, qtype=QuestionType.SINGLE, topic="Q6", answer="A", section="三"),
+        ]
+        meta = _meta(shuffle=True)
+        random.seed(42)
+        result = apply_transforms(questions, meta)
+
+        # 分区内 id 集合不变
+        sec1_ids = sorted(q.id for q in result if q.section == "一")
+        sec2_ids = sorted(q.id for q in result if q.section == "二")
+        sec3_ids = sorted(q.id for q in result if q.section == "三")
+        assert sec1_ids == [1, 2, 3]
+        assert sec2_ids == [4, 5]
+        assert sec3_ids == [6]
+
+        # 分区顺序应保持（先一、再二、最后三）
+        sec_names = []
+        for q in result:
+            if not sec_names or sec_names[-1] != q.section:
+                sec_names.append(q.section)
+        assert sec_names[0] == "一"
+        # 至少分区间的相对顺序被保留

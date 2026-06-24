@@ -243,6 +243,86 @@ function buildReviewList() {
   }
 }
 
+/* ── 侧边栏未答题提示 ───────────────────────────── */
+function showUnansweredInSidebar(unanswered) {
+  if (!navUnanswered || !navUnansweredList) return;
+  navUnansweredList.innerHTML = "";
+  for (var i = 0; i < unanswered.length; i++) {
+    var span = document.createElement("span");
+    span.className = "nav-unanswered-item";
+    span.textContent = "#" + unanswered[i];
+    span.addEventListener("click", function() {
+      var qid = this.textContent.replace("#", "");
+      var card = container.querySelector('.question-card[data-qid="' + qid + '"]');
+      if (card) card.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+    navUnansweredList.appendChild(span);
+  }
+  navUnanswered.classList.remove("hidden");
+}
+
+/* ── 填充打印成绩单 ──────────────────────────────── */
+function fillPrintReport(totalScore, totalMax) {
+  if (!printReport || !printReportScore) return;
+  printReportScore.textContent = totalScore + " / " + totalMax + " 分";
+
+  // 及格状态
+  if (EXAM_META.passing_score != null) {
+    if (totalScore >= EXAM_META.passing_score) {
+      printReportPass.textContent = "✔ 已通过（及格线 " + EXAM_META.passing_score + " 分）";
+      printReportPass.className = "print-report-pass pass";
+    } else {
+      printReportPass.textContent = "✘ 未通过（及格线 " + EXAM_META.passing_score + " 分）";
+      printReportPass.className = "print-report-pass fail";
+    }
+  }
+
+  // 题型统计
+  var typeStats = {};
+  for (var i = 0; i < examResults.length; i++) {
+    var r = examResults[i];
+    var t = r.qtype || (findExamData(r.id) && findExamData(r.id).qtype);
+    if (!t) continue;
+    if (!typeStats[t]) typeStats[t] = { correct: 0, total: 0, score: 0, maxScore: 0 };
+    typeStats[t].total++;
+    typeStats[t].maxScore += r.score || 0;
+    if (r.correct === true) {
+      typeStats[t].correct++;
+      typeStats[t].score += r.score || 0;
+    } else if (gradingScores && gradingScores[r.id] > 0) {
+      typeStats[t].correct++;
+      typeStats[t].score += gradingScores[r.id];
+    }
+  }
+
+  var order = [QT.SINGLE, QT.MULTIPLE, QT.JUDGE, QT.FILL, QT.ESSAY];
+  var typesHtml = "";
+  for (var j = 0; j < order.length; j++) {
+    var t = order[j];
+    var ts = typeStats[t];
+    if (!ts || !ts.total) continue;
+    typesHtml += '<span class="print-report-type"><span>' + TYPE_ABBR[t] + '：</span><span>' + ts.correct + '/' + ts.total + '</span></span>';
+  }
+  printReportTypes.innerHTML = typesHtml;
+
+  // 逐题列表
+  var listHtml = "";
+  for (var k = 0; k < examResults.length; k++) {
+    var r2 = examResults[k];
+    var resultClass = r2.correct === true ? "correct" : (r2.correct === false ? "wrong" : "essay");
+    var resultText = r2.correct === true ? "✓ 正确" : (r2.correct === false ? "✗ 错误" : "待评");
+    var rowScore = (r2.correct === true || r2.correct === false) ? r2.score : (gradingScores && gradingScores[r2.id] || 0);
+    listHtml += '<div class="print-row">'
+      + '<span class="print-row-num">#' + r2.id + '</span>'
+      + '<span class="print-row-topic">' + escapeHTML((r2.topic || "").substring(0, 60)) + '</span>'
+      + '<span class="print-row-result ' + resultClass + '">' + resultText + '</span>'
+      + '<span class="print-row-score">' + (rowScore || 0) + ' 分</span>'
+      + '</div>';
+  }
+  printReportList.innerHTML = listHtml;
+  printReport.classList.remove("hidden");
+}
+
 /* ── 提交答卷 ───────────────────────────────────────── */
 function onSubmit() {
   var unanswered = [];
@@ -265,7 +345,9 @@ function onSubmit() {
   }
 
   if (unanswered.length > 0) {
-    var confirmMsg = "还有 " + unanswered.length + " 道题未作答，确定要提交吗？\n\n未作答：" + unanswered.join("、");
+    // 在侧边栏显示未答题提示
+    showUnansweredInSidebar(unanswered);
+    var confirmMsg = "还有 " + unanswered.length + " 道题未作答，确定要提交吗？";
     if (!confirm(confirmMsg)) return;
   }
 
@@ -345,6 +427,10 @@ function onReset() {
   }
   // 隐藏结果摘要
   if (navResult) navResult.classList.add("hidden");
+  // 隐藏未答题提示
+  if (navUnanswered) navUnanswered.classList.add("hidden");
+  // 隐藏打印成绩单
+  if (printReport) printReport.classList.add("hidden");
 
   scoreArea.classList.add("hidden");
   passStatus.textContent = "";
@@ -364,6 +450,9 @@ function onReset() {
   for (var bi = 0; bi < bookmarks.length; bi++) { bookmarks[bi].textContent = "☆"; bookmarks[bi].classList.remove("active"); }
   var bmCards = container.querySelectorAll(".question-card.bookmarked");
   for (var bc = 0; bc < bmCards.length; bc++) { bmCards[bc].classList.remove("bookmarked"); }
+  // 重置题卡上的书签图标
+  var cardBms = container.querySelectorAll(".question-bookmark");
+  for (var cbi = 0; cbi < cardBms.length; cbi++) { cardBms[cbi].textContent = "☆"; cardBms[cbi].classList.remove("active"); }
   updateProgress();
   if (EXAM_META && EXAM_META.time) {
     startCountdown(EXAM_META.time * 60);
@@ -391,6 +480,7 @@ function showFinalScore(totalScore, maxScore, totalJudged, correctCount) {
   }
   resetBtn.classList.remove("hidden");
   addPrintBtn();
+  fillPrintReport(totalScore, maxScore);
 }
 
 /* ── 打印成绩单按钮 ──────────────────────────────── */

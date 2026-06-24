@@ -369,6 +369,15 @@ function onGradingDone() {
   gradingActive = false;
   addPrintBtn();
   clearSavedAnswers();
+  // 计算总分用于打印成绩单
+  var reportTotal = 0; var reportMax = 0;
+  for (var i = 0; i < examResults.length; i++) {
+    var rr = examResults[i];
+    reportMax += rr.score || 0;
+    if (rr.correct === true) reportTotal += rr.score || 0;
+    else if (gradingScores[rr.id]) reportTotal += gradingScores[rr.id];
+  }
+  fillPrintReport(reportTotal, reportMax);
 
   reRenderMath();
   computeRealtimeScore();

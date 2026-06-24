@@ -44,8 +44,22 @@ function buildQuestionCard(q) {
     '<span class="question-type" data-type="' + q.qtype + '">' + TYPE_LABELS[q.qtype] + '</span>' +
     '<span class="question-number">' + q.id + '.</span>' +
     headerTopic +
-    '<span class="question-score">' + (q.score || 0) + ' 分</span>';
+    '<span class="question-score">' +
+      '<span class="question-bookmark" data-qid="' + q.id + '" title="点击标记待复查">&#9734;</span>' +
+      (q.score || 0) + ' 分' +
+    '</span>';
   card.appendChild(header);
+
+  // 题卡上书签点击
+  setTimeout(function() {
+    var bm = card.querySelector('.question-bookmark');
+    if (bm) {
+      bm.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (typeof toggleBookmark === "function") toggleBookmark(bm.getAttribute('data-qid'));
+      });
+    }
+  }, 0);
 
   if (q.qtype === QT.SINGLE || q.qtype === QT.MULTIPLE || q.qtype === QT.JUDGE) {
     card.appendChild(buildOptions(q));
