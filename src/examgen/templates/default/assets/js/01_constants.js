@@ -40,6 +40,7 @@ var printReportScore = document.getElementById("printReportScore");
 var printReportPass = document.getElementById("printReportPass");
 var printReportTypes = document.getElementById("printReportTypes");
 var printReportList = document.getElementById("printReportList");
+var scoreTypeSummary = document.getElementById("scoreTypeSummary");
 var timerBar   = document.getElementById("timerBarInner");
 var timerBubble = document.getElementById("timerBubble");
 var bubbleFill = document.getElementById("bubbleFill");

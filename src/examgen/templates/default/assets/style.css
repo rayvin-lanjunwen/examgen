@@ -686,22 +686,40 @@ body {
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
 }
-.score-area h2 {
-  margin: 8px 0 4px;
-  font-size: 1.3rem;
-  color: var(--color-text);
+
+/* ── 总分大字 ─────────────────────────────────────── */
+.score-total {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+/* ── 通过/未通过 ──────────────────────────────────── */
+.pass {
+  color: var(--color-correct);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.fail {
+  color: var(--color-wrong);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 12px;
 }
 
 /* ── 环形进度图（渐变 + 发光）───────────────────────── */
 .score-ring-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   position: relative;
 }
 .score-ring {
-  width: 120px;
-  height: 120px;
+  width: 90px;
+  height: 90px;
   transform: rotate(-90deg);
   filter: drop-shadow(0 2px 8px rgba(99,102,241,0.25));
 }
@@ -726,40 +744,39 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  margin-top: -22px;
 }
 .ring-percent {
-  font-size: 1.8rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: var(--color-primary);
 }
 .ring-label {
-  font-size: 0.75rem;
+  font-size: 0.6rem;
   color: var(--color-text-secondary);
 }
 
-#score-display {
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin: 8px 0;
+/* ── 题型汇总条 ──────────────────────────────────── */
+.score-type-summary {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  margin-bottom: 8px;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
-.pass {
-  color: var(--color-correct);
-  font-size: 1.1rem;
-  font-weight: 700;
-}
-.fail {
-  color: var(--color-wrong);
-  font-size: 1.1rem;
-  font-weight: 700;
-}
+.score-type-summary.hidden { display: none; }
+.score-type-item { font-size: 0.82rem; }
+.score-type-item .sts-label { color: var(--color-text-secondary); margin-right: 2px; }
+.score-type-item .sts-count { font-weight: 700; color: var(--color-text); }
 
 /* ── 逐题回顾列表 ────────────────────────────────────── */
 .review-list {
-  margin-top: 24px;
+  margin-top: 12px;
   text-align: left;
   border-top: 1px solid var(--color-border);
-  padding-top: 16px;
+  padding-top: 12px;
 }
 .review-item {
   display: flex;
@@ -1337,11 +1354,10 @@ body {
   .answer-display { font-size: 0.8rem; padding: 8px 12px; }
 
   /* 成绩区域 */
-  .score-area { padding: 20px 12px; margin-top: 20px; }
+  .score-area { padding: 20px 14px; margin-top: 20px; }
+  .score-total { font-size: 1.6rem; }
   .score-ring-container { margin-bottom: 2px; }
-  .score-ring { width: 80px; height: 80px; }
-  .score-area h2 { font-size: 1.1rem; margin: 4px 0; }
-  #score-display { font-size: 1.1rem; }
+  .score-ring { width: 70px; height: 70px; }
   .review-list { max-height: none; }
   .review-item { padding: 8px 10px; font-size: 0.82rem; }
   .review-qid { font-size: 0.78rem; }

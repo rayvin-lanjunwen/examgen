@@ -71,6 +71,8 @@
 
         <!-- 得分区域 -->
         <div id="score-area" class="score-area hidden">
+          <div class="score-total" id="score-display">0 / 0 分</div>
+          <div id="pass-status"></div>
           <div class="score-ring-container">
             <svg class="score-ring" viewBox="0 0 120 120">
               <defs>
@@ -87,9 +89,7 @@
               <span class="ring-label">正确率</span>
             </div>
           </div>
-          <h2>考试结果</h2>
-          <p id="score-display">0 / 0 分</p>
-          <div id="pass-status"></div>
+          <div class="score-type-summary hidden" id="scoreTypeSummary"></div>
           <div class="review-list" id="reviewList"></div>
         </div>
 

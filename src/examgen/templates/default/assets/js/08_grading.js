@@ -65,6 +65,22 @@ function enterGradingMode() {
   scoreArea.classList.remove("hidden");
   resetBtn.classList.add("hidden");
 
+  // 进入批阅时隐藏未答题提示
+  if (navUnanswered) navUnanswered.classList.add("hidden");
+
+  // 手机端：交卷按钮改为完成批阅按钮
+  var mtbSubmitBtn = document.getElementById("mtbSubmitBtn");
+  if (mtbSubmitBtn) {
+    mtbSubmitBtn.textContent = "完成批阅";
+    mtbSubmitBtn.classList.remove("hidden");
+    mtbSubmitBtn.removeAttribute("data-submit");
+    mtbSubmitBtn.setAttribute("data-grading", "1");
+    // 重新绑定
+    var newBtn = mtbSubmitBtn.cloneNode(true);
+    mtbSubmitBtn.parentNode.replaceChild(newBtn, mtbSubmitBtn);
+    newBtn.addEventListener("click", function () { onGradingDone(); });
+  }
+
   // 构建右面板的快捷分值按钮
   buildRightPanelButtons();
 
@@ -430,6 +446,7 @@ function computeRealtimeScore() {
 
   buildReviewList();
   updateNavResults();
+  fillScoreTypeSummary();
 }
 
 /* ── 完成批阅 ────────────────────────────────────────── */
@@ -452,6 +469,14 @@ function onGradingDone() {
   gradingActive = false;
   addPrintBtn();
   clearSavedAnswers();
+
+  // 手机端：恢复交卷按钮
+  var mtbSubmitBtn = document.getElementById("mtbSubmitBtn");
+  if (mtbSubmitBtn) {
+    mtbSubmitBtn.textContent = "交卷";
+    mtbSubmitBtn.classList.add("hidden");
+    mtbSubmitBtn.removeAttribute("data-grading");
+  }
   // 计算总分用于打印成绩单
   var reportTotal = 0; var reportMax = 0;
   for (var i = 0; i < examResults.length; i++) {

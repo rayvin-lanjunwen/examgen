@@ -323,6 +323,32 @@ function fillPrintReport(totalScore, totalMax) {
   printReport.classList.remove("hidden");
 }
 
+/* ── 填充题型汇总条 ──────────────────────────────── */
+function fillScoreTypeSummary() {
+  var el = document.getElementById("scoreTypeSummary");
+  if (!el) return;
+  var typeStats = {};
+  for (var i = 0; i < examResults.length; i++) {
+    var r = examResults[i];
+    var t = r.qtype || (findExamData(r.id) && findExamData(r.id).qtype);
+    if (!t) continue;
+    if (!typeStats[t]) typeStats[t] = { correct: 0, total: 0 };
+    typeStats[t].total++;
+    if (r.correct === true) typeStats[t].correct++;
+    else if (gradingScores && gradingScores[r.id] > 0) typeStats[t].correct++;
+  }
+  var order = [QT.SINGLE, QT.MULTIPLE, QT.JUDGE, QT.FILL, QT.ESSAY];
+  var html = "";
+  for (var j = 0; j < order.length; j++) {
+    var tt = order[j];
+    var ts = typeStats[tt];
+    if (!ts || !ts.total) continue;
+    html += '<span class="score-type-item"><span class="sts-label">' + TYPE_ABBR[tt] + '：</span><span class="sts-count">' + ts.correct + '/' + ts.total + '</span></span>';
+  }
+  el.innerHTML = html;
+  el.classList.remove("hidden");
+}
+
 /* ── 提交答卷 ───────────────────────────────────────── */
 function onSubmit() {
   var unanswered = [];
@@ -431,6 +457,8 @@ function onReset() {
   if (navUnanswered) navUnanswered.classList.add("hidden");
   // 隐藏打印成绩单
   if (printReport) printReport.classList.add("hidden");
+  // 隐藏题型汇总
+  if (scoreTypeSummary) { scoreTypeSummary.innerHTML = ""; scoreTypeSummary.classList.add("hidden"); }
 
   scoreArea.classList.add("hidden");
   passStatus.textContent = "";
@@ -481,6 +509,11 @@ function showFinalScore(totalScore, maxScore, totalJudged, correctCount) {
   resetBtn.classList.remove("hidden");
   addPrintBtn();
   fillPrintReport(totalScore, maxScore);
+
+  // 填充题型汇总条
+  fillScoreTypeSummary();
+  // 重新渲染公式（解析和答案中的 LaTeX）
+  reRenderMath();
 }
 
 /* ── 打印成绩单按钮 ──────────────────────────────── */
