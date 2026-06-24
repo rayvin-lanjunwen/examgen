@@ -686,40 +686,22 @@ body {
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
 }
-
-/* ── 总分大字 ─────────────────────────────────────── */
-.score-total {
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: var(--color-primary);
-  margin-bottom: 4px;
-  line-height: 1.2;
-}
-
-/* ── 通过/未通过 ──────────────────────────────────── */
-.pass {
-  color: var(--color-correct);
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 12px;
-}
-.fail {
-  color: var(--color-wrong);
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 12px;
+.score-area h2 {
+  margin: 8px 0 4px;
+  font-size: 1.3rem;
+  color: var(--color-text);
 }
 
 /* ── 环形进度图（渐变 + 发光）───────────────────────── */
 .score-ring-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   position: relative;
 }
 .score-ring {
-  width: 90px;
-  height: 90px;
+  width: 120px;
+  height: 120px;
   transform: rotate(-90deg);
   filter: drop-shadow(0 2px 8px rgba(99,102,241,0.25));
 }
@@ -744,15 +726,32 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  margin-top: -22px;
 }
 .ring-percent {
-  font-size: 1.2rem;
+  font-size: 1.8rem;
   font-weight: 800;
   color: var(--color-primary);
 }
 .ring-label {
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   color: var(--color-text-secondary);
+}
+
+#score-display {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 8px 0;
+}
+.pass {
+  color: var(--color-correct);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.fail {
+  color: var(--color-wrong);
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 /* ── 题型汇总条 ──────────────────────────────────── */
@@ -1355,9 +1354,10 @@ body {
 
   /* 成绩区域 */
   .score-area { padding: 20px 14px; margin-top: 20px; }
-  .score-total { font-size: 1.6rem; }
   .score-ring-container { margin-bottom: 2px; }
-  .score-ring { width: 70px; height: 70px; }
+  .score-ring { width: 80px; height: 80px; }
+  .score-area h2 { font-size: 1.1rem; margin: 4px 0; }
+  #score-display { font-size: 1.1rem; }
   .review-list { max-height: none; }
   .review-item { padding: 8px 10px; font-size: 0.82rem; }
   .review-qid { font-size: 0.78rem; }

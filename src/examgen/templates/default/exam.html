@@ -69,6 +69,31 @@
         <!-- 题目列表 -->
         <div id="questions-container"></div>
 
+        <!-- 得分区域 -->
+        <div id="score-area" class="score-area hidden">
+          <div class="score-ring-container">
+            <svg class="score-ring" viewBox="0 0 120 120">
+              <defs>
+                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#6366f1"/>
+                  <stop offset="100%" stop-color="#a855f7"/>
+                </linearGradient>
+              </defs>
+              <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+              <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52" stroke-dasharray="0 327"></circle>
+            </svg>
+            <div class="score-ring-text">
+              <span class="ring-percent" id="ringPercent">0%</span>
+              <span class="ring-label">正确率</span>
+            </div>
+          </div>
+          <h2>考试结果</h2>
+          <p id="score-display">0 / 0 分</p>
+          <div id="pass-status"></div>
+          <div class="score-type-summary hidden" id="scoreTypeSummary"></div>
+          <div class="review-list" id="reviewList"></div>
+        </div>
+
         <!-- 操作按钮 -->
         <div class="exam-actions">
           <button id="submit-btn" class="btn btn-primary">提交答卷</button>
