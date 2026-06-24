@@ -4,26 +4,29 @@
 
 ## 功能特性
 
-- **Markdown 驱动** — 用纯文本编写试卷，支持 YAML front matter 元数据
+- **Markdown 驱动** — 用纯文本编写试卷，专用 `#区块标记` 语法清晰直观
 - **五种题型** — 单选、多选、判断、填空、简答，全覆盖
-- **完全离线** — 生成的 HTML 文件内联了所有 CSS / JS，无需联网即可作答
-- **自动判分** — 提交后即时判分、高亮正误、显示解析
-- **倒计时** — 设置考试时间后自动生成倒计时，到时自动交卷
+- **数学公式** — 支持 LaTeX（`$...$` / `$$...$$`），由 KaTeX 渲染
+- **富文本** — 题干/解析/答案支持 Markdown 表格、代码、图片等
+- **完全离线** — 生成的 HTML 内联了所有 CSS / JS，无需联网即可作答
+- **自动判分** — 提交后即时判分、高亮正误、显示正确答案和解析
+- **导航栏对错** — 侧边栏逐题显示对/错/待评状态，一目了然
+- **简答批阅** — 内置批阅面板，手动评分后自动汇总
+- **倒计时** — 设置考试时间后自动生成倒计时
 - **随机化** — 支持题目顺序打乱、选项顺序打乱（答案映射自动同步）
-- **命令行工具** — 一条命令完成从 `.md` 到 `.html` 的全流程
-- **打印友好** — CSS `@media print` 优化，隐藏按钮、显示答案解析
+- **结构化错误提示** — 上传文件格式不对时，精确指出字段名和修复建议
+- **命令行 + Web** — CLI 一条命令出卷，Web 界面拖拽上传更方便
+- **打印友好** — CSS `@media print` 优化，隐藏交互元素、显示答案解析
 
 ## 安装
 
-### 从源码安装（推荐开发时使用）
-
 ```bash
-git clone <your-repo-url>
-cd 试卷生成器
+git clone https://github.com/rayvin-lanjunwen/examgen.git
+cd examgen
 pip install -e .
 ```
 
-### 安装开发依赖
+安装开发依赖（运行测试）：
 
 ```bash
 pip install -e ".[dev]"
@@ -31,11 +34,7 @@ pip install -e ".[dev]"
 
 ## 快速开始
 
-### 1. 准备 Markdown 试卷文件
-
-创建一个 `.md` 文件，顶部用 YAML front matter 声明试卷元数据，正文按规范编写题目。
-
-示例（`quiz.md`）：
+### 1. 编写 Markdown 试卷
 
 ```markdown
 ---
@@ -43,28 +42,43 @@ title: Python 基础测验
 subject: 计算机科学
 time: 30
 total_score: 20
+default_score: 1
 passing_score: 12
 ---
 
-1. [单选] 下列哪个是 Python 的关键字？
+#1. [单选]
+#题干
+下列哪个是 Python 的关键字？
+#选项
 - A. class
 - B. Class
 - C. CLASS
 - D. classify
-答案：A
-分值：2
-解析：class 是 Python 的保留关键字。
+#答案
+A
+#分值
+2
+#解析
+`class` 是 Python 保留关键字，用于定义类。
 
-2. [判断] Python 中 None 表示空值。
-答案：A
-分值：2
+#2. [判断]
+#题干
+Python 中 `None` 表示空值。
+#答案
+A
+#分值
+2
 
-3. [填空] Python 中用于输出到控制台的内置函数是 ____。
-答案：print
-分值：2
+#3. [填空]
+#题干
+Python 中输出到控制台的内置函数是 `____`。
+#答案
+print
+#分值
+2
 ```
 
-完整的题目源文件规范见 [docs/spec.md](docs/spec.md)。
+> 完整规范见 [docs/spec.md](docs/spec.md)，示例模板见 [tests/fixtures/sample.md](tests/fixtures/sample.md)。
 
 ### 2. 生成 HTML
 
@@ -74,7 +88,7 @@ examgen generate quiz.md -o quiz.html
 
 ### 3. 打开浏览器作答
 
-双击 `quiz.html` 即可在浏览器中答题、提交、查看分数。
+双击 `quiz.html` 即可答题、提交、查看分数和解析。
 
 ### 命令行选项
 
@@ -92,9 +106,9 @@ Options:
   --help                     显示帮助信息
 ```
 
-## 可视化界面
+## Web 可视化界面
 
-ExamGen 内置了基于 FastAPI 的 Web 界面，无需记忆命令行参数，拖拽上传即可生成试卷。
+内置基于 FastAPI 的 Web 界面，拖拽上传 `.md` 文件即可生成试卷。**格式错误时会显示具体的字段名和修复建议。**
 
 ### 启动
 
@@ -108,42 +122,85 @@ examgen web
 examgen web --host 0.0.0.0 --port 3000 --reload
 ```
 
-### 使用
+### 部署到 Vercel
 
-1. 浏览器访问 http://localhost:8080
-2. 拖拽 `.md` 试卷文件到上传区域，或点击选择文件
-3. 可选：展开"可选参数"设置标题覆盖、考试时间、打乱选项等
-4. 点击 **"生成并下载试卷"**
-5. 浏览器自动下载生成的 HTML 试卷文件，双击即可作答
+项目根目录已包含 `vercel.json`，直接将仓库导入 Vercel 即可部署。
 
-<!-- 截图占位：上传页面和生成结果示意图 -->
-
-## 题目源文件规范
-
-### Front Matter（元数据）
+## YAML 元数据
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `title` | string | 是 | 试卷标题 |
-| `subject` | string | 否 | 科目 |
-| `time` | int | 否 | 考试时间（分钟） |
-| `total_score` | float | 否 | 总分 |
-| `default_score` | float | 否 | 题目默认分值（默认 1.0） |
-| `shuffle` | bool | 否 | 是否随机打乱题目顺序 |
-| `option_shuffle` | bool | 否 | 是否随机打乱选项顺序 |
-| `passing_score` | float | 否 | 及格分 |
+| `title` | string | **是** | 试卷标题 |
+| `subject` | string | 否 | 科目（注意：不是 `course`） |
+| `time` | int | 否 | 考试时长（分钟），必须是纯数字如 `90`，不能带单位 |
+| `total_score` | float | 否 | 试卷总分（注意：不是 `score`） |
+| `default_score` | float | 否 | 未指定分值时的默认分（默认 `1.0`），**建议填写** |
+| `shuffle` | bool | 否 | 随机打乱题目顺序（默认 `false`） |
+| `option_shuffle` | bool | 否 | 随机打乱选项顺序（默认 `false`） |
+| `passing_score` | float | 否 | 及格分，**建议填写**（如 `60`） |
 
-### 题目格式
+> 常见错误：`course` → `subject`、`score` → `total_score`、`time: 90分钟` → `time: 90`。上传时若字段错误，解析器会给出具体提示。
 
-- 题目之间用 **空行** 分隔
-- 每道题第一行：`题号. [题型] 题干`
-- 题型标识：`[单选]` / `[多选]` / `[判断]` / `[填空]` / `[简答]`
-- 选项行：`- A. 选项内容`
-- 答案行：`答案：A` 或 `答案：A,B,D`
-- 分值行：`分值：2`
-- 解析行：`解析：说明文字`（可选）
+## 题目格式
 
-详细规范见 [docs/spec.md](docs/spec.md)。
+每道题使用 `#` 区块标记声明内容区块，支持新旧两种格式：
+
+| 标记 | 含义 | 说明 |
+|------|------|------|
+| `#题干` | 题目主干 | **必填**，支持 Markdown、LaTeX 公式 |
+| `#图片` | 配图 | 可选，`![描述](URL)` |
+| `#表格` | 数据表格 | 可选，GFM 表格语法 |
+| `#选项` | 选项 | 选择/判断题必填，`- A. xxx` 四行连续 |
+| `#答案` | 参考答案 | **必填** |
+| `#分值` | 分值 | 可选，不填则用 `default_score` |
+| `#解析` | 题目解析 | 可选，提交后展示 |
+
+```
+#1. [单选]
+#题干
+问题描述
+#选项
+- A. 选项A
+- B. 选项B
+- C. 选项C
+- D. 选项D
+#答案
+A
+#分值
+2
+#解析
+详细解析...
+```
+
+### 题型标识
+
+| 标识 | 题型 | 判分方式 |
+|------|------|----------|
+| `[单选]` | 单选题 | 自动判分 |
+| `[多选]` | 多选题 | 自动判分，支持 `A,B,D` 或 `ABD` |
+| `[判断]` | 判断题 | 自动判分，A=正确 / B=错误，选项可省略 |
+| `[填空]` | 填空题 | 自动判分，多空用 `____`，答案 `|` 分隔，多答案答对一个即算对 |
+| `[简答]` | 简答题 | 提交后展示参考答案，手动批阅评分 |
+
+### 数学公式
+
+使用标准 LaTeX 语法，在线环境由 KaTeX 渲染：
+
+```markdown
+#题干
+函数 $f(x) = \sum_{i=1}^{n} x_i^2$ 在 $x=0$ 处取得最小值。
+
+#解析
+$$
+\frac{\partial f}{\partial x_i} = 2x_i = 0 \implies x_i = 0
+$$
+```
+
+## 出卷参考
+
+- **格式规范**：[docs/spec.md](docs/spec.md) — 完整的 Markdown 格式标准 + 常见错误排查
+- **出卷提示词**：[docs/prompt.md](docs/prompt.md) — 提供给 AI 的出卷要求模板
+- **示例模板**：[tests/fixtures/sample.md](tests/fixtures/sample.md) — 可直接复制使用的示范文件
 
 ## 开发指南
 
@@ -151,51 +208,45 @@ examgen web --host 0.0.0.0 --port 3000 --reload
 
 ```
 examgen/
-├── pyproject.toml                 # 项目配置、依赖、CLI 入口
+├── pyproject.toml
+├── vercel.json                          # Vercel 部署配置
+├── api/
+│   └── index.py                        # Vercel Serverless 入口
 ├── src/examgen/
-│   ├── __init__.py                # 版本号
-│   ├── cli.py                     # Click CLI 入口
-│   ├── models.py                  # 数据类定义（Question, ExamMeta 等）
+│   ├── __init__.py
+│   ├── cli.py                          # Click CLI 入口
+│   ├── models.py                       # 数据模型 (ExamMeta, Question, Option)
 │   ├── core/
-│   │   ├── parser.py              # 解析 Markdown → 数据模型
-│   │   ├── normalizer.py          # 校验、补全缺失字段
-│   │   ├── transformer.py         # 题目 / 选项随机化
-│   │   └── generator.py           # Jinja2 渲染 → HTML
+│   │   ├── parser.py                   # Markdown 解析 → 数据模型（含 ParseError）
+│   │   ├── normalizer.py               # 校验、补全分值/选项/答案规范化
+│   │   ├── transformer.py              # 题目 / 选项随机化
+│   │   └── generator.py                # Jinja2 渲染 → 独立 HTML
 │   ├── web/
-│   │   ├── app.py                 # FastAPI Web 应用
-│   │   ├── templates/
-│   │   │   └── upload.html        # 上传页面模板
-│   │   └── static/
-│   │       └── style.css          # Web 界面样式
+│   │   ├── app.py                      # FastAPI Web 应用（返回结构化错误）
+│   │   ├── templates/upload.html       # 上传页面
+│   │   └── static/style.css            # Web 界面样式
 │   └── templates/default/
-│       ├── exam.html              # Jinja2 试卷模板
+│       ├── exam.html                   # Jinja2 试卷模板
 │       └── assets/
-│           ├── style.css          # 试卷样式表（内联）
-│           └── script.js          # 答题交互逻辑（内联）
+│           ├── style.css               # 试卷样式（内联）
+│           └── js/
+│               ├── 01_constants.js     # 常量定义
+│               ├── 02_utils.js         # HTML 转义、Markdown 渲染（公式保护）
+│               ├── 03_nav.js           # 侧边导航 + 对错状态
+│               ├── 04_render.js        # 题目渲染（含公式保护）
+│               ├── 05_scoring.js       # 判分、高亮、答案展示
+│               ├── 06_countdown.js     # 倒计时
+│               ├── 07_init.js          # 页面初始化
+│               └── 08_grading.js       # 简答题批阅系统
 ├── tests/
-│   ├── fixtures/sample.md         # 官方标准模板
-│   ├── test_parser.py
+│   ├── fixtures/sample.md              # 标准模板（解析 + 展示用）
+│   ├── test_parser.py                  # 含公式保留、ParseError 测试
 │   ├── test_normalizer.py
 │   ├── test_transformer.py
 │   └── test_generator.py
 └── docs/
-    └── spec.md                    # 题目源文件规范
-```
-
-### 设置开发环境
-
-```bash
-# 克隆项目
-git clone <your-repo-url>
-cd 试卷生成器
-
-# 创建虚拟环境（可选）
-python -m venv .venv
-.venv\Scripts\activate        # Windows
-# source .venv/bin/activate   # macOS / Linux
-
-# 安装（可编辑模式 + 开发依赖）
-pip install -e ".[dev]"
+    ├── spec.md                         # 题目源文件规范
+    └── prompt.md                       # AI 出卷提示词
 ```
 
 ### 运行测试
@@ -209,13 +260,14 @@ pytest tests/ -v
 ```
 Markdown (.md)
   │
-  ▼ parser.py ───────→ ExamMeta + List[Question]
+  ▼ parser.py ───────→ 预检 YAML → 切分区块 → ExamMeta + List[Question]
+  │                    （字段错误时抛出 ParseError，精确指错）
   │
-  ▼ normalizer.py ───→ 校验、补全分值/选项
+  ▼ normalizer.py ───→ 分值补全 / 选项补全 / 答案大写 / 格式校验
   │
-  ▼ transformer.py ──→ 随机打乱题目/选项
+  ▼ transformer.py ──→ 题目打乱 / 选项打乱（答案映射同步）
   │
-  ▼ generator.py ───→ Jinja2 渲染 → 独立 HTML
+  ▼ generator.py ───→ Jinja2 渲染 + CSS/JS 内联 → 独立 HTML
   │
   ▼ save_exam ──────→ 写入文件
 ```
