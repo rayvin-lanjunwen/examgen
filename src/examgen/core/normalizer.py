@@ -4,6 +4,7 @@ from dataclasses import replace
 from typing import List
 
 from examgen.models import ExamMeta, Option, Question, QuestionType
+from examgen.core.parser import ParseError
 
 
 def normalize_questions(questions: List[Question], meta: ExamMeta) -> List[Question]:
@@ -48,21 +49,27 @@ def normalize_questions(questions: List[Question], meta: ExamMeta) -> List[Quest
 
 
 def _validate_answer(q: Question) -> None:
-    """根据题型校验答案格式，不合理时抛出 ValueError。"""
+    """根据题型校验答案格式，不合理时抛出 ParseError。"""
     if q.qtype == QuestionType.SINGLE:
         if len(q.answer) != 1:
-            raise ValueError(
-                f"第 {q.id} 题（单选）答案长度应为 1，实际为: '{q.answer}'"
+            raise ParseError(
+                f"第 {q.id} 题（单选）答案长度应为 1，实际为: '{q.answer}'",
+                field=f"第 {q.id} 题",
+                suggestion="单选题答案应为单个大写字母，如 `A`",
             )
 
     elif q.qtype == QuestionType.MULTIPLE:
         if len(q.answer) < 1:
-            raise ValueError(
-                f"第 {q.id} 题（多选）答案不能为空"
+            raise ParseError(
+                f"第 {q.id} 题（多选）答案不能为空",
+                field=f"第 {q.id} 题",
+                suggestion="多选题至少应有一个正确答案，如 `ABD`",
             )
 
     elif q.qtype == QuestionType.JUDGE:
         if q.answer not in ("A", "B"):
-            raise ValueError(
-                f"第 {q.id} 题（判断）答案应为 A 或 B，实际为: '{q.answer}'"
+            raise ParseError(
+                f"第 {q.id} 题（判断）答案应为 A 或 B，实际为: '{q.answer}'",
+                field=f"第 {q.id} 题",
+                suggestion="判断题答案 `A`=正确，`B`=错误",
             )

@@ -5,7 +5,7 @@ import pytest
 from examgen.core.parser import ParseError, _strip_leading_backslash, parse_exam_file, parse_exam_text
 from examgen.models import QuestionType
 
-FIXTURE = "tests/fixtures/sample.md"
+FIXTURE = "docs/sample.md"
 
 
 class TestParseMeta:

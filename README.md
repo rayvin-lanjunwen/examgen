@@ -82,7 +82,7 @@ print
 2
 ```
 
-> 完整规范见 [docs/spec.md](docs/spec.md)，示例模板见 [tests/fixtures/sample.md](tests/fixtures/sample.md)。
+> 完整规范见 [docs/spec.md](docs/spec.md)，示例模板见 [docs/sample.md](docs/sample.md)。
 
 ### 2. 生成 HTML
 

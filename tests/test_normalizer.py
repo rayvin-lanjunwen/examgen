@@ -3,6 +3,7 @@
 import pytest
 
 from examgen.core.normalizer import normalize_questions
+from examgen.core.parser import ParseError
 from examgen.models import ExamMeta, Option, Question, QuestionType
 
 
@@ -74,18 +75,18 @@ class TestInvalidAnswer:
         """单选题答案长度不为 1 时抛出异常。"""
         q = Question(id=1, qtype=QuestionType.SINGLE, topic="t", answer="AB",
                      options=[Option("A", "a"), Option("B", "b")])
-        with pytest.raises(ValueError, match="第 1 题"):
+        with pytest.raises(ParseError, match="第 1 题"):
             normalize_questions([q], _meta())
 
     def test_multiple_choice_empty(self):
         """多选题答案为空时抛出异常。"""
         q = Question(id=2, qtype=QuestionType.MULTIPLE, topic="t", answer="",
                      options=[Option("A", "a")])
-        with pytest.raises(ValueError, match="第 2 题"):
+        with pytest.raises(ParseError, match="第 2 题"):
             normalize_questions([q], _meta())
 
     def test_judge_invalid_answer(self):
         """判断题答案非 A 或 B 时抛出异常。"""
         q = Question(id=3, qtype=QuestionType.JUDGE, topic="t", answer="C")
-        with pytest.raises(ValueError, match="第 3 题"):
+        with pytest.raises(ParseError, match="第 3 题"):
             normalize_questions([q], _meta())
