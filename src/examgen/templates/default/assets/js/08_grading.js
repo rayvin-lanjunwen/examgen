@@ -62,7 +62,6 @@ function enterGradingMode() {
     if (gradingLeftPanel) gradingLeftPanel.classList.remove("hidden");
     if (gradingRightPanel) gradingRightPanel.classList.remove("hidden");
   }
-  scoreArea.classList.remove("hidden");
   resetBtn.classList.add("hidden");
 
   // 进入批阅时隐藏未答题提示
@@ -412,39 +411,7 @@ function computeRealtimeScore() {
     if (el) el.textContent = (gradingScores[qid] || 0) + "/" + (gradingMaxScores[qid] || 5);
   }
 
-  // 结果面板
-  animateScore(0, totalUser, totalMax);
-  var totalJudged = 0;
-  var correctCount = 0;
-  for (var m = 0; m < examResults.length; m++) {
-    var rr = examResults[m];
-    if (rr.correct !== null || gradingScores[rr.id] !== undefined) {
-      totalJudged++;
-      var s = (rr.correct === true) ? (rr.score || 0) : (gradingScores[rr.id] || 0);
-      if ((rr.correct === true) || s > 0) correctCount++;
-    }
-  }
-  var pct = totalJudged > 0 ? Math.round(correctCount / totalJudged * 100) : 0;
-  animateRing(pct);
-
-  if (EXAM_META.passing_score != null) {
-    if (essayGraded === gradingEssayOrder.length) {
-      if (totalUser >= EXAM_META.passing_score) {
-        passStatus.className = "pass";
-        passStatus.textContent = "恭喜，你已通过考试！";
-      } else {
-        passStatus.className = "fail";
-        passStatus.textContent = "未达到及格线 (" + EXAM_META.passing_score + " 分)，继续努力！";
-      }
-    } else {
-      passStatus.className = "";
-      passStatus.textContent = "批阅中…";
-    }
-  }
-
-  buildReviewList();
   updateNavResults();
-  fillScoreTypeSummary();
 }
 
 /* ── 完成批阅 ────────────────────────────────────────── */

@@ -461,12 +461,8 @@ function onReset() {
   if (navUnanswered) navUnanswered.classList.add("hidden");
   // 隐藏打印成绩单
   if (printReport) printReport.classList.add("hidden");
-  // 隐藏题型汇总
-  if (scoreTypeSummary) { scoreTypeSummary.innerHTML = ""; scoreTypeSummary.classList.add("hidden"); }
 
-  scoreArea.classList.add("hidden");
-  passStatus.textContent = "";
-  passStatus.className = "";
+  // 恢复侧栏
   submitBtn.classList.remove("hidden");
   resetBtn.classList.add("hidden");
   if (gradingBar) gradingBar.classList.add("hidden");
@@ -495,28 +491,9 @@ function onReset() {
 
 /* ── 显示最终得分 + 打印按钮 ─────────────────────── */
 function showFinalScore(totalScore, maxScore, totalJudged, correctCount) {
-  scoreArea.classList.remove("hidden");
-  animateScore(0, totalScore, maxScore);
-  var pct = totalJudged > 0 ? Math.round(correctCount / totalJudged * 100) : 0;
-  animateRing(pct);
-  buildReviewList();
   updateNavResults();
-  if (EXAM_META.passing_score != null) {
-    if (totalScore >= EXAM_META.passing_score) {
-      passStatus.className = "pass";
-      passStatus.textContent = "恭喜，你已通过考试！";
-    } else {
-      passStatus.className = "fail";
-      passStatus.textContent = "未达到及格线 (" + EXAM_META.passing_score + " 分)，继续努力！";
-    }
-  }
-  resetBtn.classList.remove("hidden");
   addPrintBtn();
   fillPrintReport(totalScore, maxScore);
-
-  // 填充题型汇总条
-  fillScoreTypeSummary();
-  // 重新渲染公式（解析和答案中的 LaTeX）
   reRenderMath();
 }
 
