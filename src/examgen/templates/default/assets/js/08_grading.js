@@ -364,9 +364,13 @@ function computeRealtimeScore() {
     var userS = 0;
     if (r.correct === true) {
       userS = maxS;
+      if (r.qtype === QT.ESSAY) essayGraded++;
     } else if (r.correct === null) {
       userS = gradingScores[r.id] || 0;
       if (gradingScores[r.id] !== undefined) essayGraded++;
+    } else if (r.correct === false) {
+      // 已批阅但得0分的简答
+      if (r.qtype === QT.ESSAY && gradingScores[r.id] !== undefined) essayGraded++;
     }
     totalUser += userS;
 
