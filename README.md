@@ -148,8 +148,8 @@ examgen web --host 0.0.0.0 --port 3000 --reload
 | `time` | int | 否 | 考试时长（分钟），必须是纯数字如 `90`，不能带单位 |
 | `total_score` | float | 否 | 试卷总分（注意：不是 `score`） |
 | `default_score` | float | 否 | 未指定分值时的默认分（默认 `1.0`），**建议填写** |
-| `shuffle` | bool | 否 | 随机打乱题目顺序（默认 `false`） |
-| `option_shuffle` | bool | 否 | 随机打乱选项顺序（默认 `false`） |
+| `shuffle` | bool | 否 | 在每个 `## 分区` 内随机打乱题目顺序，保持分区之间顺序（默认 `false`） |
+| `option_shuffle` | bool | 否 | 随机打乱选项顺序，答案字母自动映射（默认 `false`） |
 | `passing_score` | float | 否 | 及格分，**建议填写**（如 `60`） |
 
 > 常见错误：`course` → `subject`、`score` → `total_score`、`time: 90分钟` → `time: 90`。上传时若字段错误，解析器会给出具体提示。

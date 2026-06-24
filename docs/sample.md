@@ -9,7 +9,7 @@ option_shuffle: false
 passing_score: 60
 ---
 
-<!-- 格式规范详见 docs/spec.md -->
+<!-- 复制此文件作为起点，替换内容即可。格式规范详见 docs/spec.md -->
 
 ## 一、选择题（1-3 题）
 
@@ -85,6 +85,8 @@ Python 中输出到控制台的内置函数是 `____`，用于字符串格式化
 print|format
 #分值
 2
+#解析
+`print()` 是输出函数，`format()` 用于字符串格式化。
 
 ## 四、简答题（第 6-7 题）
 

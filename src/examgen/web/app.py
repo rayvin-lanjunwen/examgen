@@ -24,7 +24,7 @@ _PROJECT_ROOT = _WEB_DIR.parent.parent.parent
 
 # 读取示例模板，如果不存在则返回空串
 def _load_template_sample() -> str:
-    sample_path = _PROJECT_ROOT / "tests" / "fixtures" / "sample.md"
+    sample_path = _PROJECT_ROOT / "docs" / "sample.md"
     if sample_path.exists():
         return sample_path.read_text(encoding="utf-8")
     return ""
