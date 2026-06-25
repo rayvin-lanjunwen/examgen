@@ -49,8 +49,9 @@ def generate(input, output, shuffle, option_shuffle, time, template_dir):
     # 4. 随机变换
     questions = apply_transforms(questions, meta)
 
-    # 5. 渲染 HTML
-    html = generate_html(questions, meta, template_dir=template_dir)
+    # 5. 渲染 HTML（自动嵌入本地图片）
+    html = generate_html(questions, meta, template_dir=template_dir,
+                         content_dir=os.path.dirname(input))
 
     # 6. 写入文件
     save_exam(html, output)

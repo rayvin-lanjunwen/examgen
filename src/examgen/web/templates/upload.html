@@ -44,16 +44,17 @@
       <div class="drop-zone" id="dropZone">
         <div class="drop-zone-icon">&#128196;</div>
         <div class="drop-zone-text">
-          拖拽 .md 文件到此处，或 <strong id="browseLink">点击选择文件</strong>
+          拖拽 .md 文件<strong>及图片</strong>到此处，或 <strong id="browseLink">点击选择</strong>
         </div>
-        <input type="file" class="file-input" id="fileInput" accept=".md,.markdown">
+        <div class="drop-zone-hint">
+          支持 .md + .png/.jpg/.gif 等图片文件，按文件名自动匹配嵌入
+        </div>
+        <input type="file" class="file-input" id="fileInput"
+               accept=".md,.markdown,.png,.jpg,.jpeg,.gif,.svg,.webp" multiple>
       </div>
 
-      <!-- 已选文件信息 -->
-      <div class="file-info" id="fileInfo">
-        <span class="file-info-name" id="fileName"></span>
-        <button class="file-info-remove" id="fileRemove" title="移除文件">&times;</button>
-      </div>
+      <!-- 已选文件列表 -->
+      <div class="file-list" id="fileList"></div>
 
       <!-- 可选参数 -->
       <button class="params-toggle" id="paramsToggle">
@@ -110,14 +111,12 @@
     var dropZone      = document.getElementById("dropZone");
     var fileInput     = document.getElementById("fileInput");
     var browseLink    = document.getElementById("browseLink");
-    var fileInfo      = document.getElementById("fileInfo");
-    var fileName      = document.getElementById("fileName");
-    var fileRemove    = document.getElementById("fileRemove");
+    var fileList      = document.getElementById("fileList");
     var paramsToggle  = document.getElementById("paramsToggle");
     var paramsPanel   = document.getElementById("paramsPanel");
     var generateBtn   = document.getElementById("generateBtn");
     var statusArea    = document.getElementById("statusArea");
-    var selectedFile  = null;
+    var allFiles      = [];   // 所有上传文件（File 对象）
     var lastBlob      = null;
     var lastFname     = "exam.html";
 
@@ -148,32 +147,101 @@
     dropZone.addEventListener("drop", function (e) {
       e.preventDefault();
       dropZone.classList.remove("dragover");
-      var files = e.dataTransfer.files;
-      if (files.length > 0) setFile(files[0]);
+      addFiles(e.dataTransfer.files);
     });
     fileInput.addEventListener("change", function () {
-      if (fileInput.files.length > 0) setFile(fileInput.files[0]);
+      if (fileInput.files.length > 0) addFiles(fileInput.files);
     });
-    fileRemove.addEventListener("click", function () { clearFile(); });
 
-    function setFile(file) {
-      if (!file.name.match(/\.md$/i) && !file.name.match(/\.markdown$/i)) {
-        showStatus("请选择 .md 文件", "error");
-        return;
+    function addFiles(files) {
+      for (var i = 0; i < files.length; i++) {
+        var f = files[i];
+        // 去重
+        var dup = false;
+        for (var j = 0; j < allFiles.length; j++) {
+          if (allFiles[j].name === f.name && allFiles[j].size === f.size) {
+            dup = true; break;
+          }
+        }
+        if (!dup) allFiles.push(f);
       }
-      selectedFile = file;
-      fileName.textContent = file.name + " (" + formatSize(file.size) + ")";
-      fileInfo.classList.add("show");
+      renderFileList();
       hideStatus();
-      setStep(2);
+      fileInput.value = "";
     }
 
-    function clearFile() {
-      selectedFile = null;
-      fileInput.value = "";
-      fileInfo.classList.remove("show");
-      hideStatus();
+    function removeFile(index) {
+      allFiles.splice(index, 1);
+      renderFileList();
+    }
+
+    function clearAllFiles() {
+      allFiles = [];
+      renderFileList();
       setStep(1);
+    }
+
+    function renderFileList() {
+      if (allFiles.length === 0) {
+        fileList.innerHTML = "";
+        fileList.classList.remove("show");
+        setStep(1);
+        return;
+      }
+
+      var mdFiles = [];
+      var imageFiles = [];
+      for (var i = 0; i < allFiles.length; i++) {
+        var name = allFiles[i].name;
+        if (name.match(/\.md$/i) || name.match(/\.markdown$/i)) {
+          mdFiles.push({ index: i, file: allFiles[i] });
+        } else {
+          imageFiles.push({ index: i, file: allFiles[i] });
+        }
+      }
+
+      var html = '<div class="file-list-summary">';
+      html += '<span class="file-list-count">' + mdFiles.length + ' 个试卷文件 + ' + imageFiles.length + ' 张图片</span>';
+      html += '<button class="file-list-clear" id="clearAllBtn">清空</button>';
+      html += '</div>';
+      html += '<ul class="file-list-items">';
+
+      for (var i = 0; i < mdFiles.length; i++) {
+        var f = mdFiles[i].file;
+        html += '<li class="file-list-item file-list-md">';
+        html += '<span class="file-list-icon">&#128196;</span>';
+        html += '<span class="file-list-name">' + escapeHTML(f.name) + '</span>';
+        html += '<span class="file-list-size">' + formatSize(f.size) + '</span>';
+        html += '<button class="file-list-remove" data-index="' + mdFiles[i].index + '">&times;</button>';
+        html += '</li>';
+      }
+
+      for (var i = 0; i < imageFiles.length; i++) {
+        var f = imageFiles[i].file;
+        html += '<li class="file-list-item file-list-img">';
+        html += '<span class="file-list-icon">&#128247;</span>';
+        html += '<span class="file-list-name">' + escapeHTML(f.name) + '</span>';
+        html += '<span class="file-list-size">' + formatSize(f.size) + '</span>';
+        html += '<button class="file-list-remove" data-index="' + imageFiles[i].index + '">&times;</button>';
+        html += '</li>';
+      }
+
+      html += '</ul>';
+      fileList.innerHTML = html;
+      fileList.classList.add("show");
+
+      // 绑定删除按钮
+      var removeBtns = fileList.querySelectorAll(".file-list-remove");
+      for (var i = 0; i < removeBtns.length; i++) {
+        removeBtns[i].addEventListener("click", function () {
+          removeFile(parseInt(this.getAttribute("data-index")));
+        });
+      }
+
+      var clearBtn = document.getElementById("clearAllBtn");
+      if (clearBtn) clearBtn.addEventListener("click", clearAllFiles);
+
+      setStep(mdFiles.length > 0 ? 2 : 1);
     }
 
     function formatSize(bytes) {
@@ -231,15 +299,21 @@
 
     /* ── 提交生成（先预览） ─────────────────────────────── */
     generateBtn.addEventListener("click", function () {
-      if (!selectedFile) {
-        showStatus("请先选择 .md 文件", "error");
+      var hasMd = false;
+      for (var i = 0; i < allFiles.length; i++) {
+        if (allFiles[i].name.match(/\.md$/i)) { hasMd = true; break; }
+      }
+      if (!hasMd) {
+        showStatus("请选择 .md 试卷文件", "error");
         return;
       }
       showStatus("正在生成试卷…", "loading");
       generateBtn.disabled = true;
 
       var formData = new FormData();
-      formData.append("file", selectedFile);
+      for (var i = 0; i < allFiles.length; i++) {
+        formData.append("files", allFiles[i]);
+      }
       var title = document.getElementById("titleInput").value.trim();
       if (title) formData.append("title", title);
       var time = document.getElementById("timeInput").value.trim();
@@ -273,7 +347,6 @@
           });
         })
         .then(function (blob) {
-          // 读取 HTML 内容，提取预览信息
           return blob.text().then(function (html) {
             showPreviewInfo(html);
             hideStatus();
@@ -291,18 +364,15 @@
 
     /* ── 预览信息提取 ───────────────────────────────────── */
     function showPreviewInfo(html) {
-      // 提取 title
       var titleMatch = html.match(/<title>(.*?)<\/title>/);
       var title = titleMatch ? titleMatch[1] : "未知试卷";
 
-      // 提取 EXAM_DATA
       var dataMatch = html.match(/const EXAM_DATA = (\[[\s\S]*?\]);/);
       var questions = [];
       if (dataMatch) {
         try { questions = JSON.parse(dataMatch[1]); } catch (e) {}
       }
 
-      // 类型统计
       var counts = { single: 0, multiple: 0, judge: 0, fill: 0, essay: 0 };
       var labels = { single: "单选", multiple: "多选", judge: "判断", fill: "填空", essay: "简答" };
       for (var i = 0; i < questions.length; i++) {
@@ -322,7 +392,6 @@
       }
       statsHtml += '</div>';
 
-      // 分区
       var sections = [];
       for (var k = 0; k < questions.length; k++) {
         if (questions[k].section && sections.indexOf(questions[k].section) === -1) {
@@ -355,7 +424,6 @@
     });
     previewConfirm.addEventListener("click", function () {
       previewOverlay.classList.add("hidden");
-      // 触发下载
       if (lastBlob) {
         var url = URL.createObjectURL(lastBlob);
         var a = document.createElement("a");

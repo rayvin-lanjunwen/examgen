@@ -676,6 +676,16 @@ body {
 .explanation tr:nth-child(even), .topic-md tr:nth-child(even),
 .essay-reference tr:nth-child(even) { background: #f9fafb; }
 
+/* ── Markdown 图片 ────────────────────────────────────── */
+.topic-md img, .explanation img, .essay-reference img,
+.option-text img, .fill-text img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  margin: 8px 0;
+  display: block;
+}
+
 /* ── 得分区域 ────────────────────────────────────────── */
 .score-area {
   text-align: center;

@@ -1,8 +1,12 @@
 """ExamGen Web UI — FastAPI 应用。"""
 
+import base64
 import json
+import mimetypes
+import re
+import tempfile
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,7 +26,41 @@ _TEMPLATE_DIR = _WEB_DIR / "templates"
 _STATIC_DIR = _WEB_DIR / "static"
 _PROJECT_ROOT = _WEB_DIR.parent.parent.parent
 
-# 读取示例模板，如果不存在则返回空串
+# Markdown 图片正则：![alt](path)
+_RE_MD_IMAGE = re.compile(r'!\[([^\]]*)\]\(([^)]+)\)')
+
+
+def _embed_uploaded_images(md_text: str, image_files: dict[str, bytes]) -> str:
+    """将 Markdown 中的本地图片引用替换为上传图片的 base64 data URI。
+
+    匹配规则：提取 Markdown 中 ``![alt](path)`` 的 ``path`` 部分，
+    取文件名（去除目录前缀）与上传图片的文件名匹配。
+    """
+    def _replace(match: re.Match) -> str:
+        alt_text = match.group(1)
+        img_path = match.group(2)
+
+        # 跳过网络 / data URI
+        if img_path.startswith(("http://", "https://", "data:", "ftp://")):
+            return match.group(0)
+
+        # 取文件名（例如 _figures/xxx.png → xxx.png）
+        img_name = Path(img_path).name
+
+        if img_name not in image_files:
+            return match.group(0)
+
+        data = image_files[img_name]
+        mime_type, _ = mimetypes.guess_type(img_name)
+        if mime_type is None:
+            mime_type = "image/png"
+        b64 = base64.b64encode(data).decode("ascii")
+        return f'![{alt_text}](data:{mime_type};base64,{b64})'
+
+    return _RE_MD_IMAGE.sub(_replace, md_text)
+
+
+# 读取示例模板
 def _load_template_sample() -> str:
     sample_path = _PROJECT_ROOT / "docs" / "sample.md"
     if sample_path.exists():
@@ -43,7 +81,7 @@ _SPEC_DOC = _load_doc("spec.md")
 
 app = FastAPI(title="ExamGen", version=__version__)
 
-# CORS — 允许前端跨域调用
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -105,18 +143,49 @@ async def spec_doc():
 
 @app.post("/generate")
 async def generate(
-    file: UploadFile = File(...),
+    files: List[UploadFile] = File(...),
     title: Optional[str] = Form(None),
     time: Optional[int] = Form(None),
     shuffle: Optional[str] = Form(None),
     option_shuffle: Optional[str] = Form(None),
 ):
-    """接收上传的 .md 文件及可选参数，生成并返回 HTML 试卷下载。"""
-    # 读取上传文件内容
-    content = await file.read()
-    md_text = content.decode("utf-8")
+    """接收上传的 .md 文件及图片文件，生成并返回 HTML 试卷下载。
+
+    图片按文件名与 Markdown 中的 ``![alt](path)`` 引用自动匹配：
+    无论图片在 Markdown 中写的是 ``_figures/xxx.png`` 还是 ``images/xxx.png``，
+    只要上传的图片文件名（如 ``xxx.png``）一致即可匹配。
+    """
+    # 分离 .md 文件和图片文件
+    md_text = None
+    image_files: dict[str, bytes] = {}
+
+    for f in files:
+        if not f.filename:
+            continue
+        fname_lower = f.filename.lower()
+        data = await f.read()
+
+        if fname_lower.endswith((".md", ".markdown")):
+            md_text = data.decode("utf-8")
+        elif fname_lower.endswith((".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp")):
+            # 按文件名（不含目录）存储
+            image_files[Path(f.filename).name] = data
+
+    if md_text is None:
+        return JSONResponse(
+            status_code=422,
+            content={
+                "error": True,
+                "message": "未找到 .md 文件",
+                "field": None,
+                "suggestion": "请确保上传的文件中包含一个 .md 文件",
+            },
+        )
 
     try:
+        # 将 Markdown 中的本地图片引用替换为 base64 data URI
+        md_text = _embed_uploaded_images(md_text, image_files)
+
         # 核心流程
         meta, questions = parse_exam_text(md_text)
         questions = normalize_questions(questions, meta)

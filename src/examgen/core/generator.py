@@ -1,5 +1,8 @@
 """使用 Jinja2 将题目数据渲染为独立的离线 HTML 文件。"""
 
+import base64
+import mimetypes
+import re
 from dataclasses import asdict
 from pathlib import Path
 from typing import List, Optional
@@ -11,11 +14,58 @@ from examgen.models import ExamMeta, Question
 # 默认模板目录：包内 templates/default/
 _DEFAULT_TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates" / "default"
 
+# Markdown 图片正则：![alt](path)
+_RE_MD_IMAGE = re.compile(r'!\[([^\]]*)\]\(([^)]+)\)')
+
+
+def _embed_local_images(text: str, base_dir: Path) -> str:
+    """将 Markdown 文本中的本地图片引用转换为 base64 data URI。
+
+    只处理相对路径和绝对路径的图片（排除 http/https/data URI），
+    读取图片文件后嵌入为 data URI，使 HTML 完全自包含。
+    """
+    if not text or not base_dir or not base_dir.is_dir():
+        return text
+
+    def _replace(match: re.Match) -> str:
+        alt_text = match.group(1)
+        img_path = match.group(2)
+
+        # 只处理本地文件路径
+        if img_path.startswith(("http://", "https://", "data:", "ftp://")):
+            return match.group(0)
+
+        # 尝试解析图片文件路径
+        candidate = (base_dir / img_path).resolve()
+        if not candidate.exists():
+            # 尝试在基目录下递归查找文件名
+            try:
+                candidates = list(base_dir.rglob(candidate.name))
+                if candidates:
+                    candidate = candidates[0]
+                else:
+                    return match.group(0)
+            except Exception:
+                return match.group(0)
+
+        try:
+            mime_type, _ = mimetypes.guess_type(str(candidate))
+            if mime_type is None:
+                mime_type = "image/png"
+            data = candidate.read_bytes()
+            b64 = base64.b64encode(data).decode("ascii")
+            return f'![{alt_text}](data:{mime_type};base64,{b64})'
+        except Exception:
+            return match.group(0)
+
+    return _RE_MD_IMAGE.sub(_replace, text)
+
 
 def generate_html(
     questions: List[Question],
     meta: ExamMeta,
     template_dir: Optional[str] = None,
+    content_dir: Optional[str] = None,
 ) -> str:
     """渲染试卷为完整独立的 HTML 字符串。
 
@@ -27,6 +77,10 @@ def generate_html(
         试卷元信息。
     template_dir : str or None
         自定义模板目录路径。为 None 时使用包内默认模板。
+    content_dir : str or None
+        原始 Markdown 文件所在目录。提供后可自动将 Markdown 中
+        引用的本地图片（如 ``_figures/xxx.png``）嵌入为 base64，
+        使生成的 HTML 完全自包含。
 
     Returns
     -------
@@ -34,6 +88,20 @@ def generate_html(
         完整可离线运行的 HTML 字符串。
     """
     tpl_dir = Path(template_dir) if template_dir else _DEFAULT_TEMPLATE_DIR
+
+    # 将本地图片嵌入为 base64 data URI
+    if content_dir:
+        base_dir = Path(content_dir).resolve()
+        for q in questions:
+            if q.topic:
+                q.topic = _embed_local_images(q.topic, base_dir)
+            if q.answer:
+                q.answer = _embed_local_images(q.answer, base_dir)
+            if q.explanation:
+                q.explanation = _embed_local_images(q.explanation, base_dir)
+            for opt in q.options:
+                if opt.text:
+                    opt.text = _embed_local_images(opt.text, base_dir)
 
     env = Environment(
         loader=FileSystemLoader(str(tpl_dir)),

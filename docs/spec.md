@@ -181,8 +181,46 @@ print|end
 ## 五、富文本支持
 
 - **Markdown**：题干/解析/答案支持完整 Markdown（加粗、列表、引用、代码、表格等）
-- **数学公式**：行内 `$...$`，块级 `$$...$$`，由 KaTeX 渲染。**LaTeX 命令必须小写**（`\times` 而非 `\TIMES`，`\sum` 而非 `\SUM`）
-- **图片**：`![描述](URL)`，支持远程和本地相对路径
+- **数学公式**：行内 `$...$`，块级 `$$...$$`，由 KaTeX 渲染。
+
+> ⚠️ **致命错误：LaTeX 命令必须全部小写！**  
+> KaTeX 严格区分大小写，大写命令不会渲染，公式将原样显示为纯文本。  
+> **错误**：`\FRAC` `\TIMES` `\APPROX` `\SUM` `\INT` `\LIM` `\PI` `\DIV`  
+> **正确**：`\frac` `\times` `\approx` `\sum` `\int` `\lim` `\pi` `\div`  
+> 一句话：**只要你按了 Shift 或 CapsLock，公式就废了。**
+- **图片**：`![描述](URL)`，支持远程 URL 和本地图片。
+
+### 5.1 图片使用说明
+
+#### 本地图片（推荐：网页上传时附带图片文件）
+
+在 Markdown 中使用相对路径引用图片（如 `_figures/xxx.png`），上传时**同时选择 .md 文件和图片文件**，服务器按**文件名**自动匹配嵌入 base64。
+
+```markdown
+![网络拓扑图](_figures/network_reliability.png)
+```
+
+只需上传 `network_reliability.png` 即可匹配，不关心目录路径。
+
+> ⚠️ 图片嵌入匹配规则：提取 Markdown 中 `![alt](path)` 的 `path` 部分，取**文件名**（去除目录前缀）与上传图片的文件名对比，一致则嵌入。因此 `_figures/a.png`、`images/a.png`、`a.png` 都会匹配上传的 `a.png`。
+
+#### 远程图片
+
+直接使用 URL，无需上传：
+
+```markdown
+![示例图](https://example.com/image.png)
+```
+
+#### Base64 内嵌
+
+将图片直接写在 Markdown 文件中（适合小图片）：
+
+```markdown
+![图](data:image/png;base64,iVBORw0KGgo...)
+```
+
+可使用 `scripts/embed_images.py` 工具将本地图片一键嵌入到 .md 文件中。
 
 ---
 
@@ -201,3 +239,6 @@ print|end
 | 9 | `#选项` 后内容为空 | `#选项` 后留空行 | 直接跟 `- A.` |
 | 10 | 区块内容为空 | 标记行后留空行 | 紧跟前一个区块 |
 | 11 | 末尾内容误解析 | 末尾有 AI 提示文字 | 全部删除 |
+| 12 | 图片不显示（裂图） | 网页端仅上传 .md 未上传图片文件 | 上传时同时选择 .md 和图片文件 |
+| 13 | 图片不显示（裂图） | 上传的图片文件名与 Markdown 中的引用名不匹配 | 确保上传的图片文件名（如 `xxx.png`）与 Markdown 中 `![alt](path)` 的 `path` 文件名一致 |
+| 14 | 公式原样显示不渲染 | LaTeX 命令用了**大写字母**（如 `\FRAC`、`\TIMES`） | KaTeX 只认小写命令，全部改为小写：`\frac`、`\times`、`\approx`、`\sum` 等 |

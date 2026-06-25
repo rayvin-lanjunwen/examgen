@@ -39,7 +39,7 @@ function buildQuestionCard(q) {
   var header = document.createElement("div");
   header.className = "question-header";
   // 填空题：标题只显示题号+分值，题干在 buildFillInput 中完整渲染
-  var headerTopic = (q.qtype === QT.FILL) ? '' : '<span class="topic-md">' + mdToHTML(q.topic) + '</span>';
+  var headerTopic = (q.qtype === QT.FILL) ? '' : '<div class="topic-md">' + mdToHTML(q.topic) + '</div>';
   header.innerHTML =
     '<span class="question-type" data-type="' + q.qtype + '">' + TYPE_LABELS[q.qtype] + '</span>' +
     '<span class="question-number">' + q.id + '.</span>' +
@@ -116,7 +116,7 @@ function buildOptions(q) {
 
     var text = document.createElement("span");
     text.className = "option-text";
-    text.textContent = opt.text;
+    text.innerHTML = mdToHTML(opt.text);
 
     label.appendChild(input);
     label.appendChild(circle);
