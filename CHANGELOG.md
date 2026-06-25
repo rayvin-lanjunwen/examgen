@@ -2,6 +2,18 @@
 
 ---
 
+## 2026-06-25 11:30
+
+### 图片嵌入 & LaTeX 大小写强化
+- **Web 端多文件上传** — 支持同时选择 `.md` + 图片文件，后端按**文件名**自动匹配嵌入 base64，无需关心目录路径
+- **前端文件列表** — 上传区区分 `.md`（蓝色左边框）和图片（绿色左边框），支持拖拽和多选
+- **修复选项图片不渲染** — `04_render.js` 中选项文本改用 `innerHTML` + `mdToHTML()` 渲染，`style.css` 新增 `img` 自适应样式
+- **LaTeX 大小写致命警告** — `spec.md`、`prompt.md`、`sample.md` 三文档同步强化：blockquote 醒目警告 + 8 组错误/正确对照（`\FRAC`→`\frac`、`\TIMES`→`\times` 等）
+- **错误排查表扩充** — `spec.md` 新增第 12/13/14 条：图片未上传、图片名不匹配、公式大写不渲染
+- **工具脚本** — 新增 `scripts/embed_images.py`，支持将本地图片一键转为 base64 嵌入 `.md`
+
+---
+
 ## 2026-06-25 01:30
 
 - **删除打印成绩单** — 移除独立打印页面（`#printReport` 元素 + `@media print` 样式 + `fillPrintReport`/`addPrintBtn` 函数）
