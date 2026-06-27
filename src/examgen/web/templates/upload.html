@@ -11,14 +11,14 @@
     <div class="page-title">
       <div class="logo">&#128221;</div>
       <h1>ExamGen</h1>
-      <p>从 Markdown 生成离线 HTML 试卷</p>
+      <p>从 Markdown / TXT 生成离线 HTML 试卷</p>
     </div>
 
     <!-- 三步引导 -->
     <div class="steps">
       <div class="step active" id="step1">
         <span class="step-num">1</span>
-        <span class="step-label">编写 .md</span>
+        <span class="step-label">编写 .md/.txt</span>
       </div>
       <div class="step-line"></div>
       <div class="step" id="step2">
@@ -44,13 +44,13 @@
       <div class="drop-zone" id="dropZone">
         <div class="drop-zone-icon">&#128196;</div>
         <div class="drop-zone-text">
-          拖拽 .md 文件<strong>及图片</strong>到此处，或 <strong id="browseLink">点击选择</strong>
+          拖拽 .md / .txt 文件<strong>及图片</strong>到此处，或 <strong id="browseLink">点击选择</strong>
         </div>
         <div class="drop-zone-hint">
-          支持 .md + .png/.jpg/.gif 等图片文件，按文件名自动匹配嵌入
+          支持 .md / .txt + .png/.jpg/.gif 等图片文件，按文件名自动匹配嵌入
         </div>
         <input type="file" class="file-input" id="fileInput"
-               accept=".md,.markdown,.png,.jpg,.jpeg,.gif,.svg,.webp" multiple>
+               accept=".md,.markdown,.txt,.png,.jpg,.jpeg,.gif,.svg,.webp" multiple>
       </div>
 
       <!-- 已选文件列表 -->
@@ -63,7 +63,7 @@
       <div class="params-panel" id="paramsPanel">
         <div class="form-row">
           <label for="titleInput">试卷标题覆盖</label>
-          <input type="text" id="titleInput" placeholder="留空则使用 .md 中的标题">
+          <input type="text" id="titleInput" placeholder="留空则使用文件中的标题">
         </div>
         <div class="form-row-inline">
           <div class="form-row">
@@ -189,30 +189,30 @@
         return;
       }
 
-      var mdFiles = [];
+      var examFiles = [];
       var imageFiles = [];
       for (var i = 0; i < allFiles.length; i++) {
         var name = allFiles[i].name;
-        if (name.match(/\.md$/i) || name.match(/\.markdown$/i)) {
-          mdFiles.push({ index: i, file: allFiles[i] });
+        if (name.match(/\.(md|markdown|txt)$/i)) {
+          examFiles.push({ index: i, file: allFiles[i] });
         } else {
           imageFiles.push({ index: i, file: allFiles[i] });
         }
       }
 
       var html = '<div class="file-list-summary">';
-      html += '<span class="file-list-count">' + mdFiles.length + ' 个试卷文件 + ' + imageFiles.length + ' 张图片</span>';
+      html += '<span class="file-list-count">' + examFiles.length + ' 个试卷文件 + ' + imageFiles.length + ' 张图片</span>';
       html += '<button class="file-list-clear" id="clearAllBtn">清空</button>';
       html += '</div>';
       html += '<ul class="file-list-items">';
 
-      for (var i = 0; i < mdFiles.length; i++) {
-        var f = mdFiles[i].file;
+      for (var i = 0; i < examFiles.length; i++) {
+        var f = examFiles[i].file;
         html += '<li class="file-list-item file-list-md">';
         html += '<span class="file-list-icon">&#128196;</span>';
         html += '<span class="file-list-name">' + escapeHTML(f.name) + '</span>';
         html += '<span class="file-list-size">' + formatSize(f.size) + '</span>';
-        html += '<button class="file-list-remove" data-index="' + mdFiles[i].index + '">&times;</button>';
+        html += '<button class="file-list-remove" data-index="' + examFiles[i].index + '">&times;</button>';
         html += '</li>';
       }
 
@@ -241,7 +241,7 @@
       var clearBtn = document.getElementById("clearAllBtn");
       if (clearBtn) clearBtn.addEventListener("click", clearAllFiles);
 
-      setStep(mdFiles.length > 0 ? 2 : 1);
+      setStep(examFiles.length > 0 ? 2 : 1);
     }
 
     function formatSize(bytes) {
@@ -299,12 +299,12 @@
 
     /* ── 提交生成（先预览） ─────────────────────────────── */
     generateBtn.addEventListener("click", function () {
-      var hasMd = false;
+      var hasExam = false;
       for (var i = 0; i < allFiles.length; i++) {
-        if (allFiles[i].name.match(/\.md$/i)) { hasMd = true; break; }
+        if (allFiles[i].name.match(/\.(md|markdown|txt)$/i)) { hasExam = true; break; }
       }
-      if (!hasMd) {
-        showStatus("请选择 .md 试卷文件", "error");
+      if (!hasExam) {
+        showStatus("请选择 .md 或 .txt 试卷文件", "error");
         return;
       }
       showStatus("正在生成试卷…", "loading");

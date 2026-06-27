@@ -1,6 +1,6 @@
 # ExamGen
 
-从 Markdown 一键生成可离线使用的 HTML 网页试卷。
+从 Markdown / TXT 一键生成可离线使用的 HTML 网页试卷。
 
 ## 功能特性
 

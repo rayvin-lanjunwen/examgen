@@ -13,6 +13,9 @@ venv/
 # 调试输出 / 构建产物
 *.txt
 !requirements.txt
+!docs/spec-txt.txt
+!docs/prompt-txt.txt
+!docs/sample-txt.txt
 *.html
 !src/**/*.html
 

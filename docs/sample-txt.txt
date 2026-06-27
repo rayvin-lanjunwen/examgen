@@ -1,0 +1,224 @@
+<meta>
+  <title>期末考试样卷</title>
+  <subject>计算机科学</subject>
+  <time>90</time>
+  <total_score>105</total_score>
+  <default_score>2</default_score>
+  <shuffle>false</shuffle>
+  <option_shuffle>false</option_shuffle>
+  <passing_score>60</passing_score>
+</meta>
+
+<!-- 复制此文件作为起点，替换内容即可。格式规范详见 docs/spec-txt.txt -->
+<!-- ⚠️ 致命错误：LaTeX 命令必须全部小写！ \frac 而非 \FRAC，\times 而非 \TIMES -->
+
+<question>
+  <id>1</id>
+  <type>single</type>
+  <section>一、选择题</section>
+  <topic>下列哪个是 Python 的关键字？</topic>
+  <options>
+    <option>
+      <label>A</label>
+      <text>class</text>
+    </option>
+    <option>
+      <label>B</label>
+      <text>Class</text>
+    </option>
+    <option>
+      <label>C</label>
+      <text>CLASS</text>
+    </option>
+    <option>
+      <label>D</label>
+      <text>classify</text>
+    </option>
+  </options>
+  <answer>A</answer>
+  <score>10</score>
+  <explanation>`class` 是 Python 的保留关键字，用于定义类。其他选项均非保留字。</explanation>
+</question>
+
+<question>
+  <id>2</id>
+  <type>multiple</type>
+  <section>一、选择题</section>
+  <topic>以下哪些是 Python 的内建数据类型？</topic>
+  <options>
+    <option>
+      <label>A</label>
+      <text>list</text>
+    </option>
+    <option>
+      <label>B</label>
+      <text>dict</text>
+    </option>
+    <option>
+      <label>C</label>
+      <text>array</text>
+    </option>
+    <option>
+      <label>D</label>
+      <text>tuple</text>
+    </option>
+  </options>
+  <answer>A,B,D</answer>
+  <score>12</score>
+  <explanation>`array` 需要通过 `import array` 导入，其余三者均为 Python 内建类型。</explanation>
+</question>
+
+<question>
+  <id>3</id>
+  <type>judge</type>
+  <section>一、选择题</section>
+  <topic>Python 中 `None` 表示空值。</topic>
+  <answer>A</answer>
+  <score>8</score>
+  <explanation>`None` 是 Python 中唯一的空值对象，类型为 `NoneType`。</explanation>
+</question>
+
+<question>
+  <id>4</id>
+  <type>single</type>
+  <section>二、综合题</section>
+  <topic>根据下表，选择正确的描述。</topic>
+  <table>
+| 参数 | 值 | 说明 |
+|------|-----|------|
+| time | 90 | 考试时长 |
+| score | 100 | 试卷总分 |
+| passing | 60 | 及格线 |
+  </table>
+  <options>
+    <option>
+      <label>A</label>
+      <text>考试时长为 90 分钟</text>
+    </option>
+    <option>
+      <label>B</label>
+      <text>总分是 60 分</text>
+    </option>
+    <option>
+      <label>C</label>
+      <text>及格线为 100 分</text>
+    </option>
+    <option>
+      <label>D</label>
+      <text>以上都不对</text>
+    </option>
+  </options>
+  <answer>A</answer>
+  <score>15</score>
+  <explanation>表格中 `time = 90` 表示 90 分钟考试时长。</explanation>
+</question>
+
+<question>
+  <id>5</id>
+  <type>fill</type>
+  <section>三、填空题</section>
+  <topic>Python 中输出到控制台的内置函数是 `____`，用于字符串格式化的方法是 `____`。</topic>
+  <answer>print|format</answer>
+  <score>10</score>
+</question>
+
+<question>
+  <id>6</id>
+  <type>single</type>
+  <section>三、填空题</section>
+  <topic>代码 `if a &lt; b and c &gt; d:` 中包含几个比较运算符？</topic>
+  <options>
+    <option>
+      <label>A</label>
+      <text>1 个</text>
+    </option>
+    <option>
+      <label>B</label>
+      <text>2 个</text>
+    </option>
+    <option>
+      <label>C</label>
+      <text>3 个</text>
+    </option>
+    <option>
+      <label>D</label>
+      <text>4 个</text>
+    </option>
+  </options>
+  <answer>B</answer>
+  <score>5</score>
+</question>
+
+<question>
+  <id>7</id>
+  <type>essay</type>
+  <section>四、简答题</section>
+  <topic>请简述 Python 中列表（list）和元组（tuple）的主要区别。</topic>
+  <answer>列表与元组的核心区别如下：
+- **可变性**：列表可变，元组不可变
+- **语法**：列表 `[]`，元组 `()`
+- **用途**：元组可作为字典键，列表不能</answer>
+  <score>15</score>
+  <explanation>
+- 元组创建后元素不可增删改
+- 列表支持 `append`、`remove` 等修改操作
+- 可变性是两者最核心的区别
+  </explanation>
+  <keywords>可变性, append, remove, 字典键, 不可变</keywords>
+</question>
+
+<question>
+  <id>8</id>
+  <type>essay</type>
+  <section>四、简答题</section>
+  <topic>以下是两种排序算法的时间复杂度对比，请回答问题。</topic>
+  <table>
+| 算法 | 最好 | 平均 | 最坏 | 空间 |
+|------|------|------|------|------|
+| 快速排序 | <inline-math>O(n \log n)</inline-math> | <inline-math>O(n \log n)</inline-math> | <inline-math>O(n^2)</inline-math> | <inline-math>O(\log n)</inline-math> |
+| 归并排序 | <inline-math>O(n \log n)</inline-math> | <inline-math>O(n \log n)</inline-math> | <inline-math>O(n \log n)</inline-math> | <inline-math>O(n)</inline-math> |
+  </table>
+  <answer>
+1. 数据基本有序时选快速排序，实测性能优于归并排序。
+2. 内存有限时选快速排序，归并排序需要 O(n) 额外空间。
+  </answer>
+  <score>20</score>
+  <explanation>
+- 快速排序原地排序，空间开销小但最坏 <inline-math>O(n^2)</inline-math>
+- 归并排序稳定，但需要额外数组存储中间结果
+- 实际工程中快速排序更常用
+  </explanation>
+  <keywords>快速排序, 归并排序, 空间复杂度, O(n), 原地排序</keywords>
+</question>
+
+<question>
+  <id>9</id>
+  <type>single</type>
+  <section>五、带图片的题目</section>
+  <topic>观察以下网络拓扑图，若所有路段的行程时间均为 10 分钟，则节点 A 到节点 D 的最短路径用时为多少分钟？</topic>
+  <image>sample_network.png</image>
+  <options>
+    <option>
+      <label>A</label>
+      <text>20 分钟</text>
+    </option>
+    <option>
+      <label>B</label>
+      <text>30 分钟</text>
+    </option>
+    <option>
+      <label>C</label>
+      <text>40 分钟</text>
+    </option>
+    <option>
+      <label>D</label>
+      <text>50 分钟</text>
+    </option>
+  </options>
+  <answer>B</answer>
+  <score>10</score>
+  <explanation>
+从 A 到 D 的最短路径为 A→B→D，总用时 10+20=30 分钟。
+A→C→D 需要 10+25=35 分钟，A→B→C→D 需要 10+15+25=50 分钟。
+  </explanation>
+</question>

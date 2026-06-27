@@ -18,6 +18,7 @@ from examgen import __version__
 from examgen.core.generator import generate_html
 from examgen.core.normalizer import normalize_questions
 from examgen.core.parser import ParseError, parse_exam_text
+from examgen.core.parser_txt import parse_exam_text_txt
 from examgen.core.transformer import apply_transforms
 
 # 目录
@@ -149,14 +150,18 @@ async def generate(
     shuffle: Optional[str] = Form(None),
     option_shuffle: Optional[str] = Form(None),
 ):
-    """接收上传的 .md 文件及图片文件，生成并返回 HTML 试卷下载。
+    """接收上传的 .md / .txt 文件及图片文件，生成并返回 HTML 试卷下载。
 
-    图片按文件名与 Markdown 中的 ``![alt](path)`` 引用自动匹配：
-    无论图片在 Markdown 中写的是 ``_figures/xxx.png`` 还是 ``images/xxx.png``，
-    只要上传的图片文件名（如 ``xxx.png``）一致即可匹配。
+    支持两种格式：
+    - ``.md`` / ``.markdown``：Markdown DSL 格式（原有格式）
+    - ``.txt``：TXT 结构化标签格式（新格式，见 docs/spec-txt.txt）
+
+    两种格式不能混传，同一批次只能包含一种试卷文件。
+    图片按文件名自动匹配嵌入 base64。
     """
-    # 分离 .md 文件和图片文件
-    md_text = None
+    # 分离试卷文件（.md / .txt）和图片文件
+    exam_text = None
+    exam_format = None  # "md" or "txt"
     image_files: dict[str, bytes] = {}
 
     for f in files:
@@ -166,28 +171,64 @@ async def generate(
         data = await f.read()
 
         if fname_lower.endswith((".md", ".markdown")):
-            md_text = data.decode("utf-8")
+            if exam_format == "txt":
+                return JSONResponse(
+                    status_code=422,
+                    content={
+                        "error": True,
+                        "message": "不能同时上传 .md 和 .txt 文件",
+                        "field": None,
+                        "suggestion": "请只上传一种格式的试卷文件（.md 或 .txt）",
+                    },
+                )
+            exam_text = data.decode("utf-8")
+            exam_format = "md"
+        elif fname_lower.endswith(".txt"):
+            if exam_format == "md":
+                return JSONResponse(
+                    status_code=422,
+                    content={
+                        "error": True,
+                        "message": "不能同时上传 .md 和 .txt 文件",
+                        "field": None,
+                        "suggestion": "请只上传一种格式的试卷文件（.md 或 .txt）",
+                    },
+                )
+            exam_text = data.decode("utf-8")
+            exam_format = "txt"
         elif fname_lower.endswith((".png", ".jpg", ".jpeg", ".gif", ".svg", ".webp")):
-            # 按文件名（不含目录）存储
             image_files[Path(f.filename).name] = data
 
-    if md_text is None:
+    if exam_text is None:
         return JSONResponse(
             status_code=422,
             content={
                 "error": True,
-                "message": "未找到 .md 文件",
+                "message": "未找到试卷文件",
                 "field": None,
-                "suggestion": "请确保上传的文件中包含一个 .md 文件",
+                "suggestion": "请上传 .md 或 .txt 格式的试卷文件",
             },
         )
 
     try:
-        # 将 Markdown 中的本地图片引用替换为 base64 data URI
-        md_text = _embed_uploaded_images(md_text, image_files)
-
-        # 核心流程
-        meta, questions = parse_exam_text(md_text)
+        if exam_format == "txt":
+            # TXT 结构化格式：直接解析，解析后 topic 已包含 Markdown 图片语法
+            meta, questions = parse_exam_text_txt(exam_text)
+            # 对解析后的 topic 做图片嵌入（解析器已生成 ![alt](file) 格式）
+            for q in questions:
+                if q.topic:
+                    q.topic = _embed_uploaded_images(q.topic, image_files)
+                if q.answer:
+                    q.answer = _embed_uploaded_images(q.answer, image_files)
+                if q.explanation:
+                    q.explanation = _embed_uploaded_images(q.explanation, image_files)
+                for opt in q.options:
+                    if opt.text:
+                        opt.text = _embed_uploaded_images(opt.text, image_files)
+        else:
+            # .md 格式：先嵌入图片再解析
+            exam_text = _embed_uploaded_images(exam_text, image_files)
+            meta, questions = parse_exam_text(exam_text)
         questions = normalize_questions(questions, meta)
 
         # 命令行覆盖参数

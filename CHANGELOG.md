@@ -2,6 +2,34 @@
 
 ---
 
+## 2026-06-27
+
+### TXT 结构化格式支持
+
+新增纯文本结构化标签格式（`.txt`），与原有 Markdown DSL 格式并行，共用同一套渲染和判分引擎。
+
+- **新增 TXT 格式** — 封闭标签语法，`<meta> / <question>` 树形结构，零 Markdown 语法冲突
+- **核心标签** — `<title>` `<topic>` `<type>` `<options>` `<answer>` `<explanation>` `<keywords>`
+- **资源标签** — `<image>` 图片、`<table>` GFM 表格、`<math>` 块级 LaTeX 公式、`<inline-math>` 行内 LaTeX 公式（可嵌套在文本/表格中）
+- **选项分离** — `<option>` 内拆分为 `<label>A</label>` + `<text>内容</text>`，label 和文本彻底解耦
+- **解析器** — 新增 `src/examgen/core/parser_txt.py`，输出与原有 parser 完全一致的 `ExamMeta + List[Question]`，直接对接现有 `normalize → transform → generate_html` 管线
+- **Web 端支持** — `/generate` 接口自动识别 `.md` / `.txt` 文件并分流，两种格式不能混传
+- **前端适配** — 上传区 accept 属性加 `.txt`，文件列表统一识别 `.md/.markdown/.txt` 为试卷文件
+- **转义规则** — `<topic>/<text>/<explanation>` 内 `<` `>` 须转义为 `&lt;` `&gt;`；`<math>/<inline-math>` 内不需要
+- **注释支持** — `<!-- -->` 格式注释，放在标签外部
+- **标签顺序无关** — 解析器按标签名匹配，不按出现位置
+
+### 文档
+
+- **新增** `docs/spec-txt.txt` — TXT 结构化格式完整规范（15 个标签定义 + 8 条错误排查）
+- **新增** `docs/prompt-txt.txt` — 面向 AI 的 TXT 格式出卷提示词
+- **新增** `docs/sample-txt.txt` — TXT 格式完整示例（9 题，5 种题型全覆盖）
+- **更新** `README.md` — 补充 TXT 格式说明
+- **更新** `CHANGELOG.md` — 添加本次更新记录
+- **修复** `.gitignore` — 添加 `!docs/*-txt.txt` 例外规则
+
+---
+
 ## 2026-06-25 11:30
 
 ### 图片嵌入 & LaTeX 大小写强化

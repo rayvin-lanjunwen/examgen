@@ -1,0 +1,524 @@
+# TXT 结构化格式规范 — ExamGen 格式参考
+
+ExamGen 支持使用 **TXT 结构化格式**编写试卷。本文档是该格式的规范说明，涵盖标签定义、元数据、题型格式和常见错误排查。
+
+---
+
+## 一、文件结构
+
+```xml
+<meta>
+  <title>试卷标题</title>
+  <!-- 其他元数据... -->
+</meta>
+
+<question>
+  <id>1</id>
+  <type>题型</type>
+  <section>分区标题（可选）</section>
+  <topic>题干...<inline-math>E=mc^2</inline-math></topic>
+  <image>图片文件名（可选）</image>
+  <table>
+| 参数 | 值 | <inline-math>公式</inline-math> |
+|------|-----|-------------------------------|
+| time | 90  |                               |
+  </table>
+  <math>LaTeX 公式（可选）</math>
+  <options>
+    <option>
+      <label>A</label>
+      <text>xxx</text>
+    </option>
+    <option>
+      <label>B</label>
+      <text>xxx</text>
+    </option>
+  </options>
+  <answer>答案</answer>
+  <score>分值（可选）</score>
+  <explanation>解析（可选）</explanation>
+  <keywords>关键词（可选，简答题用）</keywords>
+</question>
+```
+
+---
+
+## 二、标签总览
+
+### 2.1 元数据标签 `<meta>`
+
+| 标签 | 对应模型字段 | 必填 | 类型 | 说明 |
+|------|-------------|------|------|------|
+| `<title>` | `title` | **是** | string | 试卷标题 |
+| `<subject>` | `subject` | 否 | string | 科目 |
+| `<time>` | `time` | 否 | int | 考试时长（分钟），纯数字如 `90` |
+| `<total_score>` | `total_score` | 否 | float | 试卷总分 |
+| `<default_score>` | `default_score` | 否 | float | 未指定分值时默认分，默认 `1.0` |
+| `<passing_score>` | `passing_score` | 否 | float | 及格分，填了才显示是否及格 |
+| `<shuffle>` | `shuffle` | 否 | bool | `true` — 在每个分区内打乱题目顺序 |
+| `<option_shuffle>` | `option_shuffle` | 否 | bool | `true` — 打乱选项顺序，答案自动映射 |
+
+所有元数据标签必须包裹在 `<meta>...</meta>` 内部。
+
+### 2.2 题目标签 `<question>`
+
+| 标签 | 对应模型字段 | 必填 | 说明 |
+|------|-------------|------|------|
+| `<id>` | `id` | **是** | 题号，纯整数 |
+| `<type>` | `qtype` | **是** | 题型标识（见下方取值表） |
+| `<section>` | `section` | 否 | 所属分区标题 |
+| `<topic>` | `topic` | **是** | 题干正文，支持 Markdown 语法 |
+| `<inline-math>` | 嵌入内容文本 | 否 | 行内公式，可在 `<topic>` `<text>` `<explanation>` `<table>` 内嵌套使用 |
+| `<image>` | 嵌入 `topic` | 否 | 图片，内容为文件名或 URL，与 `<topic>` 平级 |
+| `<table>` | 嵌入 `topic` | 否 | 数据表格，GFM 表格语法，与 `<topic>` 平级 |
+| `<math>` | 嵌入 `topic` | 否 | 块级数学公式，LaTeX 语法（不含 `$$`），与 `<topic>` 平级 |
+| `<options>` | `options` | 选填 | 选项容器，内部放 `<option>` 标签 |
+| `<option>` | `Option` | 选填 | 单选项容器，内部必须包含 `<label>` 和 `<text>` |
+| `<label>` | `Option.label` | 选填 | 选项字母，取值 `A` `B` `C` `D` |
+| `<text>` | `Option.text` | 选填 | 选项内容，支持 Markdown 和 `<inline-math>` |
+| `<answer>` | `answer` | **是** | 参考答案 |
+| `<score>` | `score` | 否 | 分值，不填则用 `default_score` |
+| `<explanation>` | `explanation` | 否 | 题目解析，可多行，支持 Markdown 和 `<inline-math>` |
+| `<keywords>` | — | 否 | 简答题关键词，逗号分隔，与 `<explanation>` 同级（均在 `<question>` 内） |
+
+### 2.3 题型标识
+
+| `<type>` 取值 | 对应题型 | 说明 |
+|---------------|----------|------|
+| `single` | 单选题 | 答案单个大写字母 |
+| `multiple` | 多选题 | 答案多个字母，用 `,` 或空格分隔 |
+| `judge` | 判断题 | `A` = 正确，`B` = 错误 |
+| `fill` | 填空题 | 答案按空位顺序填写 |
+| `essay` | 简答题 | 答案自由文本，配合 `<keywords>` 判分 |
+
+---
+
+## 三、核心规则
+
+### 3.1 标签格式
+
+- 所有标签使用**小写英文**
+- 成对出现：`<question>...</question>`
+- 允许嵌套：`<options>` 内包含 `<option>`，`<option>` 内必须包含 `<label>` + `<text>`；`<topic>` `<text>` `<explanation>` `<table>` 内可嵌套 `<inline-math>`
+- 标签内的空白（换行、缩进）被忽略，仅内容文本有效
+- 标签可跨多行（如 `<explanation>` 包含多段文字）
+- **内容中的 `<` 和 `>` 必须转义**：`<topic>`、`<explanation>`、`<text>` 内容中的 `<` 写成 `&lt;`，`>` 写成 `&gt;`。只有标签自身的 `<>`（如 `<topic>`、`</topic>`）不需要转义
+  - 正确：`<topic>当 x &lt; 5 时</topic>`
+  - 错误：`<topic>当 x < 5 时</topic>`（`<5` 会被误认为标签）
+
+- **`<math>` 和 `<inline-math>` 不需要转义**：这两个标签内部是 LaTeX 语法，`<` 本身就是数学小于号。解析器通过 `</math>` / `</inline-math>` 作为闭合标记，不会将内容中的 `<` 误判为标签
+  - `<math>` 内容中可以正常写 `x < 0` 而无需 `&lt;`
+
+### 3.2 字段规则
+
+- `<id>` 按 1 开始连续编号，解析器以题号为准
+- `<type>` 必须为 `single` / `multiple` / `judge` / `fill` / `essay` 之一
+- `<topic>` 为题干正文，支持 Markdown 语法（加粗、列表、引用、代码等）
+- `<options>` 和 `<section>` 按题型需要可选
+- `<image>`、`<table>`、`<math>` 均为可选，与 `<topic>` 平级；同一题可出现**多次**
+- 不存在的标签或空标签内容解析为 `None` / 空列表
+- **标签无固定顺序**：解析器按标签名匹配，`<id>` 和 `<type>` 哪个先出现不影响解析结果
+
+### 3.3 多行内容
+
+`<topic>`、`<explanation>`、`<table>` 等标签可包含多行文本：
+
+```xml
+<explanation>
+第一步：客户端发送 SYN 包。
+第二步：服务器回复 SYN+ACK。
+第三步：客户端发送 ACK 确认。
+</explanation>
+```
+
+解析器将标签内所有内容（去除首尾空行）作为文本值。
+
+### 3.4 标签嵌套规则
+
+- `<inline-math>` 可嵌套在 `<topic>`、`<text>`、`<explanation>`、`<table>` 内部，用于行内公式
+- `<table>` 内部可嵌套 `<inline-math>`（表格中的公式）和 `<image>`（表格中的图片）
+- `<topic>` 内部可嵌套 `<inline-math>`
+- 其他标签之间不允许嵌套
+
+```xml
+<topic>
+TCP 的吞吐量公式为 <inline-math>Throughput = \frac{W}{RTT}</inline-math>，单位是 Mbps。
+</topic>
+```
+
+### 3.5 资源标签顺序
+
+`<image>`、`<table>`、`<math>` 三个平级资源标签，渲染时按**在文件中出现的顺序**拼接在 `<topic>` 之后。每个标签内可嵌套 `<inline-math>` 等子标签。
+
+### 3.6 注释
+
+支持 `<!-- ... -->` 格式的注释，可放在文件任意位置（`<meta>` 前后、`<question>` 之间均可）。注释内容会被解析器跳过，不影响结果。
+
+```xml
+<meta>
+  <title>考试标题</title>
+</meta>
+
+<!-- 这是注释，不会被解析 -->
+
+<question>
+  <id>1</id>
+  ...
+</question>
+```
+
+- 注释不能嵌套（`<!-- <!-- --> -->` 不合法）
+- 注释不能出现在标签内容内部（如 `<topic>te<!--注释-->xt</topic>` 不合法）
+
+---
+
+## 四、资源标签
+
+### 4.1 图片 `<image>`
+
+```xml
+<question>
+  <id>1</id>
+  <type>single</type>
+  <topic>观察以下网络拓扑图，节点 A 到 D 的最短路径用时是多少？</topic>
+  <image>network_topology.png</image>
+  <options>
+    <option>
+      <label>A</label>
+      <text>20 分钟</text>
+    </option>
+    <option>
+      <label>B</label>
+      <text>30 分钟</text>
+    </option>
+    <option>
+      <label>C</label>
+      <text>40 分钟</text>
+    </option>
+    <option>
+      <label>D</label>
+      <text>50 分钟</text>
+    </option>
+  </options>
+  <answer>B</answer>
+</question>
+```
+
+- `<image>` 内容为图片文件名（本地）或完整 URL（远程）
+- 本地图片上传时按文件名自动匹配嵌入 base64
+- 支持格式：`.png`、`.jpg`、`.jpeg`、`.gif`、`.svg`、`.webp`
+
+### 4.2 表格 `<table>`
+
+```xml
+<question>
+  <id>2</id>
+  <type>single</type>
+  <topic>根据下表，选择正确的描述。</topic>
+  <table>
+| 参数 | 值 | 说明 |
+|------|-----|------|
+| time | 90 | 考试时长 |
+| score | 100 | 试卷总分 |
+  </table>
+  <options>
+    <option>
+      <label>A</label>
+      <text>考试时长为 90 分钟</text>
+    </option>
+    <option>
+      <label>B</label>
+      <text>总分是 60 分</text>
+    </option>
+  </options>
+  <answer>A</answer>
+</question>
+```
+
+- `<table>` 内容使用 GFM（GitHub Flavored Markdown）表格语法
+- 表头与数据行之间的 `|---|---|` 分隔线不能省略
+- 表格内可嵌套 `<inline-math>` 用于渲染公式
+
+### 4.3 块级公式 `<math>`
+
+```xml
+<question>
+  <id>3</id>
+  <type>single</type>
+  <topic>以下哪个公式描述了质能方程？</topic>
+  <math>E = mc^2</math>
+  <options>
+    <option>
+      <label>A</label>
+      <text>F = ma</text>
+    </option>
+    <option>
+      <label>B</label>
+      <text>E = mc^2</text>
+    </option>
+    <option>
+      <label>C</label>
+      <text>PV = nRT</text>
+    </option>
+  </options>
+  <answer>B</answer>
+</question>
+```
+
+- `<math>` 内容为标准 LaTeX 语法，**不包含 `$$` 或 `$` 包裹符**
+- 系统在渲染时自动包裹为 `$$...$$`（块级公式，居中独占一行）
+
+> ⚠️ **致命错误：LaTeX 命令必须全部小写！**
+> KaTeX 严格区分大小写，大写命令不会渲染。
+> **错误**：`\FRAC` `\TIMES` `\APPROX` `\SUM` `\INT` `\LIM` `\PI` `\DIV`
+> **正确**：`\frac` `\times` `\approx` `\sum` `\int` `\lim` `\pi` `\div`
+
+### 4.4 行内公式 `<inline-math>`
+
+```xml
+<topic>
+TCP 吞吐量公式 <inline-math>T = \frac{W}{RTT}</inline-math> 描述了窗口和时延的关系。
+</topic>
+```
+
+- `<inline-math>` 内容为标准 LaTeX 语法，**不包含 `$` 包裹符**
+- 系统渲染时自动包裹为 `$...$`（行内公式，与文字混排）
+- 可在 `<topic>`、`<text>`、`<explanation>`、`<table>` 内部嵌套使用
+
+### 4.5 多资源混合
+
+```xml
+<question>
+  <id>4</id>
+  <type>essay</type>
+  <topic>分析下图数据，写出吞吐量公式并解释。</topic>
+  <image>throughput_chart.png</image>
+  <table>
+| 场景 | RTT | 吞吐量 |
+|------|-----|--------|
+| 有线 | 10ms | <inline-math>100\text{ Mbps}</inline-math> |
+| 无线 | 50ms | <inline-math>20\text{ Mbps}</inline-math> |
+  </table>
+  <math>Throughput = \frac{W}{RTT}</math>
+  <answer>略</answer>
+  <keywords>吞吐量, RTT, 窗口</keywords>
+</question>
+```
+
+渲染顺序为 `<topic>` → `<image>` → `<table>` → `<math>`（按出现顺序），其中 `<table>` 内的 `<inline-math>` 在表格内部渲染。
+
+---
+
+## 五、题型格式
+
+### 5.1 单选题 `<type>single</type>`
+
+```xml
+<question>
+  <id>1</id>
+  <type>single</type>
+  <section>一、选择题</section>
+  <topic>TCP 协议位于 OSI 模型的哪一层？</topic>
+  <options>
+    <option>
+      <label>A</label>
+      <text>应用层</text>
+    </option>
+    <option>
+      <label>B</label>
+      <text>传输层</text>
+    </option>
+    <option>
+      <label>C</label>
+      <text>网络层</text>
+    </option>
+    <option>
+      <label>D</label>
+      <text>链路层</text>
+    </option>
+  </options>
+  <answer>B</answer>
+  <score>10</score>
+  <explanation>TCP 是传输层协议。</explanation>
+</question>
+```
+
+- `<options>` 内每个 `<option>` 必须包含 `<label>` + `<text>`
+- `<label>` 为 `A` `B` `C` `D` 等大写字母
+- `<answer>` 为单个大写字母，与选项 `<label>` 对应
+
+### 5.2 多选题 `<type>multiple</type>`
+
+```xml
+<question>
+  <id>2</id>
+  <type>multiple</type>
+  <topic>以下哪些是传输层协议？</topic>
+  <options>
+    <option>
+      <label>A</label>
+      <text>TCP</text>
+    </option>
+    <option>
+      <label>B</label>
+      <text>UDP</text>
+    </option>
+    <option>
+      <label>C</label>
+      <text>IP</text>
+    </option>
+    <option>
+      <label>D</label>
+      <text>HTTP</text>
+    </option>
+  </options>
+  <answer>A, B</answer>
+  <score>12</score>
+</question>
+```
+
+- `<answer>` 支持 `A,B`（无空格逗号）、`A, B`（有空格逗号）、`AB`（连写）
+- 至少两个正确答案
+
+### 5.3 判断题 `<type>judge</type>`
+
+```xml
+<question>
+  <id>3</id>
+  <type>judge</type>
+  <topic>UDP 是面向连接的协议。</topic>
+  <answer>B</answer>
+  <score>8</score>
+  <explanation>UDP 是无连接的。</explanation>
+</question>
+```
+
+- `A` = 正确，`B` = 错误
+- `<options>` **可省略**，引擎自动生成 `A. 正确 / B. 错误`
+- 如果手动写 `<options>`，同样使用 `<label>+<text>` 格式
+
+### 5.4 填空题 `<type>fill</type>`
+
+```xml
+<question>
+  <id>4</id>
+  <type>fill</type>
+  <section>二、填空题</section>
+  <topic>OSI 模型有 ____ 层。TCP 使用 ____ 位端口号。</topic>
+  <answer>7|16</answer>
+  <score>10</score>
+</question>
+```
+
+- 空位用 `____`（四个下划线）或 `**`（两个星号）标记
+- 多个空答案按顺序用 `|` 分隔
+- 单空允许多个可接受答案时也用 `|` 列出，答对一个即判对
+
+### 5.5 简答题 `<type>essay</type>`
+
+```xml
+<question>
+  <id>5</id>
+  <type>essay</type>
+  <section>三、简答题</section>
+  <topic>简述 TCP 三次握手的过程。</topic>
+  <answer>略</answer>
+  <score>15</score>
+  <explanation>
+    第一步：客户端发送 SYN 包。
+    第二步：服务器回复 SYN+ACK。
+    第三步：客户端发送 ACK 确认。
+  </explanation>
+  <keywords>SYN, ACK, 三次握手</keywords>
+</question>
+```
+
+- 提交后展示参考答案，标记"待评"
+- `<keywords>` 中的关键词用逗号分隔，不区分大小写
+- 系统按匹配比例给建议分
+
+---
+
+## 六、内容格式
+
+- **Markdown**：`<topic>`、`<explanation>`、`<text>`、`<table>` 内容支持完整 Markdown（加粗 `**...**`、斜体 `*...*`、列表、引用、代码 `` `...` `` 等）
+- **块级公式**：使用 `<math>...</math>` 标签，渲染为 `$$...$$`（居中独占一行）
+- **行内公式**：使用 `<inline-math>...</inline-math>` 标签，渲染为 `$...$`（与文字混排）
+- **图片**：使用 `<image>...</image>` 标签
+- **表格**：使用 `<table>...</table>` 标签
+
+---
+
+## 七、完整示例
+
+```xml
+<meta>
+  <title>计算机网络期末考试</title>
+  <subject>计算机网络</subject>
+  <time>90</time>
+  <total_score>30</total_score>
+  <default_score>2</default_score>
+  <passing_score>60</passing_score>
+</meta>
+
+<question>
+  <id>1</id>
+  <type>single</type>
+  <section>一、选择题</section>
+  <topic>TCP 协议位于 OSI 模型的哪一层？</topic>
+  <options>
+    <option>
+      <label>A</label>
+      <text>应用层</text>
+    </option>
+    <option>
+      <label>B</label>
+      <text>传输层</text>
+    </option>
+    <option>
+      <label>C</label>
+      <text>网络层</text>
+    </option>
+    <option>
+      <label>D</label>
+      <text>链路层</text>
+    </option>
+  </options>
+  <answer>B</answer>
+  <score>10</score>
+</question>
+
+<question>
+  <id>2</id>
+  <type>essay</type>
+  <section>二、简答题</section>
+  <topic>简述 TCP 三次握手的过程，并写出吞吐量公式 <inline-math>Throughput = \frac{W}{RTT}</inline-math>。</topic>
+  <answer>略</answer>
+  <score>20</score>
+  <keywords>SYN, ACK, 三次握手</keywords>
+</question>
+```
+
+---
+
+## 八、常见错误排查
+
+| # | 现象 | 原因 | 正确做法 |
+|---|------|------|----------|
+| 1 | 解析失败 | `<meta>` 缺少闭合标签 `</meta>` | 确保成对出现，不要遗漏 |
+| 2 | 标题为空 | `title` 标签内容为空 | `<title>试卷标题</title>` 填写内容 |
+| 3 | 题型不识别 | `<type>` 写了中文 `单选` | 使用英文标识：`single` / `multiple` / `judge` / `fill` / `essay` |
+| 4 | 选项不显示 | `<option>` 内缺少 `<label>` 或 `<text>` | 每个 `<option>` 必须包含 `<label>A</label><text>内容</text>` |
+| 5 | 多选答案不识别 | 答案格式错误 | 支持 `A,B`、`A, B`、`AB` 三种格式 |
+| 6 | 解析为空 | `<explanation>` 跨行但标签不匹配 | 确保 `<explanation>...</explanation>` 成对 |
+| 7 | 题号错乱 | 多道题 `<id>` 重复 | 每道题 `<id>` 应唯一且递增 |
+| 8 | 标签未闭合 | `<question>` 漏写 `</question>` | 检查每个标签的闭合 |
+| 9 | 公式不渲染 | `<math>` 内容包含了 `$$` 包裹符 | `<math>` 内只写 LaTeX 命令本身，不加 `$$` |
+| 10 | 公式不渲染 | LaTeX 使用了大写命令 | 全部改为小写，如 `\frac` 而非 `\FRAC` |
+| 11 | 图片不显示 | `<image>` 文件名与上传文件不一致 | 确保文件名完全一致，包括扩展名 |
+| 12 | 表格格式错乱 | `<table>` 内缺少分隔线行 | 确保有 `|---|---|` 分隔线 |
+| 13 | 文件末尾多余内容 | 末尾有无关文字 | 确保最后一个 `</question>` 之后无多余内容 |
+| 14 | 行内公式不渲染 | `<inline-math>` 内容包含了 `$` | `<inline-math>` 内只写 LaTeX 命令，不加 `$` |
+| 15 | 行内公式显示为块级 | 误把 `<inline-math>` 写成了 `<math>` | 行内用 `<inline-math>`，块级独立用 `<math>` |
+| 16 | 文本中的 `<` `>` 导致解析错乱 | `<topic>` `<text>` `<explanation>` 中未转义 | 内容中的 `<` 写成 `&lt;`，`>` 写成 `&gt;`（`<math>` / `<inline-math>` 除外） |
+| 17 | 注释不生效 | 注释写在标签内容内部（如 `<topic>...<!-- -->...</topic>`） | 注释只能放在 `<question>` 外部或 `<question>` 之间 |
