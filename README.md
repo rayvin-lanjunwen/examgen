@@ -4,6 +4,7 @@
 
 ## 功能特性
 
+- **双格式支持** — Markdown DSL（`#区块标记`）和 TXT 结构化标签（`<question>` 树形语法），两种输入格式
 - **Markdown 驱动** — 用纯文本编写试卷，专用 `#区块标记` 语法清晰直观
 - **五种题型** — 单选、多选、判断、填空、简答，全覆盖
 - **数学公式** — 支持 LaTeX（`$...$` / `$$...$$`），由 KaTeX 渲染
@@ -211,9 +212,12 @@ $$
 
 ## 出卷参考
 
-- **格式规范**：[docs/spec.md](docs/spec.md) — 完整的 Markdown 格式标准 + 常见错误排查
-- **出卷提示词**：[docs/prompt.md](docs/prompt.md) — 提供给 AI 的出卷要求模板
-- **示例模板**：[docs/sample.md](docs/sample.md) — 可直接复制使用的示范文件
+- **格式规范（Markdown）**：[docs/spec.md](docs/spec.md) — Markdown DSL 格式标准 + 常见错误排查
+- **格式规范（TXT）**：[docs/spec-txt.txt](docs/spec-txt.txt) — TXT 结构化标签格式标准 + 常见错误排查
+- **出卷提示词（Markdown）**：[docs/prompt.md](docs/prompt.md) — 提供给 AI 的 Markdown 出卷要求模板
+- **出卷提示词（TXT）**：[docs/prompt-txt.txt](docs/prompt-txt.txt) — 提供给 AI 的 TXT 格式出卷要求模板
+- **示例模板（Markdown）**：[docs/sample.md](docs/sample.md) — Markdown 格式示范文件
+- **示例模板（TXT）**：[docs/sample-txt.txt](docs/sample-txt.txt) — TXT 格式示范文件
 
 ## 开发指南
 
@@ -231,6 +235,7 @@ examgen/
 │   ├── models.py                       # 数据模型 (ExamMeta, Question, Option)
 │   ├── core/
 │   │   ├── parser.py                   # Markdown 解析 → 数据模型（含 ParseError）
+│   │   ├── parser_txt.py               # TXT 结构化格式解析 → 数据模型
 │   │   ├── normalizer.py               # 校验、补全分值/选项/答案规范化
 │   │   ├── transformer.py              # 题目 / 选项随机化
 │   │   └── generator.py                # Jinja2 渲染 → 独立 HTML
@@ -258,9 +263,12 @@ examgen/
 │   ├── test_transformer.py
 │   └── test_generator.py
 └── docs/
-    ├── spec.md                       # 题目源文件规范
-    ├── prompt.md                     # AI 出卷提示词
-    └── sample.md                     # 示例模板（可复制的试卷）
+    ├── spec.md                       # 题目源文件规范（Markdown）
+    ├── spec-txt.txt                  # 题目源文件规范（TXT）
+    ├── prompt.md                     # AI 出卷提示词（Markdown）
+    ├── prompt-txt.txt                # AI 出卷提示词（TXT）
+    ├── sample.md                     # 示例模板（Markdown）
+    └── sample-txt.txt                # 示例模板（TXT）
 ```
 
 ### 运行测试
@@ -276,6 +284,11 @@ Markdown (.md)
   │
   ▼ parser.py ───────→ 预检 YAML → 切分区块 → ExamMeta + List[Question]
   │                    （字段错误时抛出 ParseError，精确指错）
+  │
+TXT (.txt)
+  │
+  ▼ parser_txt.py ──→ 移除注释 → 提取标签 → ExamMeta + List[Question]
+  │                    （与 .md 输出相同的模型对象）
   │
   ▼ normalizer.py ───→ 分值补全 / 选项补全 / 答案大写 / 格式校验
   │

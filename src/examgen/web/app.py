@@ -68,7 +68,14 @@ def _load_template_sample() -> str:
         return sample_path.read_text(encoding="utf-8")
     return ""
 
+def _load_template_sample_txt() -> str:
+    sample_path = _PROJECT_ROOT / "docs" / "sample-txt.txt"
+    if sample_path.exists():
+        return sample_path.read_text(encoding="utf-8")
+    return ""
+
 _SAMPLE_TEMPLATE = _load_template_sample()
+_SAMPLE_TEMPLATE_TXT = _load_template_sample_txt()
 
 # 读取文档文件
 def _load_doc(name: str) -> str:
@@ -78,7 +85,9 @@ def _load_doc(name: str) -> str:
     return ""
 
 _PROMPT_DOC = _load_doc("prompt.md")
+_PROMPT_DOC_TXT = _load_doc("prompt-txt.txt")
 _SPEC_DOC = _load_doc("spec.md")
+_SPEC_DOC_TXT = _load_doc("spec-txt.txt")
 
 app = FastAPI(title="ExamGen", version=__version__)
 
@@ -124,6 +133,15 @@ async def template_sample():
     )
 
 
+@app.get("/api/template-txt")
+async def template_sample_txt():
+    """返回示例模板 TXT 内容（纯文本）。"""
+    return Response(
+        content=_SAMPLE_TEMPLATE_TXT,
+        media_type="text/plain; charset=utf-8",
+    )
+
+
 @app.get("/api/prompt")
 async def prompt_doc():
     """返回出卷提示词文档（纯文本）。"""
@@ -133,11 +151,29 @@ async def prompt_doc():
     )
 
 
+@app.get("/api/prompt-txt")
+async def prompt_doc_txt():
+    """返回出卷提示词 TXT 文档（纯文本）。"""
+    return Response(
+        content=_PROMPT_DOC_TXT,
+        media_type="text/plain; charset=utf-8",
+    )
+
+
 @app.get("/api/spec")
 async def spec_doc():
     """返回题目源文件规范文档（纯文本）。"""
     return Response(
         content=_SPEC_DOC,
+        media_type="text/plain; charset=utf-8",
+    )
+
+
+@app.get("/api/spec-txt")
+async def spec_doc_txt():
+    """返回题目源文件规范 TXT 文档（纯文本）。"""
+    return Response(
+        content=_SPEC_DOC_TXT,
         media_type="text/plain; charset=utf-8",
     )
 

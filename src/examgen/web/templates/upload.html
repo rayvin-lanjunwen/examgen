@@ -35,9 +35,12 @@
     <div class="card">
       <!-- 文档链接 -->
       <div class="doc-links">
-        <a href="#" id="downloadSpec" class="doc-link">&#128214; 规范说明</a>
-        <a href="#" id="downloadPrompt" class="doc-link">&#128221; 出卷提示词</a>
-        <a href="#" id="downloadTemplate" class="doc-link">&#128196; 示例模板</a>
+        <a href="#" id="downloadSpec" class="doc-link">&#128214; 规范说明 (.md)</a>
+        <a href="#" id="downloadSpecTxt" class="doc-link">&#128214; 规范说明 (.txt)</a>
+        <a href="#" id="downloadPrompt" class="doc-link">&#128221; 出卷提示词 (.md)</a>
+        <a href="#" id="downloadPromptTxt" class="doc-link">&#128221; 出卷提示词 (.txt)</a>
+        <a href="#" id="downloadTemplate" class="doc-link">&#128196; 示例模板 (.md)</a>
+        <a href="#" id="downloadTemplateTxt" class="doc-link">&#128196; 示例模板 (.txt)</a>
       </div>
 
       <!-- 拖拽上传区 -->
@@ -287,14 +290,29 @@
       downloadDoc("/api/template", "exam-template.md");
     });
 
+    document.getElementById("downloadTemplateTxt").addEventListener("click", function (e) {
+      e.preventDefault();
+      downloadDoc("/api/template-txt", "exam-template.txt");
+    });
+
     document.getElementById("downloadPrompt").addEventListener("click", function (e) {
       e.preventDefault();
       downloadDoc("/api/prompt", "exam-prompt.md");
     });
 
+    document.getElementById("downloadPromptTxt").addEventListener("click", function (e) {
+      e.preventDefault();
+      downloadDoc("/api/prompt-txt", "exam-prompt.txt");
+    });
+
     document.getElementById("downloadSpec").addEventListener("click", function (e) {
       e.preventDefault();
       downloadDoc("/api/spec", "exam-spec.md");
+    });
+
+    document.getElementById("downloadSpecTxt").addEventListener("click", function (e) {
+      e.preventDefault();
+      downloadDoc("/api/spec-txt", "exam-spec.txt");
     });
 
     /* ── 提交生成（先预览） ─────────────────────────────── */
