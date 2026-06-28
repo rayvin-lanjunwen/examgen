@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.25/dist/katex.min.css" onerror="this.remove()">
   <style>
     {{ style_content | safe }}
+    {{ challenge_css | safe }}
   </style>
 </head>
 <body data-theme="{{ theme }}">
@@ -19,7 +20,7 @@
     <div class="mobile-topbar" id="mobileTopbar">
       <button class="mtb-hamburger" id="mtbHamburgerBtn">&#9776;</button>
       <span class="mtb-progress" id="mtbProgress">0/0</span>
-      <button class="mtb-submit" id="mtbSubmitBtn">交卷</button>
+      <button class="mtb-challenge-end" id="mtbEndBtn">结束闯关</button>
     </div>
 
     <!-- 顶部计时条 -->
@@ -41,10 +42,6 @@
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
         <span class="progress-text" id="progressText">0/0</span>
       </div>
-      <div class="nav-unanswered hidden" id="navUnanswered">
-        <div class="nav-unanswered-title">未作答</div>
-        <div class="nav-unanswered-list" id="navUnansweredList"></div>
-      </div>
       <div class="nav-result hidden" id="navResult"></div>
       <ul class="nav-list" id="navList"></ul>
     </nav>
@@ -52,22 +49,45 @@
     <!-- 主内容区 -->
     <main class="main-content">
       <div class="exam-container">
-        <!-- 渐变横幅头部 -->
-        <header class="exam-banner">
+
+        <!-- 横幅头部 -->
+        <header class="exam-banner challenge-banner">
           <div class="banner-bg"></div>
           <div class="banner-content">
+            <div class="challenge-mode-badge">&#9876; 闯关模式</div>
             <h1 class="exam-title">{{ meta.title }}</h1>
             <div class="exam-info">
               {% if meta.subject %}<span class="info-item"><span class="info-icon">&#128218;</span> {{ meta.subject }}</span>{% endif %}
               {% if meta.time %}<span class="info-item"><span class="info-icon">&#9200;</span> <span id="countdown">{{ meta.time }}</span> 分钟</span>{% endif %}
-              {% if meta.total_score %}<span class="info-item"><span class="info-icon">&#127942;</span> {{ meta.total_score }} 分</span>{% endif %}
-              {% if meta.passing_score %}<span class="info-item"><span class="info-icon">&#9989;</span> 及格：{{ meta.passing_score }} 分</span>{% endif %}
+              <span class="info-item"><span class="info-icon">&#127942;</span> <span id="challenge-score-live">0 / {{ meta.total_score or 0 }}</span> 分</span>
             </div>
           </div>
         </header>
 
-        <!-- 题目列表 -->
+        <!-- 关卡进度条 -->
+        <div class="challenge-progress-bar">
+          <div class="challenge-progress-track">
+            <div class="challenge-progress-fill" id="challengeProgressFill"></div>
+          </div>
+          <span class="challenge-progress-label" id="challengeProgressLabel">0 / {{ questions | length }}</span>
+        </div>
+
+        <!-- 单题显示区 -->
         <div id="questions-container"></div>
+
+        <!-- 上一题/下一题导航 -->
+        <div class="challenge-nav">
+          <button id="challenge-prev-btn" class="btn btn-secondary challenge-nav-btn" disabled>&#9664; 上一题</button>
+          <span class="challenge-current" id="challengeCurrent">第 1 题</span>
+          <button id="challenge-next-btn" class="btn btn-secondary challenge-nav-btn">下一题 &#9654;</button>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="exam-actions">
+          <button id="submit-btn" class="btn btn-primary">提交答案</button>
+          <button id="retry-btn" class="btn btn-secondary hidden">重做本题</button>
+          <button id="end-btn" class="btn btn-secondary">结束闯关</button>
+        </div>
 
         <!-- 得分区域 -->
         <div id="score-area" class="score-area hidden">
@@ -93,68 +113,8 @@
           <div class="review-list" id="reviewList"></div>
         </div>
 
-        <!-- 操作按钮 -->
-        <div class="exam-actions">
-          <button id="submit-btn" class="btn btn-primary">提交答卷</button>
-          <button id="reset-btn" class="btn btn-secondary hidden">重新作答</button>
-        </div>
-
-        <!-- 批阅操作栏 -->
-        <div class="grading-bar hidden" id="gradingBar">
-          <div class="grading-bar-info">
-            <span class="grading-progress-text" id="gradingProgressText">已评 0/0 题</span>
-            <span class="grading-score-live" id="gradingScoreLive">总分 0 / 0</span>
-          </div>
-          <div class="grading-bar-types" id="gradingTypeBreakdown"></div>
-          <button class="btn btn-primary" id="gradingDoneBtn" disabled>完成批阅</button>
-        </div>
       </div>
     </main>
-
-    <!-- 批阅左面板（悬浮） -->
-    <aside class="grading-left-panel hidden" id="gradingLeftPanel">
-      <div class="grading-left-header">批阅面板</div>
-      <div class="grading-left-stats">
-        <div class="grading-left-stat">
-          <span class="grading-left-stat-label">实时总分</span>
-          <span class="grading-left-stat-value" id="glpScore">0 / 0</span>
-        </div>
-        <div class="grading-left-stat">
-          <span class="grading-left-stat-label">待批阅</span>
-          <span class="grading-left-stat-value" id="glpPending">0 题</span>
-        </div>
-        <div class="grading-left-essay-list" id="glpEssayList"></div>
-      </div>
-    </aside>
-
-    <!-- 批阅右面板（悬浮分值选择） -->
-    <aside class="grading-right-panel hidden" id="gradingRightPanel">
-      <div class="grading-right-header">第 <span id="grpQid">-</span> 题</div>
-      <div class="grading-score-cur" id="grpScore">0</div>
-      <div class="grading-input-row">
-        <input type="number" class="grading-input" id="grpInput" min="0" max="0" value="0">
-        <span class="grading-input-max" id="grpMax">/ 0 分</span>
-      </div>
-      <div class="grading-score-buttons" id="grpButtons"></div>
-      <div class="grading-nav-row">
-        <button class="btn grading-nav-btn" id="grpPrevBtn" disabled>&#9664; 上一题</button>
-        <button class="btn grading-nav-btn" id="grpNextBtn" disabled>&#9654; 下一题</button>
-      </div>
-    </aside>
-
-    <!-- 手机端批阅底部 Sheet -->
-    <div class="grading-sheet hidden" id="gradingSheet">
-      <div class="grading-sheet-handle"></div>
-      <div class="grading-sheet-header">
-        <span>第 <span id="gsQid">-</span> 题</span>
-        <span class="grading-sheet-score" id="gsScore">0 / 0</span>
-      </div>
-      <div class="grading-sheet-buttons" id="gsButtons"></div>
-      <div class="grading-sheet-nav">
-        <button class="btn grading-sheet-nav-btn" id="gsPrevBtn" disabled>&#9664;</button>
-        <button class="btn grading-sheet-nav-btn" id="gsNextBtn" disabled>&#9654;</button>
-      </div>
-    </div>
 
     <!-- 右下角悬浮计时气泡（最后5分钟显示） -->
     <div class="timer-bubble hidden" id="timerBubble">

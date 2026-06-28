@@ -79,24 +79,17 @@ def _shuffle_options(q: Question) -> Question:
     # 旧映射: label → text
     old_label_to_text = {opt.label: opt.text for opt in q.options}
 
-    # 打乱 text 列表
-    texts = [opt.text for opt in q.options]
-    random.shuffle(texts)
+    # 打乱 (label, text) 对，基于位置分配新标签
+    pairs = [(opt.label, opt.text) for opt in q.options]
+    random.shuffle(pairs)
 
-    # 新选项：按位置分配标签 A, B, C …
-    new_options = [
-        Option(label=chr(ord("A") + i), text=t)
-        for i, t in enumerate(texts)
-    ]
-
-    # 构建 text → old_label 反向映射
-    text_to_old_label = {v: k for k, v in old_label_to_text.items()}
-
-    # old_label → new_label 映射
+    # 构建 old_label → new_label 映射（通过位置桥接，容忍重复文本）
     old_to_new: dict[str, str] = {}
-    for opt in new_options:
-        old_label = text_to_old_label[opt.text]
-        old_to_new[old_label] = opt.label
+    new_options: list[Option] = []
+    for i, (old_label, text) in enumerate(pairs):
+        new_label = chr(ord("A") + i)
+        old_to_new[old_label] = new_label
+        new_options.append(Option(label=new_label, text=text))
 
     # 重写答案
     new_answer = "".join(old_to_new.get(ch, ch) for ch in q.answer)

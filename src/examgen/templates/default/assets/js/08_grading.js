@@ -364,6 +364,9 @@ function computeRealtimeScore() {
     var userS = 0;
     if (r.correct === true) {
       userS = maxS;
+    } else if (r.correct === false && r._userScore !== undefined) {
+      userS = r._userScore;
+      essayGraded++;
     } else if (r.correct === null) {
       userS = gradingScores[r.id] || 0;
       if (gradingScores[r.id] !== undefined) essayGraded++;
@@ -416,7 +419,9 @@ function computeRealtimeScore() {
     var rr = examResults[m];
     if (rr.correct !== null || gradingScores[rr.id] !== undefined) {
       totalJudged++;
-      var s = (rr.correct === true) ? (rr.score || 0) : (gradingScores[rr.id] || 0);
+      var s = (rr.correct === true) ? (rr.score || 0) :
+              (rr.correct === false && rr._userScore !== undefined) ? rr._userScore :
+              (gradingScores[rr.id] || 0);
       if ((rr.correct === true) || s > 0) correctCount++;
     }
   }
@@ -450,8 +455,8 @@ function onGradingDone() {
     if (r.correct !== null) continue;
     var gs = gradingScores[r.id];
     if (gs === undefined) continue;
-    r.score = gs;
-    r.correct = gs > 0;
+    r._userScore = gs;      // 实际得分，不覆盖 r.score（满分）
+    r.correct = gs >= r.score;  // 只有得满分的简答题才算"正确"
   }
 
   if (gradingBar) gradingBar.classList.add("hidden");
@@ -513,3 +518,47 @@ function reRenderMath(el) {
     ]
   });
 }
+
+/* ====== 批阅键盘快捷键 ====== */
+document.addEventListener("keydown", function (e) {
+  if (!gradingActive) return;
+  // 忽略输入框内的按键
+  if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+  
+  var qid = gradingCurrentQid;
+  if (!qid) return;
+  var max = gradingMaxScores[qid] || 5;
+  var cur = gradingScores[qid] || 0;
+  
+  // 左右箭头：切换题目
+  if (e.key === "ArrowLeft") {
+    e.preventDefault();
+    navigateGradingQuestion(-1);
+    return;
+  }
+  if (e.key === "ArrowRight") {
+    e.preventDefault();
+    navigateGradingQuestion(1);
+    return;
+  }
+  
+  // 数字键 0-9：快速输入分值
+  if (e.key >= "0" && e.key <= "9") {
+    var digit = parseInt(e.key);
+    if (digit <= max) {
+      e.preventDefault();
+      setGradingScoreUI(qid, digit);
+    }
+    return;
+  }
+  
+  // Enter：确认评分并跳到下一题
+  if (e.key === "Enter") {
+    e.preventDefault();
+    var idx = gradingEssayOrder.indexOf(qid);
+    if (idx < gradingEssayOrder.length - 1) {
+      navigateGradingQuestion(1);
+    }
+    return;
+  }
+});

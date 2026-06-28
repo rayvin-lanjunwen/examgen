@@ -30,7 +30,11 @@ def main():
               help="覆盖：考试时间（分钟）。")
 @click.option("--template-dir", type=click.Path(exists=True, file_okay=False),
               default=None, help="自定义模板目录。")
-def generate(input, output, shuffle, option_shuffle, time, template_dir):
+@click.option("--theme", type=click.Choice(["modern", "academic", "tool", "green"]),
+              default="modern", show_default=True, help="视觉主题风格。")
+@click.option("--mode", type=click.Choice(["exam", "challenge"]),
+              default="exam", show_default=True, help="试卷模式：exam=考试模式 / challenge=闯关模式。")
+def generate(input, output, shuffle, option_shuffle, time, template_dir, theme, mode):
     """从 Markdown 文件生成离线 HTML 试卷。"""
     # 1. 解析
     meta, questions = parse_exam_file(input)
@@ -51,7 +55,7 @@ def generate(input, output, shuffle, option_shuffle, time, template_dir):
 
     # 5. 渲染 HTML（自动嵌入本地图片）
     html = generate_html(questions, meta, template_dir=template_dir,
-                         content_dir=os.path.dirname(input))
+                         content_dir=os.path.dirname(input), theme=theme, mode=mode)
 
     # 6. 写入文件
     save_exam(html, output)

@@ -2,6 +2,73 @@
 
 ---
 
+## 2026-06-28 (晚间)
+
+### 闯关模式
+
+新增第二种试卷交互模式——**闯关模式**，与原有考试模式并行：
+
+- **逐题作答** — 每道题单独在屏幕上显示，作答完当前题后手动跳转到下一题
+- **即时判分** — 每道题提交后立刻判断正误并显示正确答案和解析，实现即时反馈学习
+- **自由跳转** — 侧边导航栏保留，可随时跳转到任意题
+- **可重做** — 已判分的题可以重做，清空之前的判分结果
+- **简答题** — 不自动判分，提交后仅显示参考答案供自行对比
+- **闯关进度条** — 横幅下方显示已判分/总题数进度
+- **遍历导航** — 上一题/下一题按钮 + 左右箭头键盘快捷键
+
+**实现**：
+- 新增 `templates/default/challenge.html` — 闯关模式独立模板（单题渲染 + 进度条 + 遍历导航）
+- 新增 `assets/challenge.css` — 闯关模式增量样式（大卡片、进度条、反馈卡片）
+- 新增 `assets/js/10_challenge.js` — 闯关模式全部交互逻辑（≈750 行）
+- `generator.py` — `generate_html()` 新增 `mode` 参数，按模式分流模板和 JS 模块
+- `cli.py` — 新增 `--mode [exam|challenge]` 命令行选项
+- Web 上传页 — 新增「试卷模式」选择卡片（考试模式 / 闯关模式）
+- Web API — `/generate` 接受 `mode` form 参数
+
+### Bug 修复（15 项）
+
+- **default_score 完全被忽略** — `parser.py` 在解析时硬编码 `score=1.0`，使 `meta.default_score` 从未生效。修复为传 `None` 交 normalizer 处理
+- **填空题空答案收集缺陷** — `answers[fqid]` 为 `""` 时 falsy 导致 "|" 分隔符跳过，空答案丢失
+- **多空填空单答判对** — 只填一个空就判整题正确，修正为单空才宽松匹配
+- **重复选项内容映射错误** — 选项打乱时 `text→label` 反向字典在内容相同时丢 key，改为 `(label, text)` 对直接打乱
+- **marked.setOptions 已废弃** — CDN 加载 marked@15，`setOptions` 在 v5+ 已废弃，改为 `marked.parse(text, opts)` + 旧版回退
+- **倒计时条外层残留在无时限考试** — `timerBar` (inner) 隐藏但外层 `#timerBar` 容器仍占 4px，新增 `timerBarOuter` 一起隐藏
+- **TXT `<math>` 块级公式在 topic 内不处理** — `_process_text` 只处理 `<inline-math>`，新增 `<math>` → `$$...$$`
+- **onGradingDone 覆盖原始分值** — `r.score` 语义从"满分"变成"得分"，改为 `_userScore` 分离两种语义
+- **关键词只支持单行** — `scoreEssayByKeywords` 正则 `/.+/` 不跨行，改为 `/[\s\S]+?/`
+- **成绩报告简答得分算"正确"** — `gradingScores[id] > 0` 就计正确，改为按实际得分/满分显示
+- **FastAPI on_event("startup") 废弃** — 改为 `lifespan` 上下文管理器
+- **旧格式多行字段被截断** — `_extract_multiline_field` 遇到内容中的 `答案：` 就截断，增加 `#标记`/`##分区`/`#N.` 边界检测
+- **图片嵌入失败静默** — `_embed_local_images` 失败时无任何提示，新增 `logging.warning` 日志
+- **normalizer 不校验填空/简答答案** — 新增空答案校验
+- **选项圆圈硬编码 A/B/C/D** — 选项 > 4 个时显示不一致，统一为 `opt.label`
+
+### 侧边导航栏调整
+
+- **宽度缩减** — `--sidebar-width` 从 240px → 192px
+- **布局优化** — `nav-done` (已答图标) 居中，`nav-bookmark` (收藏星) 靠右紧跟题号
+- **页面始终居中** — `main-content` 使用 `flex + justify-content: center`，无论侧栏展开/折叠都居中
+- **题号包裹** — `q.id` 改为 `<span class="nav-qid">`，flex gap 正确生效
+- **折叠选择器修复** — `.sidebar.collapsed + .main-content` → `~`，因 sidebar-expand-btn 挡在中间
+
+### CSS 变量与主题完善
+
+- **缺失变量补全** — `--color-text-tertiary`、`--radius-xs`、`--timer-bar-bg`、`--color-hover` 添加到 `:root` 及 4 个主题
+- **硬编码色值变量化** — `.timer-bar`、`.option-label:hover`、`.essay-textarea`、`.review-item:hover`、`.score-ring` filter、SVG `#ringGrad` 全部改用 CSS 变量
+- **书签星标样式冲突清理** — 两段重复定义合并为单一完整块
+- **移动端伪元素修复** — `.option-circle::after` 无效伪元素移除，圆尺寸 22px→28px
+- **KaTeX 公式溢出** — `.katex-display` 新增 `-webkit-overflow-scrolling` + 美化滚动条
+
+### 三步引导图标
+
+- 上传页三步引导的数字 `1/2/3` 替换为 SVG 图标：✎ 编辑笔 / ↥ 上传箭头 / ↧ 下载箭头
+
+### 清理
+
+- 删除 `tmp_test/`、`.pytest_cache/`、`examgen.egg-info/`、`.venv/`、`.agents/` 等临时/废弃目录
+
+---
+
 ## 2026-06-28
 
 ### 试卷生成主题系统

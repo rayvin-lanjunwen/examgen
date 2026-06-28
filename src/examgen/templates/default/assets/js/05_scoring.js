@@ -13,9 +13,11 @@ function collectAnswers() {
   var fills = container.querySelectorAll(".fill-inline");
   for (var j = 0; j < fills.length; j++) {
     var fqid = fills[j].getAttribute("data-qid");
-    if (!answers[fqid]) answers[fqid] = "";
-    if (answers[fqid]) answers[fqid] += "|";
-    answers[fqid] += fills[j].value.trim();
+    if (!answers[fqid]) {
+      answers[fqid] = fills[j].value.trim();
+    } else {
+      answers[fqid] += "|" + fills[j].value.trim();
+    }
   }
   var essays = container.querySelectorAll(".essay-textarea");
   for (var k = 0; k < essays.length; k++) {
@@ -31,15 +33,15 @@ function isCorrect(q, userAns) {
   if (q.qtype === QT.FILL) {
     var parts = q.answer.split("|").map(norm);
     var userParts = userAns.split("|").map(norm);
+    // 移除尾部空串（用户可能不填最后一个空）
     while (userParts.length > 0 && userParts[userParts.length - 1] === "") {
       userParts.pop();
     }
-    if (userParts.length === 1) {
-      for (var i = 0; i < parts.length; i++) {
-        if (userParts[0] === parts[i]) return true;
-      }
-      return false;
+    // 单空题：用户答案匹配任一正确答案即可
+    if (parts.length === 1 && userParts.length === 1) {
+      return parts[0] === userParts[0];
     }
+    // 多空题：必须所有空都匹配
     if (parts.length !== userParts.length) return false;
     for (var j = 0; j < parts.length; j++) {
       if (parts[j] !== userParts[j]) return false;
@@ -54,11 +56,12 @@ function scoreEssayByKeywords(q, userAns) {
   if (!userAns || !q.explanation) {
     return { score: 0, keywords: [], matched: [], suggestion: "" };
   }
-  // 从解析中提取关键词：以 "关键词:" 或 "关键词：" 开头的行
-  var kwMatch = q.explanation.match(/关键词[:：]\s*(.+)/i);
+  // 从解析中提取关键词：以 "关键词:" 或 "关键词：" 开头，可能跨行
+  var kwMatch = q.explanation.match(/关键词[:：]\s*([\s\S]+?)(?:\n[^\n关键词]|$)/i);
   if (!kwMatch) return { score: 0, keywords: [], matched: [], suggestion: "" };
 
-  var keywords = kwMatch[1].split(/[,，、\s]+/).filter(function(k) { return k.length > 0; });
+  var kwText = kwMatch[1].replace(/\n/g, " ").trim();
+  var keywords = kwText.split(/[,，、\s]+/).filter(function(k) { return k.length > 0; });
   if (keywords.length === 0) return { score: 0, keywords: [], matched: [], suggestion: "" };
 
   var userLower = userAns.toLowerCase();
@@ -449,5 +452,120 @@ function showFinalScore(totalScore, maxScore, totalJudged, correctCount) {
   // 填充题型汇总条
   fillScoreTypeSummary();
   // 重新渲染公式（解析和答案中的 LaTeX）
+  
+  if (!document.getElementById("downloadReportBtn")) {
+    var dlBtn = document.createElement("button");
+    dlBtn.id = "downloadReportBtn";
+    dlBtn.className = "btn-download-report";
+    dlBtn.textContent = "下载成绩报告";
+    dlBtn.addEventListener("click", downloadScoreReport);
+    scoreArea.appendChild(dlBtn);
+  }
   reRenderMath();
+}
+
+
+/* ====== 隐藏未作答提示 ====== */
+function hideUnansweredInSidebar() {
+  if (!navUnanswered) return;
+  navUnanswered.classList.add("hidden");
+}
+
+/* ====== 分区进度 ====== */
+function fillSectionProgress() {
+  if (!container) return;
+  var sections = {};
+  for (var i = 0; i < EXAM_DATA.length; i++) {
+    var q = EXAM_DATA[i];
+    var sec = q.section || "默认";
+    if (!sections[sec]) sections[sec] = { total: 0, answered: 0 };
+    sections[sec].total++;
+    var qid = q.id;
+    var done = false;
+    if (q.qtype === "single" || q.qtype === "multiple" || q.qtype === "judge") {
+      done = container.querySelectorAll('input[name="q_' + qid + '"]:checked').length > 0;
+    } else if (q.qtype === "fill") {
+      var inps = container.querySelectorAll('.fill-inline[data-qid="' + qid + '"]');
+      for (var fi = 0; fi < inps.length; fi++) { if (inps[fi].value.trim() !== "") { done = true; break; } }
+    } else if (q.qtype === "essay") {
+      var ta = container.querySelector('.essay-textarea[data-qid="' + qid + '"]');
+      done = !!ta && ta.value.trim() !== "";
+    }
+    if (done) sections[sec].answered++;
+  }
+  var dividers = container.querySelectorAll(".section-divider");
+  for (var j = 0; j < dividers.length; j++) {
+    var secName = dividers[j].querySelector(".section-divider-text");
+    if (!secName) continue;
+    var name = secName.textContent.trim();
+    var data = sections[name];
+    if (!data) continue;
+    var existing = dividers[j].querySelector(".section-progress");
+    if (!existing) {
+      var prog = document.createElement("span");
+      prog.className = "section-progress";
+      secName.after(prog);
+      existing = prog;
+    }
+    existing.textContent = data.answered + "/" + data.total;
+  }
+}
+
+/* ====== 下载成绩报告 ====== */
+function downloadScoreReport() {
+  var lines = [];
+  lines.push("========================================");
+  lines.push("  " + (EXAM_META.title || "试卷成绩报告"));
+  lines.push("========================================");
+  lines.push("");
+  var totalUser = 0, totalMax = 0;
+  for (var i = 0; i < examResults.length; i++) {
+    var r = examResults[i];
+    var maxS = r.score || 0;
+    totalMax += maxS;
+    if (r.correct === true) totalUser += maxS;
+    else if (r.correct === false && r._userScore !== undefined) totalUser += r._userScore;
+    else if (r.correct === null && gradingScores && gradingScores[r.id] !== undefined) totalUser += gradingScores[r.id];
+  }
+  lines.push("总分: " + totalUser + " / " + totalMax);
+  lines.push("");
+  lines.push("--- 各题型得分 ---");
+  var labels = {"single": "单选", "multiple": "多选", "judge": "判断", "fill": "填空", "essay": "简答"};
+  var order = ["single", "multiple", "judge", "fill", "essay"];
+  for (var t = 0; t < order.length; t++) {
+    var count = 0, userSum = 0, maxSum = 0;
+    var tt = order[t];
+    for (var i = 0; i < examResults.length; i++) {
+      if (examResults[i].qtype === tt) {
+        count++;
+        var maxS = examResults[i].score || 0;
+        maxSum += maxS;
+        if (examResults[i].correct === true) {
+          userSum += maxS;
+        } else if (examResults[i].correct === false && examResults[i]._userScore !== undefined) {
+          userSum += examResults[i]._userScore;
+        } else if (examResults[i].correct === null && gradingScores && gradingScores[examResults[i].id] !== undefined) {
+          userSum += gradingScores[examResults[i].id];
+        }
+      }
+    }
+    if (count > 0) lines.push("  " + (labels[tt] || tt) + ": " + userSum + "/" + maxSum + " 分");
+  }
+  lines.push("");
+  lines.push("--- 标记复查 ---");
+  var bmList = [];
+  if (typeof bookmarkedSet !== "undefined" && bookmarkedSet.forEach) {
+    bookmarkedSet.forEach(function(qid) { bmList.push("#" + qid); });
+  }
+  lines.push(bmList.length > 0 ? "  " + bmList.join(", ") : "  无标记");
+  lines.push("");
+  lines.push("========================================");
+  lines.push("由 ExamGen 自动生成");
+  var blob = new Blob([lines.join("\r\n")], { type: "text/plain;charset=utf-8" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = (EXAM_META.title || "exam-report") + "-report.txt";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }

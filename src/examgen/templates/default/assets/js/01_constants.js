@@ -37,6 +37,7 @@ var navUnanswered = document.getElementById("navUnanswered");
 var navUnansweredList = document.getElementById("navUnansweredList");
 var scoreTypeSummary = document.getElementById("scoreTypeSummary");
 var timerBar   = document.getElementById("timerBarInner");
+var timerBarOuter = document.getElementById("timerBar");
 var timerBubble = document.getElementById("timerBubble");
 var bubbleFill = document.getElementById("bubbleFill");
 var bubbleText = document.getElementById("bubbleText");

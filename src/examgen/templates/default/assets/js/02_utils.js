@@ -12,7 +12,8 @@ function mdToHTML(text) {
     return escapeHTML(text);
   }
 
-  marked.setOptions({ breaks: true, gfm: true });
+  // 兼容新旧版 marked API
+  var opts = { breaks: true, gfm: true };
 
   // 保护 LaTeX 公式，防止 marked.js 将 _ 解析为斜体、* 解析为粗体等
   var mathBlocks = [];
@@ -29,7 +30,19 @@ function mdToHTML(text) {
     return "\uFFF0I" + (mathBlocks.length - 1) + "I\uFFF0";
   });
 
-  var html = marked.parse(text);
+  // 新版 marked (v5+) 用 marked.parse(text, options)，旧版用 marked.setOptions + marked.parse
+  var html;
+  try {
+    html = marked.parse(text, opts);
+  } catch (e) {
+    // 回退旧版 API
+    try {
+      marked.setOptions(opts);
+      html = marked.parse(text);
+    } catch (e2) {
+      html = marked.parse(text);
+    }
+  }
 
   // 还原公式
   html = html.replace(/\uFFF0D(\d+)D\uFFF0/g, function (_, idx) {

@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   buildNavSidebar(EXAM_DATA);
   renderQuestions(EXAM_DATA);
+  initBookmarks();
   submitBtn.addEventListener("click", onSubmit);
   resetBtn.addEventListener("click", onReset);
   if (gradingDoneBtn) gradingDoneBtn.addEventListener("click", onGradingDone);
@@ -14,6 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (EXAM_META && EXAM_META.time) {
     startCountdown(EXAM_META.time * 60);
   } else {
+    if (timerBarOuter) timerBarOuter.style.display = "none";
     timerBar.style.display = "none";
   }
 

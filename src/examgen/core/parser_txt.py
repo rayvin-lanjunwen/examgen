@@ -49,10 +49,13 @@ def _get_all_tags(text: str, tag: str) -> List[str]:
 
 
 _INLINE_MATH_RE = re.compile(r"<inline-math>([\s\S]*?)</inline-math>")
+_DISPLAY_MATH_RE = re.compile(r"<math>([\s\S]*?)</math>")
 
 
 def _process_text(content: str) -> str:
-    """处理文本内容：``<inline-math>`` 转 ``$...$``，HTML 实体反转义。"""
+    """处理文本内容：``<inline-math>`` 转 ``$...$``，``<math>`` 转 ``$$...$$``，HTML 实体反转义。"""
+    # 块级公式替换（优先，避免被行内规则误处理）
+    content = _DISPLAY_MATH_RE.sub(r"$$\1$$", content)
     # 行内公式替换
     content = _INLINE_MATH_RE.sub(r"$\1$", content)
     # 反转义 &lt; &gt; &amp; 等

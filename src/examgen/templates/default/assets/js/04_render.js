@@ -45,8 +45,8 @@ function buildQuestionCard(q) {
     '<span class="question-number">' + q.id + '.</span>' +
     headerTopic +
     '<span class="question-score">' +
-      '<span class="question-bookmark" data-qid="' + q.id + '" title="点击标记待复查">&#9734;</span>' +
       (q.score || 0) + ' 分' +
+      '<span class="question-bookmark" data-qid="' + q.id + '" title="点击标记待复查"></span>' +
     '</span>';
   card.appendChild(header);
 
@@ -92,7 +92,6 @@ function buildOptions(q) {
   var ul = document.createElement("ul");
   ul.className = "options-list";
   var inputType = q.qtype === QT.MULTIPLE ? "checkbox" : "radio";
-  var letterIcons = ["A", "B", "C", "D"];
 
   for (var i = 0; i < q.options.length; i++) {
     var opt = q.options[i];
@@ -112,7 +111,7 @@ function buildOptions(q) {
 
     var circle = document.createElement("span");
     circle.className = "option-circle";
-    circle.textContent = letterIcons[i] || opt.label;
+    circle.textContent = opt.label;
 
     var text = document.createElement("span");
     text.className = "option-text";

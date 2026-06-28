@@ -8,6 +8,8 @@ import tempfile
 from pathlib import Path
 from typing import List, Optional
 
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
@@ -89,7 +91,14 @@ _PROMPT_DOC_TXT = _load_doc("prompt-txt.txt")
 _SPEC_DOC = _load_doc("spec.md")
 _SPEC_DOC_TXT = _load_doc("spec-txt.txt")
 
-app = FastAPI(title="ExamGen", version=__version__)
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    print("ExamGen Web UI 已启动")
+    yield
+    print("ExamGen Web UI 已关闭")
+
+
+app = FastAPI(title="ExamGen", version=__version__, lifespan=lifespan)
 
 # CORS
 app.add_middleware(
@@ -103,11 +112,6 @@ templates = Jinja2Templates(directory=str(_TEMPLATE_DIR))
 
 # 挂载静态文件
 app.mount("/static", StaticFiles(directory=str(_STATIC_DIR)), name="static")
-
-
-@app.on_event("startup")
-async def startup():
-    print("ExamGen Web UI 已启动")
 
 
 @app.get("/")
@@ -186,6 +190,7 @@ async def generate(
     shuffle: Optional[str] = Form(None),
     option_shuffle: Optional[str] = Form(None),
     style: Optional[str] = Form("modern"),
+    mode: Optional[str] = Form("exam"),
 ):
     """接收上传的 .md / .txt 文件及图片文件，生成并返回 HTML 试卷下载。
 
@@ -279,7 +284,7 @@ async def generate(
             meta.option_shuffle = True
 
         questions = apply_transforms(questions, meta)
-        html = generate_html(questions, meta, theme=style)
+        html = generate_html(questions, meta, theme=style, mode=mode)
 
     except ParseError as e:
         return JSONResponse(

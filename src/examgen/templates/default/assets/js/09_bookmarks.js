@@ -1,32 +1,34 @@
-/* ── 题目标记（书签）系统 ──────────────────────────── */
-var bookmarkedSet = new Set();   // 已标记的 qid 集合
+﻿/* ====== 题目标记（书签）系统 ====== */
+var bookmarkedSet = new Set();
 
-/* ── 在导航栏项上添加书签图标 ───────────────────── */
+/* ====== SVG 星形图标 ====== */
+function starSvg(active) {
+  return '<svg class="star-icon" viewBox="0 0 22 22" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+    '<path d="M11 1.5l3.09 6.26L21 8.77l-5 4.87 1.18 6.88L11 17.27l-6.18 3.25L6 13.64 1 8.77l6.91-1.01L11 1.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>' +
+    '<path d="M11 1.5l3.09 6.26L21 8.77l-5 4.87 1.18 6.88L11 17.27l-6.18 3.25L6 13.64 1 8.77l6.91-1.01L11 1.5z" fill="currentColor" class="star-fill" opacity="' + (active ? '1' : '0') + '"/>' +
+    '</svg>';
+}
+
+/* ====== 在导航栏项上添加书签图标 ====== */
 function addBookmarkToNav(qid) {
   var navItem = navList.querySelector('.nav-item[data-qid="' + qid + '"]');
   if (!navItem) return;
-  // 检查是否已存在书签按钮
   if (navItem.querySelector(".nav-bookmark")) return;
 
   var bm = document.createElement("span");
   bm.className = "nav-bookmark";
   bm.setAttribute("data-qid", qid);
-  bm.textContent = "☆";
+  bm.innerHTML = starSvg(false);
   bm.title = "点击标记为待复查";
   bm.addEventListener("click", function (e) {
     e.stopPropagation();
     toggleBookmark(qid);
   });
-  // 插入在 nav-done 之前
-  var done = navItem.querySelector(".nav-done");
-  if (done) {
-    navItem.insertBefore(bm, done);
-  } else {
-    navItem.appendChild(bm);
-  }
+  // 插入在 nav-done 之后
+  navItem.appendChild(bm);
 }
 
-/* ── 切换书签状态 ────────────────────────────────── */
+/* ====== 切换书签状态 ====== */
 function toggleBookmark(qid, silent) {
   if (bookmarkedSet.has(qid)) {
     bookmarkedSet.delete(qid);
@@ -44,7 +46,7 @@ function updateBookmarkUI(qid, active) {
   if (navItem) {
     var bm = navItem.querySelector(".nav-bookmark");
     if (bm) {
-      bm.textContent = active ? "★" : "☆";
+      bm.innerHTML = starSvg(active);
       bm.title = active ? "已标记，点击取消" : "点击标记为待复查";
       if (active) bm.classList.add("active");
       else bm.classList.remove("active");
@@ -58,7 +60,7 @@ function updateBookmarkUI(qid, active) {
     else card.classList.remove("bookmarked");
     var cardBm = card.querySelector(".question-bookmark");
     if (cardBm) {
-      cardBm.textContent = active ? "★" : "☆";
+      cardBm.innerHTML = starSvg(active);
       if (active) cardBm.classList.add("active");
       else cardBm.classList.remove("active");
     }
@@ -73,18 +75,24 @@ function updateBookmarkUI(qid, active) {
       reviewBm.className = "review-bookmark";
       reviewItem.appendChild(reviewBm);
     }
-    reviewBm.textContent = active ? "★" : "☆";
+    reviewBm.innerHTML = starSvg(active);
   }
 }
 
-/* ── 初始化：给每个导航项添加书签图标 ──────────── */
+/* ====== 初始化：给每个导航项添加书签图标 ====== */
 function initBookmarks() {
   for (var i = 0; i < EXAM_DATA.length; i++) {
     addBookmarkToNav(EXAM_DATA[i].id);
   }
+  // Initialize card bookmark icons with SVG
+  var bms = container.querySelectorAll(".question-bookmark");
+  for (var j = 0; j < bms.length; j++) {
+    var qid = bms[j].getAttribute("data-qid");
+    bms[j].innerHTML = starSvg(bookmarkedSet.has(qid));
+  }
 }
 
-/* ── 构建复盘列表时附加书签标记 ────────────────── */
+/* ====== 构建复盘列表时附加书签标记 ====== */
 function enhanceReviewListWithBookmarks() {
   var items = reviewList.querySelectorAll(".review-item");
   for (var i = 0; i < items.length; i++) {
@@ -92,7 +100,7 @@ function enhanceReviewListWithBookmarks() {
     if (bookmarkedSet.has(qid)) {
       var bm = document.createElement("span");
       bm.className = "review-bookmark";
-      bm.textContent = "★";
+      bm.innerHTML = starSvg(true);
       items[i].appendChild(bm);
     }
   }

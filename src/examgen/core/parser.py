@@ -296,10 +296,15 @@ def _extract_multiline_field(block: str, field: str) -> str:
         same_line = m.group(1).strip()
         if same_line:
             return same_line
-        # 多行模式：收集后续行直到下一个字段标记
+        # 多行模式：收集后续行直到下一个字段标记或题目起始
         content_lines: List[str] = []
         for j in range(i + 1, len(lines)):
+            stripped_j = _strip_leading_backslash(lines[j])
             if _RE_FIELD_MARKER_LEGACY.match(lines[j]):
+                break
+            if _RE_FIELD_MARKER_NEW.match(stripped_j):
+                break
+            if _RE_Q_START.match(stripped_j) or _RE_SECTION.match(stripped_j):
                 break
             content_lines.append(lines[j])
         return "\n".join(content_lines).strip()
@@ -388,7 +393,7 @@ def _parse_question_block(
         topic=topic,
         options=options,
         answer=answer,
-        score=score if score is not None else 1.0,
+        score=score,  # None 留给 normalizer 用 meta.default_score 填充
         section=section,
         explanation=explanation if explanation else None,
     )

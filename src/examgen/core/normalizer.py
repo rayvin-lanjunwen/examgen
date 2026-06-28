@@ -73,3 +73,19 @@ def _validate_answer(q: Question) -> None:
                 field=f"第 {q.id} 题",
                 suggestion="判断题答案 `A`=正确，`B`=错误",
             )
+
+    elif q.qtype == QuestionType.FILL:
+        if not q.answer or not q.answer.strip():
+            raise ParseError(
+                f"第 {q.id} 题（填空）答案不能为空",
+                field=f"第 {q.id} 题",
+                suggestion="填空题答案用 `|` 分隔多个空，如 `北京|上海`",
+            )
+
+    elif q.qtype == QuestionType.ESSAY:
+        if not q.answer or not q.answer.strip():
+            raise ParseError(
+                f"第 {q.id} 题（简答）答案不能为空",
+                field=f"第 {q.id} 题",
+                suggestion="简答题至少需要提供参考答案或关键词",
+            )

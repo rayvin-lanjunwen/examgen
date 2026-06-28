@@ -71,7 +71,7 @@ class TestParseQuestions:
         """题目 id 从 1 开始递增。"""
         _, questions = parse_exam_file(FIXTURE)
         ids = [q.id for q in questions]
-        assert ids == [1, 2, 3, 4, 5, 6, 7]
+        assert ids == [1, 2, 3, 4, 5, 6, 7, 8]
 
     def test_explanation_parsed(self):
         """解析字段正确提取。"""

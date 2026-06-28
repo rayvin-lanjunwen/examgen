@@ -8,7 +8,7 @@ function buildNavSidebar(questions) {
     li.setAttribute("data-qid", q.id);
     li.innerHTML =
       '<span class="nav-badge ' + q.qtype + '">' + (TYPE_ABBR[q.qtype] || "") + '</span>' +
-      q.id +
+      '<span class="nav-qid">' + q.id + '</span>' +
       '<span class="nav-done" data-qid="' + q.id + '">✓</span>';
     li.addEventListener("click", function (e) {
       var qid = this.getAttribute("data-qid");
@@ -78,6 +78,10 @@ function updateProgress() {
   var pct = total > 0 ? Math.round(answered / total * 100) : 0;
   progressFill.style.width = pct + "%";
   progressText.textContent = answered + "/" + total;
+
+ 
+
+  if (typeof fillSectionProgress === "function") fillSectionProgress();
 }
 
 /* ── 提交后更新导航栏对错状态 ─────────────────────── */

@@ -1,4 +1,4 @@
-/* ── CSS 变量 ────────────────────────────────────────── */
+/* 鈹€鈹€ CSS 鍙橀噺 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 :root {
   --color-primary: #6366f1;
   --color-primary-hover: #4f46e5;
@@ -13,8 +13,10 @@
   --color-border: #e5e7eb;
   --color-bg: #f3f4f6;
   --color-card: #ffffff;
+  --color-hover: #f9fafb;
   --color-text: #111827;
   --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
   --color-sidebar-bg: #f8fafc;
   --color-sidebar-border: #e2e8f0;
   --color-sidebar-text: #475569;
@@ -22,15 +24,17 @@
   --color-sidebar-hover: #f1f5f9;
   --color-sidebar-active: #eef2ff;
   --color-sidebar-active-border: #6366f1;
-  --sidebar-width: 240px;
+  --sidebar-width: 192px;
   --radius: 10px;
   --radius-sm: 6px;
+  --radius-xs: 4px;
   --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
   --shadow: 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.02);
   --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
   --shadow-pop: 0 4px 16px rgba(0,0,0,0.10);
   --transition: 0.2s ease;
   --timer-bar-h: 4px;
+  --timer-bar-bg: rgba(99,102,241,0.12);
   --gradient-primary: linear-gradient(135deg, #6366f1, #818cf8);
   --gradient-primary-hover: linear-gradient(135deg, #4f46e5, #6366f1);
   --gradient-banner: linear-gradient(135deg, #4338ca 0%, #6366f1 40%, #818cf8 100%);
@@ -54,6 +58,7 @@ body[data-theme="academic"] {
   --color-bg: #f5f0eb;
   --color-border: #e2e8f0;
   --color-card: #fffdfa;
+  --timer-bar-bg: rgba(124,58,237,0.10);
   --gradient-primary: linear-gradient(135deg, #7c3aed, #a78bfa);
   --gradient-primary-hover: linear-gradient(135deg, #6d28d9, #7c3aed);
   --gradient-banner: linear-gradient(135deg, #5b21b6 0%, #7c3aed 40%, #a78bfa 100%);
@@ -74,6 +79,7 @@ body[data-theme="tool"] {
   --color-bg: #f1f5f9;
   --color-border: #e2e8f0;
   --color-card: #ffffff;
+  --timer-bar-bg: rgba(14,165,233,0.10);
   --gradient-primary: linear-gradient(135deg, #0ea5e9, #38bdf8);
   --gradient-primary-hover: linear-gradient(135deg, #0284c7, #0ea5e9);
   --gradient-banner: linear-gradient(135deg, #0369a1 0%, #0ea5e9 40%, #38bdf8 100%);
@@ -94,12 +100,13 @@ body[data-theme="green"] {
   --color-bg: #f0fdf4;
   --color-border: #d1d5db;
   --color-card: #ffffff;
+  --timer-bar-bg: rgba(5,150,105,0.10);
   --gradient-primary: linear-gradient(135deg, #059669, #34d399);
   --gradient-primary-hover: linear-gradient(135deg, #047857, #059669);
   --gradient-banner: linear-gradient(135deg, #065f46 0%, #059669 40%, #34d399 100%);
   --gradient-timer: linear-gradient(90deg, #059669, #34d399);
 }
-/* ── 全局 ────────────────────────────────────────────── */
+/* 鈹€鈹€ 鍏ㄥ眬 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
@@ -110,12 +117,12 @@ body {
   min-height: 100vh;
 }
 
-/* ── 顶部计时条 ──────────────────────────────────────── */
+/* 鈹€鈹€ 椤堕儴璁℃椂鏉?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .timer-bar {
   position: fixed;
   top: 0; left: 0; right: 0;
   height: var(--timer-bar-h);
-  background: rgba(99,102,241,0.12);
+  background: var(--timer-bar-bg);
   z-index: 200;
 }
 .timer-bar-inner {
@@ -128,14 +135,14 @@ body {
   background: linear-gradient(90deg, #ef4444, #f97316);
 }
 
-/* ── 应用布局 ────────────────────────────────────────── */
+/* 鈹€鈹€ 搴旂敤甯冨眬 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .app-layout {
   display: flex;
   min-height: 100vh;
   padding-top: var(--timer-bar-h);
 }
 
-/* ── 侧边栏 ──────────────────────────────────────────── */
+/* 鈹€鈹€ 渚ц竟鏍?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .sidebar {
   width: var(--sidebar-width);
   background: var(--color-sidebar-bg);
@@ -177,10 +184,10 @@ body {
 }
 .sidebar-collapse-btn:hover { background: var(--color-sidebar-hover); }
 .sidebar.collapsed { transform: translateX(calc(-1 * var(--sidebar-width))); }
-.sidebar.collapsed + .main-content { margin-left: 0; }
+.sidebar.collapsed ~ .main-content { margin-left: 0; }
 .sidebar.collapsed .sidebar-collapse-btn { transform: rotate(180deg); }
 
-/* ── 桌面端侧栏收起后的恢复按钮 ────────────────── */
+/* 鈹€鈹€ 妗岄潰绔晶鏍忔敹璧峰悗鐨勬仮澶嶆寜閽?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .sidebar-expand-btn {
   position: fixed;
   top: calc(var(--timer-bar-h) + 10px);
@@ -225,7 +232,7 @@ body {
   font-size: 0.72rem;
   color: var(--color-sidebar-text-dim);
 }
-/* ── 未作答提示 ────────────────────────────────────── */
+/* 鈹€鈹€ 鏈綔绛旀彁绀?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .nav-unanswered { padding: 8px 14px; border-bottom: 1px solid var(--color-sidebar-border); }
 .nav-unanswered.hidden { display: none; }
 .nav-unanswered-title { font-size: 0.72rem; color: #ef4444; font-weight: 600; margin-bottom: 4px; }
@@ -233,7 +240,7 @@ body {
 .nav-unanswered-item { font-size: 0.68rem; padding: 2px 7px; border-radius: 3px; background: #fef2f2; color: #b91c1c; cursor: pointer; transition: background 0.15s; }
 .nav-unanswered-item:hover { background: #fecaca; }
 
-/* ── 导航结果摘要 ──────────────────────────────────── */
+/* 鈹€鈹€ 瀵艰埅缁撴灉鎽樿 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .nav-result {
   padding: 14px 14px 12px;
   border-bottom: 1px solid var(--color-sidebar-border);
@@ -304,28 +311,23 @@ body {
   font-weight: 600;
   text-transform: uppercase;
 }
+.nav-qid {
+  font-weight: 500;
+  min-width: 20px;
+}
 .nav-badge.single   { background: #dbeafe; color: #1d4ed8; }
 .nav-badge.multiple { background: #fce7f3; color: #be185d; }
 .nav-badge.judge    { background: #d1fae5; color: #047857; }
 .nav-badge.fill     { background: #ffedd5; color: #c2410c; }
 .nav-badge.essay    { background: #e0e7ff; color: #4338ca; }
 .nav-done {
-  margin-left: auto;
   font-size: 0.7rem;
   opacity: 0;
+  margin: 0 auto;
   transition: opacity var(--transition);
 }
 .nav-done.done { opacity: 1; color: var(--color-correct); }
-.nav-bookmark {
-  margin-left: auto;
-  margin-right: 2px;
-  font-size: 0.75rem;
-  cursor: pointer;
-  color: #d1d5db;
-  transition: color 0.15s;
-}
-.nav-bookmark:hover { color: #f59e0b; }
-.nav-bookmark.active { color: #f59e0b; }
+
 .nav-item.nav-correct { background: rgba(16,185,129,0.08); color: #047857; }
 .nav-item.nav-correct .nav-done { color: #047857; }
 .nav-item.nav-wrong { background: rgba(239,68,68,0.08); color: #b91c1c; }
@@ -333,21 +335,23 @@ body {
 .nav-item.nav-essay { background: rgba(99,102,241,0.08); color: #4338ca; }
 .nav-item.nav-essay .nav-done { color: #4338ca; }
 
-/* ── 主内容区 ────────────────────────────────────────── */
+/* 鈹€鈹€ 涓诲唴瀹瑰尯 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .main-content {
   flex: 1;
+  display: flex;
+  justify-content: center;
   margin-left: var(--sidebar-width);
   min-height: 100vh;
 }
 
-/* ── 容器 ────────────────────────────────────────────── */
+/* 鈹€鈹€ 瀹瑰櫒 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .exam-container {
+  width: 100%;
   max-width: 860px;
-  margin: 0 auto;
   padding: 0 24px 48px;
 }
 
-/* ── 渐变横幅头部 ────────────────────────────────────── */
+/* 鈹€鈹€ 娓愬彉妯箙澶撮儴 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .exam-banner {
   position: relative;
   overflow: hidden;
@@ -402,7 +406,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── 分区标题分隔条 ──────────────────────────────────── */
+/* 鈹€鈹€ 鍒嗗尯鏍囬鍒嗛殧鏉?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .section-divider {
   display: flex;
   align-items: center;
@@ -424,7 +428,7 @@ body {
   letter-spacing: 0.03em;
 }
 
-/* ── 题目卡片 ────────────────────────────────────────── */
+/* 鈹€鈹€ 棰樼洰鍗＄墖 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .question-card {
   background: var(--color-card);
   border: 1px solid var(--color-border);
@@ -447,7 +451,7 @@ body {
   box-shadow: 0 0 0 3px rgba(99,102,241,0.15), var(--shadow);
   animation: flash 1.5s ease;
 }
-/* ── 题型左侧色条 ── */
+/* 鈹€鈹€ 棰樺瀷宸︿晶鑹叉潯 鈹€鈹€ */
 .question-card[data-qtype="single"]   { border-left-color: #3b82f6; }
 .question-card[data-qtype="multiple"] { border-left-color: #ec4899; }
 .question-card[data-qtype="judge"]    { border-left-color: #10b981; }
@@ -505,18 +509,11 @@ body {
   align-items: center;
   gap: 6px;
 }
-.question-bookmark {
-  cursor: pointer;
-  color: #d1d5db;
-  font-size: 1rem;
-  transition: color 0.15s;
-  user-select: none;
-  line-height: 1;
-}
+
 .question-bookmark:hover { color: #f59e0b; }
 .question-bookmark.active { color: #f59e0b; }
 
-/* ── 选项（彩色圆圈 + label 整行可点） ─────────────── */
+/* 鈹€鈹€ 閫夐」锛堝僵鑹插渾鍦?+ label 鏁磋鍙偣锛?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .options-list { list-style: none; padding: 0; }
 .option-item {
   margin-bottom: 6px;
@@ -532,7 +529,7 @@ body {
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.15s;
 }
 .option-label:hover {
-  background: #f9fafb;
+  background: var(--color-hover);
   border-color: var(--color-primary);
   box-shadow: var(--shadow-pop);
   transform: translateX(3px);
@@ -576,7 +573,7 @@ body {
   font-size: 0.95rem;
   line-height: 1.5;
 }
-/* 判分高亮：整行变色 */
+/* 鍒ゅ垎楂樹寒锛氭暣琛屽彉鑹?*/
 .option-item.correct .option-label {
   background: var(--color-correct-bg);
   border-color: var(--color-correct);
@@ -596,7 +593,7 @@ body {
   color: #fff;
 }
 
-/* ── 填空内联输入 ───────────────────────────────────── */
+/* 鈹€鈹€ 濉┖鍐呰仈杈撳叆 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .fill-wrap {
   display: flex;
   flex-wrap: wrap;
@@ -634,7 +631,7 @@ body {
   background: var(--color-wrong-bg);
 }
 
-/* ── 简答 ────────────────────────────────────────────── */
+/* 鈹€鈹€ 绠€绛?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .essay-textarea {
   width: 100%;
   padding: 10px 14px;
@@ -643,7 +640,7 @@ body {
   font-size: 0.95rem;
   font-family: inherit;
   transition: border-color var(--transition), box-shadow var(--transition);
-  background: #fafafa;
+  background: var(--color-hover);
   min-height: 120px;
   resize: vertical;
 }
@@ -651,10 +648,10 @@ body {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
-  background: #fff;
+  background: var(--color-card);
 }
 
-/* ── 解析 ────────────────────────────────────────────── */
+/* 鈹€鈹€ 瑙ｆ瀽 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .explanation {
   margin-top: 14px;
   padding: 14px 18px;
@@ -673,7 +670,7 @@ body {
   font-size: 1rem;
 }
 
-/* ── 简答题参考答案 ──────────────────────────────────── */
+/* 鈹€鈹€ 绠€绛旈鍙傝€冪瓟妗?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .essay-reference {
   margin-top: 14px;
   padding: 14px 18px;
@@ -694,7 +691,7 @@ body {
 .essay-reference p { margin: 6px 0; }
 .essay-reference ul, .essay-reference ol { padding-left: 20px; margin: 6px 0; }
 
-/* ── 答案对错显示 ──────────────────────────────────── */
+/* 鈹€鈹€ 绛旀瀵归敊鏄剧ず 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .answer-display {
   margin-top: 10px;
   padding: 8px 14px;
@@ -720,7 +717,7 @@ body {
 .correct-icon { color: #16a34a; }
 .wrong-icon { color: #dc2626; }
 
-/* ── Markdown 表格 ───────────────────────────────────── */
+/* 鈹€鈹€ Markdown 琛ㄦ牸 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .explanation table, .topic-md table,
 .essay-reference table {
   width: 100%;
@@ -742,7 +739,7 @@ body {
 .explanation tr:nth-child(even), .topic-md tr:nth-child(even),
 .essay-reference tr:nth-child(even) { background: #f9fafb; }
 
-/* ── Markdown 图片 ────────────────────────────────────── */
+/* 鈹€鈹€ Markdown 鍥剧墖 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .topic-md img, .explanation img, .essay-reference img,
 .option-text img, .fill-text img {
   max-width: 100%;
@@ -752,7 +749,7 @@ body {
   display: block;
 }
 
-/* ── 得分区域 ────────────────────────────────────────── */
+/* 鈹€鈹€ 寰楀垎鍖哄煙 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .score-area {
   text-align: center;
   margin-top: 36px;
@@ -763,7 +760,7 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
-/* ── 总分大字 ─────────────────────────────────────── */
+/* 鈹€鈹€ 鎬诲垎澶у瓧 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .score-total {
   font-size: 2.2rem;
   font-weight: 800;
@@ -772,7 +769,7 @@ body {
   line-height: 1.2;
 }
 
-/* ── 通过/未通过 ──────────────────────────────────── */
+/* 鈹€鈹€ 閫氳繃/鏈€氳繃 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .pass {
   color: var(--color-correct);
   font-size: 1rem;
@@ -786,7 +783,7 @@ body {
   margin-bottom: 12px;
 }
 
-/* ── 环形进度图（渐变 + 发光）───────────────────────── */
+/* 鈹€鈹€ 鐜舰杩涘害鍥撅紙娓愬彉 + 鍙戝厜锛夆攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .score-ring-container {
   display: flex;
   justify-content: center;
@@ -797,7 +794,7 @@ body {
   width: 90px;
   height: 90px;
   transform: rotate(-90deg);
-  filter: drop-shadow(0 2px 8px rgba(99,102,241,0.25));
+  filter: drop-shadow(0 2px 8px var(--color-primary-glow));
 }
 .ring-bg {
   fill: none;
@@ -831,7 +828,7 @@ body {
   color: var(--color-text-secondary);
 }
 
-/* ── 题型汇总条 ──────────────────────────────────── */
+/* 鈹€鈹€ 棰樺瀷姹囨€绘潯 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .score-type-summary {
   display: flex;
   justify-content: center;
@@ -847,7 +844,7 @@ body {
 .score-type-item .sts-label { color: var(--color-text-secondary); margin-right: 2px; }
 .score-type-item .sts-count { font-weight: 700; color: var(--color-text); }
 
-/* ── 逐题回顾列表 ────────────────────────────────────── */
+/* 鈹€鈹€ 閫愰鍥為【鍒楄〃 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .review-list {
   margin-top: 12px;
   text-align: left;
@@ -864,7 +861,7 @@ body {
   border-radius: var(--radius-sm);
   transition: background var(--transition);
 }
-.review-item:hover { background: #f9fafb; }
+.review-item:hover { background: var(--color-hover); }
 .review-icon {
   width: 26px;
   height: 26px;
@@ -884,10 +881,10 @@ body {
 .review-score { font-size: 0.82rem; color: var(--color-text-secondary); }
 .review-bookmark { margin-left: auto; color: #f59e0b; font-size: 0.8rem; }
 
-/* ── 题目卡片书签标记 ──────────────────────────────── */
+/* 鈹€鈹€ 棰樼洰鍗＄墖涔︾鏍囪 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .question-card.bookmarked { box-shadow: 0 0 0 2px #f59e0b; }
 
-/* ── 操作按钮 ────────────────────────────────────────── */
+/* 鈹€鈹€ 鎿嶄綔鎸夐挳 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .exam-actions {
   display: flex;
   flex-direction: column;
@@ -929,7 +926,7 @@ body {
 }
 .btn-secondary:hover { background: #e5e7eb; }
 
-/* ── 批阅操作栏 ──────────────────────────────────────── */
+/* 鈹€鈹€ 鎵归槄鎿嶄綔鏍?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .grading-bar {
   display: flex;
   align-items: center;
@@ -980,7 +977,7 @@ body {
   padding: 8px 24px;
 }
 
-/* ── 批阅侧栏（左：统计 + 右：评分） ────────────────── */
+/* 鈹€鈹€ 鎵归槄渚ф爮锛堝乏锛氱粺璁?+ 鍙筹細璇勫垎锛?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .grading-left-panel {
   position: fixed;
   top: calc(var(--timer-bar-h) + 16px);
@@ -1050,7 +1047,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* ── 批阅右面板（悬浮分值选择） ──────────────────────── */
+/* 鈹€鈹€ 鎵归槄鍙抽潰鏉匡紙鎮诞鍒嗗€奸€夋嫨锛?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .grading-right-panel {
   position: fixed;
   top: calc(var(--timer-bar-h) + 16px);
@@ -1135,7 +1132,7 @@ body {
   box-shadow: 0 0 0 3px var(--color-primary-glow);
 }
 
-/* ── 批阅上一题 / 下一题 ──────────────────────────── */
+/* 鈹€鈹€ 鎵归槄涓婁竴棰?/ 涓嬩竴棰?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .grading-nav-row {
   display: flex;
   gap: 8px;
@@ -1164,7 +1161,7 @@ body {
   cursor: not-allowed;
 }
 
-/* ── 手机端批阅底部 Sheet ────────────────────────── */
+/* 鈹€鈹€ 鎵嬫満绔壒闃呭簳閮?Sheet 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .grading-sheet {
   display: none;
   position: fixed;
@@ -1226,9 +1223,9 @@ body {
 }
 .grading-sheet-nav-btn:disabled { opacity: 0.3; }
 
-/* ── 响应式：窄屏隐藏左右批阅面板 ── */
+/* 鈹€鈹€ 鍝嶅簲寮忥細绐勫睆闅愯棌宸﹀彸鎵归槄闈㈡澘 鈹€鈹€ */
 @media (max-width: 900px) {
-  /* 隐藏桌面端悬浮批阅面板，使用底部 sheet 替代 */
+  /* 闅愯棌妗岄潰绔偓娴壒闃呴潰鏉匡紝浣跨敤搴曢儴 sheet 鏇夸唬 */
   .grading-left-panel,
   .grading-right-panel {
     display: none !important;
@@ -1236,7 +1233,7 @@ body {
   .grading-sheet { display: block; }
 }
 
-/* ── 悬浮计时气泡（毛玻璃 + 脉冲）───────────────────── */
+/* 鈹€鈹€ 鎮诞璁℃椂姘旀场锛堟瘺鐜荤拑 + 鑴夊啿锛夆攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .timer-bubble {
   position: fixed;
   bottom: 24px;
@@ -1291,16 +1288,25 @@ body {
 }
 .timer-bubble.flash .timer-bubble-text { color: #ef4444; }
 
-/* ── KaTeX ───────────────────────────────────────────── */
+/* 鈹€鈹€ KaTeX 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .katex { font-size: 1.05em !important; }
 .katex-display {
   overflow-x: auto;
   overflow-y: hidden;
   padding: 6px 0;
   margin: 10px 0;
+  -webkit-overflow-scrolling: touch;
+}
+.katex-display::-webkit-scrollbar { height: 3px; }
+.katex-display::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+.katex-display::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* ── CDN 离线提示横幅 ───────────────────────────────── */
+/* 鈹€鈹€ CDN 绂荤嚎鎻愮ず妯箙 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .cdn-fallback-banner {
   background: var(--color-warning-bg);
   border: 1px solid var(--color-warning-border);
@@ -1316,11 +1322,11 @@ body {
   margin-right: 6px;
 }
 
-/* ── 工具类 ──────────────────────────────────────────── */
+/* 鈹€鈹€ 宸ュ叿绫?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .hidden { display: none !important; }
 
-/* ── 响应式 ──────────────────────────────────────────── */
-/* 手机端顶部操作栏 ─────────────────────────────── */
+/* 鈹€鈹€ 鍝嶅簲寮?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
+/* 鎵嬫満绔《閮ㄦ搷浣滄爮 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 .mobile-topbar {
   display: none;
   position: fixed;
@@ -1371,7 +1377,7 @@ body {
 .mtb-submit:disabled { opacity: 0.4; cursor: not-allowed; }
 .mtb-submit.hidden { display: none; }
 
-/* 手机端遮罩 */
+/* 鎵嬫満绔伄缃?*/
 .sidebar-overlay {
   display: none;
   position: fixed;
@@ -1399,7 +1405,7 @@ body {
   .main-content { margin-left: 0; padding-top: 44px; }
   .exam-container { padding: 0 10px 80px; }
 
-  /* 横幅缩小 */
+  /* 妯箙缂╁皬 */
   .banner-content { padding: 20px 14px 16px; }
   .exam-banner { margin: 0 -10px; border-radius: 0; }
   .exam-title { font-size: 1.25rem; margin-bottom: 4px; }
@@ -1408,28 +1414,27 @@ body {
   .section-divider { margin: 10px 0; font-size: 0.82rem; }
   .section-divider-text { font-size: 0.82rem; }
 
-  /* 题目卡片 */
+  /* 棰樼洰鍗＄墖 */
   .question-card { padding: 14px 12px; margin-bottom: 12px; }
   .question-header { flex-wrap: wrap; gap: 4px; }
   .question-type { font-size: 0.65rem; padding: 2px 7px; }
   .question-number { font-size: 0.88rem; }
   .question-score { font-size: 0.75rem; }
 
-  /* 选项放大触控区 */
+  /* 閫夐」鏀惧ぇ瑙︽帶鍖?*/
   .option-label { padding: 13px 12px; font-size: 0.92rem; border-radius: 10px; }
-  .option-circle { width: 22px; height: 22px; min-width: 22px; }
-  .option-circle::after { width: 10px; height: 10px; }
+  .option-circle { width: 28px; height: 28px; min-width: 28px; font-size: 0.78rem; }
 
-  /* 填空/简答输入 */
+  /* 濉┖/绠€绛旇緭鍏?*/
   .fill-inline { font-size: 0.9rem; padding: 8px 10px; min-width: 80px; }
   .essay-textarea { font-size: 0.9rem; padding: 12px; min-height: 100px; }
 
-  /* 解析/参考答案 */
+  /* 瑙ｆ瀽/鍙傝€冪瓟妗?*/
   .explanation { padding: 12px 14px; font-size: 0.82rem; }
   .essay-reference { padding: 12px 14px; font-size: 0.82rem; }
   .answer-display { font-size: 0.8rem; padding: 8px 12px; }
 
-  /* 成绩区域 */
+  /* 鎴愮哗鍖哄煙 */
   .score-area { padding: 20px 14px; margin-top: 20px; }
   .score-total { font-size: 1.6rem; }
   .score-ring-container { margin-bottom: 2px; }
@@ -1441,16 +1446,16 @@ body {
   .exam-actions { padding: 0 10px; }
   .btn { padding: 12px 20px; font-size: 0.9rem; }
 
-  /* 计时器 */
+  /* 璁℃椂鍣?*/
   .timer-bar-inner { height: 4px; }
   .timer-bubble { bottom: 12px; right: 12px; width: 64px; height: 64px; }
   .timer-bubble-text { font-size: 0.8rem; }
 
-  /* 批阅底部栏 */
+  /* 鎵归槄搴曢儴鏍?*/
   .grading-bar { padding: 10px 12px; font-size: 0.82rem; gap: 8px; flex-wrap: wrap; }
   .grading-bar .btn { padding: 8px 14px; font-size: 0.8rem; }
 
-  /* CDN 提示 */
+  /* CDN 鎻愮ず */
   .cdn-fallback-banner { font-size: 0.8rem; padding: 10px 12px; }
 }
 @media (max-width: 480px) {
@@ -1469,4 +1474,98 @@ body {
   .score-area { padding: 14px 10px; }
 }
 
+/* ====== SVG Star Icon Styles ====== */
+.nav-bookmark {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  cursor: pointer;
+  color: var(--color-text-tertiary);
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+.nav-bookmark .star-icon {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+.nav-bookmark .star-icon .star-fill {
+  transition: opacity 0.2s ease;
+}
+.nav-bookmark:hover {
+  color: #f59e0b;
+  transform: scale(1.15);
+}
+.nav-bookmark.active {
+  color: #f59e0b;
+}
 
+.question-bookmark {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--color-text-tertiary);
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+.question-bookmark .star-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+.question-bookmark .star-icon .star-fill {
+  transition: opacity 0.2s ease;
+}
+.question-bookmark:hover {
+  color: #f59e0b;
+  transform: scale(1.15);
+}
+.question-bookmark.active {
+  color: #f59e0b;
+}
+
+.review-bookmark {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  color: #f59e0b;
+}
+.review-bookmark .star-icon {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+/* ====== Section Progress ====== */
+.section-progress {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  vertical-align: middle;
+}
+
+/* ====== Download Report Button ====== */
+.btn-download-report {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 16px;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-xs);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  margin-top: 12px;
+}
+.btn-download-report:hover {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}

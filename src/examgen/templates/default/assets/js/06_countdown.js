@@ -8,6 +8,7 @@ function startCountdown(totalSeconds) {
   countdownDeadline = Date.now() + totalSeconds * 1000;
   totalTimeSec = totalSeconds;
   var el = document.getElementById("countdown");
+  if (timerBarOuter) timerBarOuter.style.display = "block";
   if (timerBar) timerBar.style.display = "block";
 
   function tick() {
