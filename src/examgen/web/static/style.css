@@ -148,6 +148,22 @@ body {
   color: var(--color-primary);
 }
 
+/* ── 文档版本分组 ────────────────────────────────────── */
+.doc-group {
+  margin-bottom: 18px;
+}
+.doc-group:last-child { margin-bottom: 0; }
+.doc-group-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+.doc-group .doc-links {
+  margin-bottom: 0;
+}
+
 /* ── 拖拽上传区 ────────────────────────────────────────── */
 .drop-zone {
   border: 2.5px dashed #d1d5db;
