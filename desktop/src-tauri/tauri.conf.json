@@ -1,5 +1,4 @@
 {
-  "$schema": "https://raw.githubusercontent.com/nicegui/nicegui/main/nicegui/static/tauri/tauri.conf.json",
   "productName": "ExamGen",
   "version": "0.2.0",
   "identifier": "com.examgen.desktop",
@@ -10,7 +9,6 @@
     "beforeBuildCommand": ""
   },
   "app": {
-    "title": "ExamGen — 试卷生成器",
     "windows": [
       {
         "label": "main",
@@ -43,6 +41,15 @@
     "copyright": "",
     "category": "Education",
     "shortDescription": "离线试卷生成器",
-    "longDescription": "ExamGen — 支持 Markdown / TXT 格式的离线试卷生成工具，内置考试模式和闯关模式。"
+    "longDescription": "ExamGen — 支持 Markdown / TXT 格式的离线试卷生成工具，内置考试模式和闯关模式。",
+    "windows": {
+      "wix": {
+        "language": "zh-CN"
+      },
+      "nsis": {
+        "languages": ["SimpChinese", "English"],
+        "installMode": "currentUser"
+      }
+    }
   }
 }

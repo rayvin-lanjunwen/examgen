@@ -12,15 +12,17 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT_DIR = ROOT / "desktop" / "src-tauri" / "sidecar"
+OUT_DIR = (ROOT / "desktop" / "src-tauri" / "sidecar").resolve()
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # PyInstaller 入口 — 一个极简的 Python 脚本启动 FastAPI
-entry = ROOT / "desktop" / "_server_entry.py"
+entry = (ROOT / "desktop" / "_server_entry.py").resolve()
 entry.write_text("""
 import uvicorn
 uvicorn.run("examgen.web.app:app", host="127.0.0.1", port=8765, log_level="info")
 """)
+
+templates_src = (ROOT / "src" / "examgen" / "templates").resolve()
 
 args = [
     sys.executable, "-m", "PyInstaller",
@@ -31,7 +33,6 @@ args = [
     "--specpath", str(ROOT / "build"),
     "--noconsole",
     "--hidden-import", "jinja2",
-    "--hidden-import", "markdown",
     "--hidden-import", "uvicorn.logging",
     "--hidden-import", "uvicorn.loops.auto",
     "--hidden-import", "uvicorn.protocols.http.auto",
@@ -45,7 +46,7 @@ args = [
     "--hidden-import", "examgen.core.normalizer",
     "--hidden-import", "examgen.core.transformer",
     "--hidden-import", "examgen.models",
-    "--add-data", f"{ROOT / 'src' / 'examgen' / 'templates'};examgen/templates",
+    "--add-data", f"{templates_src}{';' if sys.platform == 'win32' else ':'}examgen/templates",
     str(entry),
 ]
 

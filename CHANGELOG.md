@@ -2,6 +2,26 @@
 
 ---
 
+## 2026-06-29（上午）
+
+### Tauri 桌面版构建修复
+
+修复 `npm run tauri build` 打包失败的问题：
+
+- **图标缺失** — `icons/icon.ico` 等图标文件未生成，导致 WiX/MSI 打包步骤报错。通过 `npx tauri icon src-tauri/icons/icon.png` 生成全套图标（ico / icns / iOS / Android / Appx）
+- **自定义 target-dir 冲突** — `.cargo/config.toml` 中将 `target-dir` 指向 `C:/tmp/examgen-build`，导致 Tauri build script 的资源路径解析失败。已注释掉该配置，改用默认 `target/` 目录
+- **tauri.conf.json 图标配置** — 恢复 `bundle.icon` 列表中的 `icon.ico` 路径
+
+### 构建产物
+
+| 产物 | 路径 |
+|------|------|
+| NSIS 安装包 (.exe) | `src-tauri/target/release/bundle/nsis/` |
+| MSI 安装包 (.msi) | `src-tauri/target/release/bundle/msi/` |
+| 免安装绿色版 | `src-tauri/target/release/examgen.exe` |
+
+---
+
 ## 2026-06-29 (凌晨续)
 
 ### Tauri 桌面版

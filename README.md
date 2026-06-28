@@ -186,6 +186,23 @@ pip install pyinstaller
 python desktop/build_release.py
 ```
 
+或手动分步构建：
+
+```bash
+cd desktop
+
+# 1. 生成 sidecar 可执行文件
+python build_sidecar.py
+
+# 2. 生成图标（需要一张 1024x1024 的 icon.png 放在 src-tauri/icons/）
+npx tauri icon src-tauri/icons/icon.png
+
+# 3. 完整打包（前端 + Rust + 安装包）
+npm run tauri build
+```
+
+构建产物位于 `serrc-tauri/target/release/bundle/` 下（NSIS `.exe` / MSI `.msi` / 免安装 `examgen.exe`）。
+
 详见 `desktop/README.md`。
 
 ## YAML 元数据

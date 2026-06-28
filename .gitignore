@@ -35,9 +35,8 @@ Thumbs.db
 desktop/node_modules/
 desktop/src-tauri/sidecar/
 desktop/src-tauri/target/
-desktop/src-tauri/icons/*.png
-desktop/src-tauri/icons/*.icns
-desktop/src-tauri/icons/*.ico
+desktop/src-tauri/gen/
+desktop/src-tauri/cargo_build.log
 
 # PyInstaller 构建产物
 build/pyinstaller/
