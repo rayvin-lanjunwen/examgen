@@ -185,6 +185,7 @@ async def generate(
     time: Optional[int] = Form(None),
     shuffle: Optional[str] = Form(None),
     option_shuffle: Optional[str] = Form(None),
+    style: Optional[str] = Form("modern"),
 ):
     """接收上传的 .md / .txt 文件及图片文件，生成并返回 HTML 试卷下载。
 
@@ -278,7 +279,7 @@ async def generate(
             meta.option_shuffle = True
 
         questions = apply_transforms(questions, meta)
-        html = generate_html(questions, meta)
+        html = generate_html(questions, meta, theme=style)
 
     except ParseError as e:
         return JSONResponse(

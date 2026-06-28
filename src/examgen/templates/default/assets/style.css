@@ -31,8 +31,74 @@
   --shadow-pop: 0 4px 16px rgba(0,0,0,0.10);
   --transition: 0.2s ease;
   --timer-bar-h: 4px;
+  --gradient-primary: linear-gradient(135deg, #6366f1, #818cf8);
+  --gradient-primary-hover: linear-gradient(135deg, #4f46e5, #6366f1);
+  --gradient-banner: linear-gradient(135deg, #4338ca 0%, #6366f1 40%, #818cf8 100%);
+  --gradient-timer: linear-gradient(90deg, #6366f1, #a855f7);
+
 }
 
+
+body[data-theme="academic"] {
+  --color-primary: #7c3aed;
+  --color-primary-hover: #6d28d9;
+  --color-primary-light: #ede9fe;
+  --color-primary-glow: rgba(124,58,237,0.2);
+  --color-sidebar-active-border: #7c3aed;
+  --color-sidebar-bg: #f8f4ed;
+  --color-sidebar-border: #e2e8f0;
+  --color-sidebar-text: #475569;
+  --color-sidebar-text-dim: #94a3b8;
+  --color-sidebar-hover: #ede9fe;
+  --color-sidebar-active: #ede9fe;
+  --color-bg: #f5f0eb;
+  --color-border: #e2e8f0;
+  --color-card: #fffdfa;
+  --gradient-primary: linear-gradient(135deg, #7c3aed, #a78bfa);
+  --gradient-primary-hover: linear-gradient(135deg, #6d28d9, #7c3aed);
+  --gradient-banner: linear-gradient(135deg, #5b21b6 0%, #7c3aed 40%, #a78bfa 100%);
+  --gradient-timer: linear-gradient(90deg, #7c3aed, #a78bfa);
+}
+body[data-theme="tool"] {
+  --color-primary: #0ea5e9;
+  --color-primary-hover: #0284c7;
+  --color-primary-light: #e0f2fe;
+  --color-primary-glow: rgba(14,165,233,0.22);
+  --color-sidebar-active-border: #0ea5e9;
+  --color-sidebar-bg: #f8fafc;
+  --color-sidebar-border: #e2e8f0;
+  --color-sidebar-text: #475569;
+  --color-sidebar-text-dim: #94a3b8;
+  --color-sidebar-hover: #f1f5f9;
+  --color-sidebar-active: #e0f2fe;
+  --color-bg: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-card: #ffffff;
+  --gradient-primary: linear-gradient(135deg, #0ea5e9, #38bdf8);
+  --gradient-primary-hover: linear-gradient(135deg, #0284c7, #0ea5e9);
+  --gradient-banner: linear-gradient(135deg, #0369a1 0%, #0ea5e9 40%, #38bdf8 100%);
+  --gradient-timer: linear-gradient(90deg, #0ea5e9, #38bdf8);
+}
+body[data-theme="green"] {
+  --color-primary: #059669;
+  --color-primary-hover: #047857;
+  --color-primary-light: #d1fae5;
+  --color-primary-glow: rgba(5,150,105,0.22);
+  --color-sidebar-active-border: #059669;
+  --color-sidebar-bg: #f0fdf4;
+  --color-sidebar-border: #d1d5db;
+  --color-sidebar-text: #475569;
+  --color-sidebar-text-dim: #94a3b8;
+  --color-sidebar-hover: #dcfce7;
+  --color-sidebar-active: #d1fae5;
+  --color-bg: #f0fdf4;
+  --color-border: #d1d5db;
+  --color-card: #ffffff;
+  --gradient-primary: linear-gradient(135deg, #059669, #34d399);
+  --gradient-primary-hover: linear-gradient(135deg, #047857, #059669);
+  --gradient-banner: linear-gradient(135deg, #065f46 0%, #059669 40%, #34d399 100%);
+  --gradient-timer: linear-gradient(90deg, #059669, #34d399);
+}
 /* ── 全局 ────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -54,7 +120,7 @@ body {
 }
 .timer-bar-inner {
   height: 100%;
-  background: linear-gradient(90deg, #6366f1, #a855f7);
+  background: var(--gradient-timer);
   width: 100%;
   transition: width 1s linear;
 }
@@ -179,7 +245,7 @@ body {
   color: #fff;
   text-align: center;
   padding: 8px 0;
-  background: linear-gradient(135deg, #6366f1, #818cf8);
+  background: var(--gradient-primary);
   border-radius: 8px;
   margin-bottom: 10px;
   letter-spacing: 0.02em;
@@ -292,7 +358,7 @@ body {
 .banner-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #4338ca 0%, #6366f1 40%, #818cf8 100%);
+  background: var(--gradient-banner);
   z-index: 0;
 }
 .banner-bg::after {
@@ -848,12 +914,12 @@ body {
   transform: translateY(0);
 }
 .btn-primary {
-  background: linear-gradient(135deg, #6366f1, #818cf8);
+  background: var(--gradient-primary);
   color: #fff;
   box-shadow: 0 4px 14px rgba(99,102,241,0.35);
 }
 .btn-primary:hover {
-  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  background: var(--gradient-primary-hover);
   box-shadow: 0 6px 20px rgba(99,102,241,0.45);
 }
 .btn-secondary {

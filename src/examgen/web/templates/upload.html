@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -6,57 +6,79 @@
   <title>ExamGen - 试卷生成器</title>
   <link rel="stylesheet" href="/static/style.css?v={{ version }}">
 </head>
-<body>
+ <body>
+   <div class="bg-pattern"></div>
   <div class="container">
+
     <div class="page-title">
-      <div class="logo">&#128221;</div>
+      <span class="brand-logo">
+        <svg viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#6366f1"/>
+              <stop offset="100%" stop-color="#818cf8"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="48" height="48" rx="12" fill="url(#logoGrad)"/>
+          <path d="M16 18h20M16 26h20M16 34h12" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.7"/>
+          <path d="M28 34l8-8-4-4" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </span>
       <h1>ExamGen</h1>
       <p>从 Markdown / TXT 生成离线 HTML 试卷</p>
+      <p class="subtitle">轻量试卷生成工具</p>
     </div>
 
     <!-- 三步引导 -->
-    <div class="steps">
+    <div class="steps stagger-1">
       <div class="step active" id="step1">
         <span class="step-num">1</span>
         <span class="step-label">编写 .md/.txt</span>
       </div>
-      <div class="step-line"></div>
+      <div class="step-line" id="stepLine1"><div class="step-line-fill" id="stepFill1"></div></div>
       <div class="step" id="step2">
         <span class="step-num">2</span>
         <span class="step-label">上传文件</span>
       </div>
-      <div class="step-line"></div>
+      <div class="step-line" id="stepLine2"><div class="step-line-fill" id="stepFill2"></div></div>
       <div class="step" id="step3">
         <span class="step-num">3</span>
         <span class="step-label">下载试卷</span>
       </div>
     </div>
 
-    <div class="card">
-      <!-- 文档链接 -->
-      <div class="doc-group">
-        <div class="doc-group-title">&#128196; Markdown 版</div>
-        <div class="doc-links">
-          <a href="#" id="downloadSpec" class="doc-link">&#128214; 规范说明</a>
-          <a href="#" id="downloadPrompt" class="doc-link">&#128221; 出卷提示词</a>
-          <a href="#" id="downloadTemplate" class="doc-link">&#128196; 示例模板</a>
+    <div class="card stagger-3">
+            <!-- 参考资料 -->
+      <div class="resource-bar">
+        <div style="position:relative">
+          <button class="resource-btn" id="mdResourcesBtn">&#128196; Markdown <span class="arrow">&#9662;</span></button>
+          <div class="resource-dropdown" id="mdResourcesDrop">
+            <a href="#" id="downloadSpec"><span>&#128214;</span> 规范说明</a>
+            <a href="#" id="downloadPrompt"><span>&#128221;</span> 出卷提示词</a>
+            <a href="#" id="downloadTemplate"><span>&#128196;</span> 示例模板</a>
+          </div>
+        </div>
+        <div style="position:relative">
+          <button class="resource-btn" id="txtResourcesBtn">&#128196; TXT <span class="arrow">&#9662;</span></button>
+          <div class="resource-dropdown" id="txtResourcesDrop">
+            <a href="#" id="downloadSpecTxt"><span>&#128214;</span> 规范说明</a>
+            <a href="#" id="downloadPromptTxt"><span>&#128221;</span> 出卷提示词</a>
+            <a href="#" id="downloadTemplateTxt"><span>&#128196;</span> 示例模板</a>
+          </div>
         </div>
       </div>
-      <div class="doc-group">
-        <div class="doc-group-title">&#128196; TXT 版</div>
-        <div class="doc-links">
-          <a href="#" id="downloadSpecTxt" class="doc-link">&#128214; 规范说明</a>
-          <a href="#" id="downloadPromptTxt" class="doc-link">&#128221; 出卷提示词</a>
-          <a href="#" id="downloadTemplateTxt" class="doc-link">&#128196; 示例模板</a>
-        </div>
-      </div>
-
-      <!-- 拖拽上传区 -->
       <div class="drop-zone" id="dropZone">
-        <div class="drop-zone-icon">&#128196;</div>
+        <span class="drop-zone-success">&#9989; 文件已添加，继续拖入或点击添加更多</span>
+        <span class="drop-zone-icon">&#128196;</span>
         <div class="drop-zone-text">
-          拖拽 .md / .txt 文件<strong>及图片</strong>到此处，或 <strong id="browseLink">点击选择</strong>
+          拖拽 .md / .txt 文件<strong>及图片</strong>到此处，或<strong id="browseLink">点击选择</strong>
         </div>
+        <div class="drop-zone-hint">
+          支持 .md / .txt + .png/.jpg/.gif，按文件名自动匹配嵌入
+        </div>
+        <input type="file" class="file-input" id="fileInput"
+               accept=".md,.markdown,.txt,.png,.jpg,.jpeg,.gif,.svg,.webp" multiple>
+
         <div class="drop-zone-hint">
           支持 .md / .txt + .png/.jpg/.gif 等图片文件，按文件名自动匹配嵌入
         </div>
@@ -65,35 +87,58 @@
       </div>
 
       <!-- 已选文件列表 -->
-      <div class="file-list" id="fileList"></div>
+            <div class="file-list" id="fileList"></div>
+
+      <!-- 流程提示 -->
+      <div class="flow-hint" id="flowHint">
+        <strong>&#9989; 文件已就绪</strong> &middot; 展开下方选项调整设置，然后生成试卷
+      </div>
 
       <!-- 可选参数 -->
       <button class="params-toggle" id="paramsToggle">
         <span class="arrow">&#9654;</span> 可选参数
       </button>
-      <div class="params-panel" id="paramsPanel">
+       <div class="params-panel" id="paramsPanel">
+         <!-- 试卷风格选择 -->
         <div class="form-row">
-          <label for="titleInput">试卷标题覆盖</label>
-          <input type="text" id="titleInput" placeholder="留空则使用文件中的标题">
-        </div>
-        <div class="form-row-inline">
-          <div class="form-row">
-            <label for="timeInput">考试时间（分钟）</label>
-            <input type="number" id="timeInput" placeholder="留空则使用默认值" min="1">
+          <label>试卷风格</label>
+          <div class="style-selector" id="styleSelector">
+            <button class="style-option active" data-theme="modern" title="紫色主调，干净现代">
+              <span class="style-dot" style="background:#6366f1"></span>现代教育
+            </button>
+            <button class="style-option" data-theme="academic" title="暖色调，学术感">
+              <span class="style-dot" style="background:#7c3aed"></span>学术纸本
+            </button>
+            <button class="style-option" data-theme="tool" title="天蓝主调，极简工具风">
+              <span class="style-dot" style="background:#0ea5e9"></span>专业工具
+            </button>
+            <button class="style-option" data-theme="green" title="绿色主调，清新自然">
+              <span class="style-dot" style="background:#059669"></span>碧绿清新
+            </button>
           </div>
         </div>
-        <div class="checkbox-row">
-          <input type="checkbox" id="shuffleCheck">
-          <label for="shuffleCheck">随机打乱题目顺序</label>
+
+       <div class="toggle-row">
+          <span class="toggle-label">随机打乱题目顺序</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="shuffleCheck">
+            <span class="toggle-slider"></span>
+          </label>
         </div>
-        <div class="checkbox-row">
-          <input type="checkbox" id="optionShuffleCheck">
-          <label for="optionShuffleCheck">随机打乱选项顺序</label>
+        <div class="toggle-row">
+          <span class="toggle-label">随机打乱选项顺序</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="optionShuffleCheck">
+            <span class="toggle-slider"></span>
+          </label>
         </div>
       </div>
 
       <!-- 生成按钮 -->
-      <button class="btn-generate" id="generateBtn">生成并下载试卷</button>
+      <button class="btn-generate" id="generateBtn">
+        <span class="btn-spinner"></span>
+        <span class="btn-text">生成并下载试卷</span>
+      </button>
 
       <!-- 状态提示 -->
       <div class="status" id="statusArea"></div>
@@ -114,144 +159,90 @@
       </div>
     </div>
 
-    <div class="footer">ExamGen v{{ version }}</div>
+    <div class="footer stagger-5">ExamGen v{{ version }}</div>
   </div>
 
   <script>
-    /* ── DOM ─────────────────────────────────────────────── */
-    var dropZone      = document.getElementById("dropZone");
-    var fileInput     = document.getElementById("fileInput");
-    var browseLink    = document.getElementById("browseLink");
-    var fileList      = document.getElementById("fileList");
-    var paramsToggle  = document.getElementById("paramsToggle");
-    var paramsPanel   = document.getElementById("paramsPanel");
-    var generateBtn   = document.getElementById("generateBtn");
-    var statusArea    = document.getElementById("statusArea");
-    var allFiles      = [];   // 所有上传文件（File 对象）
-    var lastBlob      = null;
-    var lastFname     = "exam.html";
+    /* ====== DOM ====== */
+    var dropZone = document.getElementById("dropZone");
+    var fileInput = document.getElementById("fileInput");
+    var browseLink = document.getElementById("browseLink");
+    var fileList = document.getElementById("fileList");
+    var paramsToggle = document.getElementById("paramsToggle");
+    var paramsPanel = document.getElementById("paramsPanel");
+    var generateBtn = document.getElementById("generateBtn");
+    var statusArea = document.getElementById("statusArea");
+    var allFiles = [];
+    var lastBlob = null;
+    var lastFname = "exam.html";
+    var selectedStyle = "modern";
 
-    // 步骤元素
     var step1 = document.getElementById("step1");
     var step2 = document.getElementById("step2");
     var step3 = document.getElementById("step3");
+    var stepFill1 = document.getElementById("stepFill1");
+    var stepFill2 = document.getElementById("stepFill2");
 
-    // 预览
     var previewOverlay = document.getElementById("previewOverlay");
-    var previewBody    = document.getElementById("previewBody");
-    var previewClose   = document.getElementById("previewClose");
-    var previewCancel  = document.getElementById("previewCancel");
+    var previewBody = document.getElementById("previewBody");
+    var previewClose = document.getElementById("previewClose");
+    var previewCancel = document.getElementById("previewCancel");
     var previewConfirm = document.getElementById("previewConfirm");
 
-    /* ── 文件选择 ────────────────────────────────────────── */
-    browseLink.addEventListener("click", function (e) {
-      e.stopPropagation();
-      fileInput.click();
-    });
+    /* ====== 试卷风格选择 ====== */
+    (function initStyleSelector() {
+      var btns = document.querySelectorAll(".style-option");
+      for (var i = 0; i < btns.length; i++) {
+        btns[i].addEventListener("click", function () {
+          for (var j = 0; j < btns.length; j++) btns[j].classList.remove("active");
+          this.classList.add("active");
+          selectedStyle = this.getAttribute("data-theme");
+        });
+      }
+    })();
 
+    /* ====== 文件选择 ====== */
+    browseLink.addEventListener("click", function (e) { e.stopPropagation(); fileInput.click(); });
     dropZone.addEventListener("click", function () { fileInput.click(); });
-    dropZone.addEventListener("dragover", function (e) {
-      e.preventDefault();
-      dropZone.classList.add("dragover");
-    });
+    dropZone.addEventListener("dragover", function (e) { e.preventDefault(); dropZone.classList.add("dragover"); });
     dropZone.addEventListener("dragleave", function () { dropZone.classList.remove("dragover"); });
-    dropZone.addEventListener("drop", function (e) {
-      e.preventDefault();
-      dropZone.classList.remove("dragover");
-      addFiles(e.dataTransfer.files);
-    });
-    fileInput.addEventListener("change", function () {
-      if (fileInput.files.length > 0) addFiles(fileInput.files);
-    });
+    dropZone.addEventListener("drop", function (e) { e.preventDefault(); dropZone.classList.remove("dragover"); addFiles(e.dataTransfer.files); });
+    fileInput.addEventListener("change", function () { if (fileInput.files.length > 0) addFiles(fileInput.files); });
 
     function addFiles(files) {
       for (var i = 0; i < files.length; i++) {
-        var f = files[i];
-        // 去重
-        var dup = false;
-        for (var j = 0; j < allFiles.length; j++) {
-          if (allFiles[j].name === f.name && allFiles[j].size === f.size) {
-            dup = true; break;
-          }
-        }
+        var f = files[i]; var dup = false;
+        for (var j = 0; j < allFiles.length; j++) { if (allFiles[j].name === f.name && allFiles[j].size === f.size) { dup = true; break; } }
         if (!dup) allFiles.push(f);
       }
-      renderFileList();
-      hideStatus();
-      fileInput.value = "";
+      renderFileList(); hideStatus(); fileInput.value = "";
     }
 
-    function removeFile(index) {
-      allFiles.splice(index, 1);
-      renderFileList();
-    }
-
-    function clearAllFiles() {
-      allFiles = [];
-      renderFileList();
-      setStep(1);
-    }
+    function removeFile(index) { allFiles.splice(index, 1); renderFileList(); }
+    function clearAllFiles() { allFiles = []; renderFileList(); setStep(1); }
 
     function renderFileList() {
-      if (allFiles.length === 0) {
-        fileList.innerHTML = "";
-        fileList.classList.remove("show");
-        setStep(1);
-        return;
-      }
-
-      var examFiles = [];
-      var imageFiles = [];
+      if (allFiles.length === 0) { fileList.innerHTML = ""; fileList.classList.remove("show"); setStep(1); return; }
+      var examFiles = []; var imageFiles = [];
       for (var i = 0; i < allFiles.length; i++) {
-        var name = allFiles[i].name;
-        if (name.match(/\.(md|markdown|txt)$/i)) {
-          examFiles.push({ index: i, file: allFiles[i] });
-        } else {
-          imageFiles.push({ index: i, file: allFiles[i] });
-        }
+        if (allFiles[i].name.match(/\.(md|markdown|txt)$/i)) { examFiles.push({ index: i, file: allFiles[i] }); }
+        else { imageFiles.push({ index: i, file: allFiles[i] }); }
       }
-
-      var html = '<div class="file-list-summary">';
-      html += '<span class="file-list-count">' + examFiles.length + ' 个试卷文件 + ' + imageFiles.length + ' 张图片</span>';
-      html += '<button class="file-list-clear" id="clearAllBtn">清空</button>';
-      html += '</div>';
-      html += '<ul class="file-list-items">';
-
+      var html = '<div class="file-list-summary"><span class="file-list-count">' + examFiles.length + ' 个试卷文件 + ' + imageFiles.length + ' 张图片</span><button class="file-list-clear" id="clearAllBtn">清空</button></div><ul class="file-list-items">';
       for (var i = 0; i < examFiles.length; i++) {
         var f = examFiles[i].file;
-        html += '<li class="file-list-item file-list-md">';
-        html += '<span class="file-list-icon">&#128196;</span>';
-        html += '<span class="file-list-name">' + escapeHTML(f.name) + '</span>';
-        html += '<span class="file-list-size">' + formatSize(f.size) + '</span>';
-        html += '<button class="file-list-remove" data-index="' + examFiles[i].index + '">&times;</button>';
-        html += '</li>';
+        html += '<li class="file-list-item file-list-md"><span class="file-list-icon">&#128196;</span><span class="file-list-name">' + escapeHTML(f.name) + '</span><span class="file-list-size">' + formatSize(f.size) + '</span><button class="file-list-remove" data-index="' + examFiles[i].index + '">&times;</button></li>';
       }
-
       for (var i = 0; i < imageFiles.length; i++) {
         var f = imageFiles[i].file;
-        html += '<li class="file-list-item file-list-img">';
-        html += '<span class="file-list-icon">&#128247;</span>';
-        html += '<span class="file-list-name">' + escapeHTML(f.name) + '</span>';
-        html += '<span class="file-list-size">' + formatSize(f.size) + '</span>';
-        html += '<button class="file-list-remove" data-index="' + imageFiles[i].index + '">&times;</button>';
-        html += '</li>';
+        html += '<li class="file-list-item file-list-img"><span class="file-list-icon">&#128247;</span><span class="file-list-name">' + escapeHTML(f.name) + '</span><span class="file-list-size">' + formatSize(f.size) + '</span><button class="file-list-remove" data-index="' + imageFiles[i].index + '">&times;</button></li>';
       }
-
       html += '</ul>';
-      fileList.innerHTML = html;
-      fileList.classList.add("show");
-
-      // 绑定删除按钮
+      fileList.innerHTML = html; fileList.classList.add("show");
       var removeBtns = fileList.querySelectorAll(".file-list-remove");
-      for (var i = 0; i < removeBtns.length; i++) {
-        removeBtns[i].addEventListener("click", function () {
-          removeFile(parseInt(this.getAttribute("data-index")));
-        });
-      }
-
+      for (var i = 0; i < removeBtns.length; i++) { removeBtns[i].addEventListener("click", function () { removeFile(parseInt(this.getAttribute("data-index"))); }); }
       var clearBtn = document.getElementById("clearAllBtn");
       if (clearBtn) clearBtn.addEventListener("click", clearAllFiles);
-
       setStep(examFiles.length > 0 ? 2 : 1);
     }
 
@@ -262,88 +253,40 @@
     }
 
     function setStep(n) {
-      step1.classList.toggle("active", n >= 1);
-      step1.classList.toggle("done", n > 1);
-      step2.classList.toggle("active", n === 2);
-      step2.classList.toggle("done", n > 2);
+      step1.classList.toggle("active", n >= 1); step1.classList.toggle("done", n > 1);
+      step2.classList.toggle("active", n === 2); step2.classList.toggle("done", n > 2);
       step3.classList.toggle("active", n === 3);
+      stepFill1.style.width = n > 1 ? "100%" : "0%";
+      stepFill2.style.width = n > 2 ? "100%" : "0%";
     }
 
-    /* ── 参数面板 ────────────────────────────────────────── */
-    paramsToggle.addEventListener("click", function () {
-      paramsToggle.classList.toggle("open");
-      paramsPanel.classList.toggle("show");
-    });
+    /* ====== 参数面板 ====== */
+    paramsToggle.addEventListener("click", function () { paramsToggle.classList.toggle("open"); paramsPanel.classList.toggle("show"); });
 
-    /* ── 文档下载 ────────────────────────────────────────── */
+    /* ====== 文档下载 ====== */
     function downloadDoc(apiPath, fileName) {
-      fetch(apiPath)
-        .then(function (r) { return r.text(); })
-        .then(function (content) {
-          var blob = new Blob([content], { type: "text/markdown" });
-          var url = URL.createObjectURL(blob);
-          var a = document.createElement("a");
-          a.href = url;
-          a.download = fileName;
-          a.click();
-          URL.revokeObjectURL(url);
-        })
-        .catch(function () {
-          showStatus("无法加载文档，请检查网络", "error");
-        });
+      fetch(apiPath).then(function (r) { return r.text(); }).then(function (content) {
+        var blob = new Blob([content], { type: "text/markdown" });
+        var url = URL.createObjectURL(blob); var a = document.createElement("a");
+        a.href = url; a.download = fileName; a.click(); URL.revokeObjectURL(url);
+      }).catch(function () { showStatus("无法加载文档，请检查网络", "error"); });
     }
+    document.getElementById("downloadTemplate").addEventListener("click", function (e) { e.preventDefault(); downloadDoc("/api/template", "exam-template.md"); });
+    document.getElementById("downloadTemplateTxt").addEventListener("click", function (e) { e.preventDefault(); downloadDoc("/api/template-txt", "exam-template.txt"); });
+    document.getElementById("downloadPrompt").addEventListener("click", function (e) { e.preventDefault(); downloadDoc("/api/prompt", "exam-prompt.md"); });
+    document.getElementById("downloadPromptTxt").addEventListener("click", function (e) { e.preventDefault(); downloadDoc("/api/prompt-txt", "exam-prompt.txt"); });
+    document.getElementById("downloadSpec").addEventListener("click", function (e) { e.preventDefault(); downloadDoc("/api/spec", "exam-spec.md"); });
+    document.getElementById("downloadSpecTxt").addEventListener("click", function (e) { e.preventDefault(); downloadDoc("/api/spec-txt", "exam-spec.txt"); });
 
-    document.getElementById("downloadTemplate").addEventListener("click", function (e) {
-      e.preventDefault();
-      downloadDoc("/api/template", "exam-template.md");
-    });
-
-    document.getElementById("downloadTemplateTxt").addEventListener("click", function (e) {
-      e.preventDefault();
-      downloadDoc("/api/template-txt", "exam-template.txt");
-    });
-
-    document.getElementById("downloadPrompt").addEventListener("click", function (e) {
-      e.preventDefault();
-      downloadDoc("/api/prompt", "exam-prompt.md");
-    });
-
-    document.getElementById("downloadPromptTxt").addEventListener("click", function (e) {
-      e.preventDefault();
-      downloadDoc("/api/prompt-txt", "exam-prompt.txt");
-    });
-
-    document.getElementById("downloadSpec").addEventListener("click", function (e) {
-      e.preventDefault();
-      downloadDoc("/api/spec", "exam-spec.md");
-    });
-
-    document.getElementById("downloadSpecTxt").addEventListener("click", function (e) {
-      e.preventDefault();
-      downloadDoc("/api/spec-txt", "exam-spec.txt");
-    });
-
-    /* ── 提交生成（先预览） ─────────────────────────────── */
+    /* ====== 生成 ====== */
     generateBtn.addEventListener("click", function () {
       var hasExam = false;
-      for (var i = 0; i < allFiles.length; i++) {
-        if (allFiles[i].name.match(/\.(md|markdown|txt)$/i)) { hasExam = true; break; }
-      }
-      if (!hasExam) {
-        showStatus("请选择 .md 或 .txt 试卷文件", "error");
-        return;
-      }
-      showStatus("正在生成试卷…", "loading");
-      generateBtn.disabled = true;
-
+      for (var i = 0; i < allFiles.length; i++) { if (allFiles[i].name.match(/\.(md|markdown|txt)$/i)) { hasExam = true; break; } }
+      if (!hasExam) { showStatus("请选择 .md 或 .txt 试卷文件", "error"); return; }
+      generateBtn.classList.add("loading"); showStatus("正在生成试卷...", "loading"); generateBtn.disabled = true;
       var formData = new FormData();
-      for (var i = 0; i < allFiles.length; i++) {
-        formData.append("files", allFiles[i]);
-      }
-      var title = document.getElementById("titleInput").value.trim();
-      if (title) formData.append("title", title);
-      var time = document.getElementById("timeInput").value.trim();
-      if (time) formData.append("time", time);
+      for (var i = 0; i < allFiles.length; i++) formData.append("files", allFiles[i]);
+      formData.append("style", selectedStyle);
       if (document.getElementById("shuffleCheck").checked) formData.append("shuffle", "1");
       if (document.getElementById("optionShuffleCheck").checked) formData.append("option_shuffle", "1");
 
@@ -353,124 +296,98 @@
             return resp.json().then(function (data) {
               if (data && data.message) {
                 var msg = '<div class="error-title">' + escapeHTML(data.message) + '</div>';
-                if (data.field) {
-                  msg += '<div class="error-field">出错的字段/位置：<code>' + escapeHTML(data.field) + '</code></div>';
-                }
-                if (data.suggestion) {
-                  msg += '<div class="error-suggestion">' + escapeHTML(data.suggestion) + '</div>';
-                }
+                if (data.field) msg += '<div class="error-field">出错字段/位置：<code>' + escapeHTML(data.field) + '</code></div>';
+                if (data.suggestion) msg += '<div class="error-suggestion">' + escapeHTML(data.suggestion) + '</div>';
                 throw new Error(msg);
               }
-              return resp.text().then(function (text) { throw new Error(text || "服务器返回错误 (" + resp.status + ")"); });
+              return resp.text().then(function (text) { throw new Error(text || "服务器返回错误(" + resp.status + ")"); });
             });
           }
           var cd = resp.headers.get("Content-Disposition") || "";
           var match = cd.match(/filename="?([^";\n]+)"?/);
           lastFname = match ? match[1] : "exam.html";
-          return resp.blob().then(function (blob) {
-            lastBlob = blob;
-            return blob;
-          });
+          return resp.blob().then(function (blob) { lastBlob = blob; return blob; });
         })
-        .then(function (blob) {
-          return blob.text().then(function (html) {
-            showPreviewInfo(html);
-            hideStatus();
-            setStep(3);
-          });
-        })
-        .catch(function (err) {
-          statusArea.innerHTML = '<div class="error-block">' + err.message + '</div>';
-          statusArea.className = "status show error";
-        })
-        .finally(function () {
-          generateBtn.disabled = false;
-        });
+        .then(function (blob) { return blob.text().then(function (html) { showPreviewInfo(html); hideStatus(); setStep(3); }); })
+        .catch(function (err) { statusArea.innerHTML = '<div class="error-block">' + err.message + '</div>'; statusArea.className = "status show error"; })
+        .finally(function () { generateBtn.classList.remove("loading"); generateBtn.disabled = false; });
     });
 
-    /* ── 预览信息提取 ───────────────────────────────────── */
+    /* ====== 预览 ====== */
     function showPreviewInfo(html) {
       var titleMatch = html.match(/<title>(.*?)<\/title>/);
       var title = titleMatch ? titleMatch[1] : "未知试卷";
-
       var dataMatch = html.match(/const EXAM_DATA = (\[[\s\S]*?\]);/);
       var questions = [];
-      if (dataMatch) {
-        try { questions = JSON.parse(dataMatch[1]); } catch (e) {}
-      }
-
+      if (dataMatch) { try { questions = JSON.parse(dataMatch[1]); } catch (e) {} }
       var counts = { single: 0, multiple: 0, judge: 0, fill: 0, essay: 0 };
       var labels = { single: "单选", multiple: "多选", judge: "判断", fill: "填空", essay: "简答" };
-      for (var i = 0; i < questions.length; i++) {
-        var t = questions[i].qtype;
-        if (counts[t] !== undefined) counts[t]++;
-      }
-
+      for (var i = 0; i < questions.length; i++) { var t = questions[i].qtype; if (counts[t] !== undefined) counts[t]++; }
       var statsHtml = '<div class="preview-title">' + escapeHTML(title) + '</div>';
-      statsHtml += '<div class="preview-stats">共 <strong>' + questions.length + '</strong> 道题</div>';
-      statsHtml += '<div class="preview-types">';
+      statsHtml += '<div class="preview-stats">共<strong>' + questions.length + '</strong> 道题</div><div class="preview-types">';
       var types = ["single", "multiple", "judge", "fill", "essay"];
-      for (var j = 0; j < types.length; j++) {
-        var t = types[j];
-        if (counts[t] > 0) {
-          statsHtml += '<span class="type-badge type-' + t + '">' + labels[t] + ' x' + counts[t] + '</span>';
-        }
-      }
+      for (var j = 0; j < types.length; j++) { var t = types[j]; if (counts[t] > 0) statsHtml += '<span class="type-badge type-' + t + '">' + labels[t] + ' x' + counts[t] + '</span>'; }
       statsHtml += '</div>';
-
       var sections = [];
-      for (var k = 0; k < questions.length; k++) {
-        if (questions[k].section && sections.indexOf(questions[k].section) === -1) {
-          sections.push(questions[k].section);
-        }
-      }
-      if (sections.length > 0) {
-        statsHtml += '<div class="preview-sections">';
-        for (var m = 0; m < sections.length; m++) {
-          statsHtml += '<div class="preview-section-item">' + escapeHTML(sections[m]) + '</div>';
-        }
-        statsHtml += '</div>';
-      }
-
-      previewBody.innerHTML = statsHtml;
-      previewOverlay.classList.remove("hidden");
+      for (var k = 0; k < questions.length; k++) { if (questions[k].section && sections.indexOf(questions[k].section) === -1) sections.push(questions[k].section); }
+      if (sections.length > 0) { statsHtml += '<div class="preview-sections">'; for (var m = 0; m < sections.length; m++) statsHtml += '<div class="preview-section-item">' + escapeHTML(sections[m]) + '</div>'; statsHtml += '</div>'; }
+      previewBody.innerHTML = statsHtml; previewOverlay.classList.remove("hidden");
     }
 
-    function escapeHTML(str) {
-      var div = document.createElement("div");
-      div.appendChild(document.createTextNode(str));
-      return div.innerHTML;
-    }
+    function escapeHTML(str) { var div = document.createElement("div"); div.appendChild(document.createTextNode(str)); return div.innerHTML; }
 
-    /* ── 预览弹窗交互 ────────────────────────────────────── */
     previewClose.addEventListener("click", function () { previewOverlay.classList.add("hidden"); });
     previewCancel.addEventListener("click", function () { previewOverlay.classList.add("hidden"); });
-    previewOverlay.addEventListener("click", function (e) {
-      if (e.target === previewOverlay) previewOverlay.classList.add("hidden");
-    });
+    previewOverlay.addEventListener("click", function (e) { if (e.target === previewOverlay) previewOverlay.classList.add("hidden"); });
     previewConfirm.addEventListener("click", function () {
       previewOverlay.classList.add("hidden");
-      if (lastBlob) {
-        var url = URL.createObjectURL(lastBlob);
-        var a = document.createElement("a");
-        a.href = url;
-        a.download = lastFname;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        showStatus("下载完成！", "success");
+      if (lastBlob) { var url = URL.createObjectURL(lastBlob); var a = document.createElement("a"); a.href = url; a.download = lastFname; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); showStatus("下载完成！", "success"); }
+    });
+
+    function showStatus(msg, type) { statusArea.textContent = msg; statusArea.className = "status show " + type; }
+    function hideStatus() { statusArea.className = "status"; }
+
+    /* ====== 资源下拉菜单 ====== */
+    var resBtns = [
+      { btn: "mdResourcesBtn", drop: "mdResourcesDrop" },
+      { btn: "txtResourcesBtn", drop: "txtResourcesDrop" },
+    ];
+    for (var i = 0; i < resBtns.length; i++) {
+      (function () {
+        var btn = document.getElementById(resBtns[i].btn);
+        var drop = document.getElementById(resBtns[i].drop);
+        if (!btn || !drop) return;
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation(); var open = drop.classList.contains("open");
+          for (var j = 0; j < resBtns.length; j++) {
+            var d = document.getElementById(resBtns[j].drop);
+            var b = document.getElementById(resBtns[j].btn);
+            if (d) d.classList.remove("open"); if (b) b.classList.remove("open");
+          }
+          if (!open) { drop.classList.add("open"); btn.classList.add("open"); }
+        });
+      })();
+    }
+    document.addEventListener("click", function () {
+      for (var i = 0; i < resBtns.length; i++) {
+        var d = document.getElementById(resBtns[i].drop);
+        var b = document.getElementById(resBtns[i].btn);
+        if (d) d.classList.remove("open"); if (b) b.classList.remove("open");
       }
     });
 
-    /* ── 状态提示 ────────────────────────────────────────── */
-    function showStatus(msg, type) {
-      statusArea.textContent = msg;
-      statusArea.className = "status show " + type;
-    }
-    function hideStatus() {
-      statusArea.className = "status";
-    }
+    /* ====== 上传后自动展开参数 ====== */
+    var _origAF = addFiles;
+    addFiles = function (files) {
+      _origAF(files);
+      if (allFiles.length > 0) {
+        paramsToggle.classList.add("open");
+        paramsPanel.classList.add("show");
+        var hint = document.getElementById("flowHint");
+        if (hint) hint.classList.add("show");
+      }
+    };
+
   </script>
 </body>
 </html>

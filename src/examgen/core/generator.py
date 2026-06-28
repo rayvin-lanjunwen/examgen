@@ -64,6 +64,7 @@ def _embed_local_images(text: str, base_dir: Path) -> str:
 def generate_html(
     questions: List[Question],
     meta: ExamMeta,
+    theme: str = "modern",
     template_dir: Optional[str] = None,
     content_dir: Optional[str] = None,
 ) -> str:
@@ -123,6 +124,7 @@ def generate_html(
         questions=questions_data,
         style_content=style_content,
         script_content=script_content,
+        theme=theme,
     )
     return html
 
