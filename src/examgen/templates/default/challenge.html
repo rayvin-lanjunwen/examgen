@@ -46,50 +46,52 @@
       <ul class="nav-list" id="navList"></ul>
     </nav>
 
-    <!-- 主内容区 -->
+    <!-- 主内容区：卡片居中 -->
     <main class="main-content">
-      <div class="exam-container">
+      <div class="challenge-stage">
 
-        <!-- 横幅头部 -->
-        <header class="exam-banner challenge-banner">
-          <div class="banner-bg"></div>
-          <div class="banner-content">
-            <div class="challenge-mode-badge">&#9876; 闯关模式</div>
-            <h1 class="exam-title">{{ meta.title }}</h1>
-            <div class="exam-info">
-              {% if meta.subject %}<span class="info-item"><span class="info-icon">&#128218;</span> {{ meta.subject }}</span>{% endif %}
-              {% if meta.time %}<span class="info-item"><span class="info-icon">&#9200;</span> <span id="countdown">{{ meta.time }}</span> 分钟</span>{% endif %}
-              <span class="info-item"><span class="info-icon">&#127942;</span> <span id="challenge-score-live">0 / {{ meta.total_score or 0 }}</span> 分</span>
+        <!-- 顶部信息栏 -->
+        <div class="challenge-topbar">
+          <div class="challenge-mode-tag">&#9876; 闯关模式</div>
+          <h1 class="challenge-title">{{ meta.title }}</h1>
+          <div class="challenge-meta">
+            {% if meta.subject %}<span class="challenge-meta-item"><span class="info-icon">&#128218;</span> {{ meta.subject }}</span>{% endif %}
+            {% if meta.time %}<span class="challenge-meta-item"><span class="info-icon">&#9200;</span> <span id="countdown">{{ meta.time }}</span> 分钟</span>{% endif %}
+            <span class="challenge-meta-item"><span class="info-icon">&#127942;</span> <span id="challenge-score-live">0</span> / {{ meta.total_score or 0 }} 分</span>
+          </div>
+          <!-- 关卡进度 -->
+          <div class="challenge-progress-bar">
+            <div class="challenge-progress-track">
+              <div class="challenge-progress-fill" id="challengeProgressFill"></div>
             </div>
+            <span class="challenge-progress-label" id="challengeProgressLabel">0 / {{ questions | length }}</span>
           </div>
-        </header>
+        </div>
 
-        <!-- 关卡进度条 -->
-        <div class="challenge-progress-bar">
-          <div class="challenge-progress-track">
-            <div class="challenge-progress-fill" id="challengeProgressFill"></div>
+        <!-- 题目卡片区 -->
+        <div class="challenge-card-wrap">
+          <div id="questions-container"></div>
+
+          <!-- 答案反馈区 -->
+          <div class="challenge-answer-zone">
+            <div id="challenge-feedback"></div>
+            <div id="challenge-explanation"></div>
+            <div id="challenge-reference"></div>
           </div>
-          <span class="challenge-progress-label" id="challengeProgressLabel">0 / {{ questions | length }}</span>
         </div>
 
-        <!-- 单题显示区 -->
-        <div id="questions-container"></div>
-
-        <!-- 上一题/下一题导航 -->
-        <div class="challenge-nav">
-          <button id="challenge-prev-btn" class="btn btn-secondary challenge-nav-btn" disabled>&#9664; 上一题</button>
-          <span class="challenge-current" id="challengeCurrent">第 1 题</span>
-          <button id="challenge-next-btn" class="btn btn-secondary challenge-nav-btn">下一题 &#9654;</button>
+        <!-- 底部操作栏 -->
+        <div class="challenge-bottombar">
+          <button id="challenge-prev-btn" class="btn challenge-nav-btn" disabled>&#9664; 上一题</button>
+          <div class="challenge-bottombar-center">
+            <span class="challenge-current" id="challengeCurrent">第 1 题</span>
+            <button id="submit-btn" class="btn btn-primary challenge-submit-btn">提交答案</button>
+            <button id="retry-btn" class="btn btn-warning hidden">&#8635; 重做本题</button>
+          </div>
+          <button id="challenge-next-btn" class="btn challenge-nav-btn">下一题 &#9654;</button>
         </div>
 
-        <!-- 操作按钮 -->
-        <div class="exam-actions">
-          <button id="submit-btn" class="btn btn-primary">提交答案</button>
-          <button id="retry-btn" class="btn btn-secondary hidden">重做本题</button>
-          <button id="end-btn" class="btn btn-secondary">结束闯关</button>
-        </div>
-
-        <!-- 得分区域 -->
+        <!-- 成绩面板 -->
         <div id="score-area" class="score-area hidden">
           <div class="score-total" id="score-display">0 / 0 分</div>
           <div id="pass-status"></div>
@@ -111,12 +113,14 @@
           </div>
           <div class="score-type-summary hidden" id="scoreTypeSummary"></div>
           <div class="review-list" id="reviewList"></div>
+          <button id="end-btn" class="btn btn-secondary">结束闯关</button>
+          <button id="reset-btn" class="btn btn-secondary hidden">重新闯关</button>
         </div>
 
       </div>
     </main>
 
-    <!-- 右下角悬浮计时气泡（最后5分钟显示） -->
+    <!-- 右下角悬浮计时气泡 -->
     <div class="timer-bubble hidden" id="timerBubble">
       <svg class="timer-bubble-ring" viewBox="0 0 80 80">
         <circle class="bubble-bg" cx="40" cy="40" r="36"></circle>

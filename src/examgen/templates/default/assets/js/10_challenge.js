@@ -4,21 +4,42 @@ var challengeJudged = {};        // { qid: bool } 是否已判分
 var challengeResults = {};       // { qid: { correct, userAns } }
 var challengeEssayAnswers = {};  // { qid: str } 简答题答案（只显示参考，不判分）
 var challengeEnded = false;
+var retryBtn = document.getElementById("retry-btn");
+var endBtn = document.getElementById("end-btn");
 
 /* ── 覆盖 renderQuestions：每次只渲染当前题 ─────────── */
 var _nativeRender = renderQuestions;
 renderQuestions = function () {
   container.innerHTML = "";
+  // 清空答案反馈区
+  var fb = document.getElementById("challenge-feedback");
+  var exp = document.getElementById("challenge-explanation");
+  var ref = document.getElementById("challenge-reference");
+  if (fb) { fb.innerHTML = ""; fb.className = "challenge-feedback"; }
+  if (exp) { exp.innerHTML = ""; exp.style.display = "none"; }
+  if (ref) { ref.innerHTML = ""; ref.style.display = "none"; }
+
   var q = findExamData(challengeCurrent);
   if (!q) {
     container.innerHTML = '<div class="challenge-feedback show wrong">题目数据异常</div>';
     return;
   }
-  container.appendChild(buildQuestionCard(q));
+  var card = buildQuestionCard(q);
+  container.appendChild(card);
 
   // 如果本题已判过，恢复反馈状态
   if (challengeJudged[q.id]) {
     showChallengeFeedback(q, challengeResults[q.id]);
+    // 恢复解析
+    if (q.explanation && exp) {
+      exp.innerHTML = '<span class="exp-icon">&#128161;</span> 解析' + mdToHTML(q.explanation);
+      exp.className = "explanation show";
+    }
+    // 恢复参考答案（简答）
+    if (q.answer && q.qtype === "essay" && ref) {
+      ref.innerHTML = '<span class="ref-icon">&#128221;</span> 参考答案' + mdToHTML(q.answer);
+      ref.className = "essay-reference show";
+    }
   }
 
   if (typeof renderMathInElement !== "undefined") {
@@ -28,6 +49,8 @@ renderQuestions = function () {
         { left: "$",  right: "$",  display: false }
       ]
     });
+    var fbd = document.getElementById("challenge-feedback");
+    if (fbd) renderMathInElement(fbd, { delimiters: [{ left: "$$", right: "$$", display: true }, { left: "$", right: "$", display: false }] });
   }
   highlightCurrentByQid(challengeCurrent);
   updateChallengeProgress();
@@ -103,6 +126,14 @@ function challengeGoTo(qid) {
   var card = container.querySelector('.question-card[data-qid="' + qid + '"]');
   if (card) card.scrollIntoView({ behavior: "smooth", block: "start" });
 
+  // 填充本题卡片的书签星标
+  var bm = container.querySelector(".question-bookmark");
+  if (bm && typeof starSvg === "function") {
+    bm.innerHTML = starSvg(bookmarkedSet.has(String(qid)));
+    if (bookmarkedSet.has(String(qid))) bm.classList.add("active");
+    else bm.classList.remove("active");
+  }
+
   saveAnswersToStorage();
 }
 
@@ -122,7 +153,6 @@ function challengeSubmit() {
 
   var userAns = collectCurrentAnswer(q);
   if (!userAns && q.qtype !== QT.ESSAY) {
-    // 未填答案，提示
     if (!confirm("你还没有作答，确定提交吗？")) return;
   }
 
@@ -130,32 +160,51 @@ function challengeSubmit() {
     // 简答题：显示参考答案，不判分
     challengeEssayAnswers[q.id] = userAns || "";
     challengeJudged[q.id] = true;
-    highlightEssay(q);
-    var expEl = container.querySelector('.explanation[data-qid="' + q.id + '"]');
-    if (expEl) expEl.classList.add("show");
-    var ref = container.querySelector(".essay-reference");
-    if (ref) ref.classList.add("show");
-    disableCurrentInputs();
-
     challengeResults[q.id] = { correct: null, userAns: userAns || "" };
+    disableCurrentInputs();
+    // 移动解析和参考答案到固定区域
+    _moveCardExtrasToAnswerZone(q);
     updateChallengeAfterJudge(q);
   } else {
-    // 客观题：判对错
     var correct = isCorrect(q, userAns);
     challengeJudged[q.id] = true;
     challengeResults[q.id] = { correct: correct, userAns: userAns || "" };
-
     highlightResult(q, userAns, correct);
-    var expEl2 = container.querySelector('.explanation[data-qid="' + q.id + '"]');
-    if (expEl2) expEl2.classList.add("show");
     disableCurrentInputs();
-
+    _moveCardExtrasToAnswerZone(q);
     updateChallengeAfterJudge(q);
   }
 
-  // 更新导航栏对错标记
   updateChallengeNavResult(q.id);
   saveAnswersToStorage();
+}
+
+/* ── 将题卡中的解析/参考答案移动到答案反馈区 ───────── */
+function _moveCardExtrasToAnswerZone(q) {
+  var card = container.querySelector('.question-card[data-qid="' + q.id + '"]');
+  if (!card) return;
+
+  // 移动解析
+  var cardExp = card.querySelector(".explanation");
+  var expZone = document.getElementById("challenge-explanation");
+  if (cardExp && expZone) {
+    expZone.innerHTML = cardExp.innerHTML;
+    expZone.className = "explanation show";
+    cardExp.remove();
+  }
+
+  // 移动参考答案（简答）
+  var cardRef = card.querySelector(".essay-reference");
+  var refZone = document.getElementById("challenge-reference");
+  if (cardRef && refZone) {
+    refZone.innerHTML = cardRef.innerHTML;
+    refZone.className = "essay-reference show";
+    cardRef.remove();
+  }
+
+  // 移除 answer-display（由 challenge-feedback 替代）
+  var ad = card.querySelector(".answer-display");
+  if (ad) ad.remove();
 }
 
 /* ── 判分后的 UI 更新 ────────────────────────────────── */
@@ -209,33 +258,33 @@ function disableCurrentInputs() {
   for (var i = 0; i < inps.length; i++) { inps[i].disabled = true; }
 }
 
-/* ── 显示判分反馈（复用后重新插入） ─────────────────── */
+/* ── 显示判分反馈 ─────────────────────────────────── */
 function showChallengeFeedback(q, result) {
-  var card = container.querySelector('.question-card[data-qid="' + q.id + '"]');
-  if (!card) return;
-
-  var existing = card.querySelector(".challenge-feedback");
-  if (existing) existing.remove();
-
-  var fb = document.createElement("div");
+  var fb = document.getElementById("challenge-feedback");
+  if (!fb) return;
+  fb.innerHTML = "";
   fb.className = "challenge-feedback show";
 
   if (q.qtype === QT.ESSAY || result.correct === null) {
-    fb.classList.add("wrong"); // 用 wrong 色但内容不同
+    fb.classList.add("wrong");
     fb.innerHTML = '<span class="challenge-feedback-icon">&#128221;</span> 简答题不自动判分，请自行对照参考答案';
-    card.appendChild(fb);
     return;
   }
 
   if (result.correct) {
     fb.classList.add("correct");
-    fb.innerHTML = '<span class="challenge-feedback-icon">&#10003;</span> 回答正确！';
+    fb.innerHTML = '<span class="challenge-feedback-icon">&#10003;</span> 回答正确！标准答案：<strong>' + escapeHTML(q.answer) + '</strong>';
   } else {
     fb.classList.add("wrong");
     fb.innerHTML = '<span class="challenge-feedback-icon">&#10007;</span> 回答错误。正确答案：<strong>' + escapeHTML(q.answer) + '</strong>';
   }
 
-  card.appendChild(fb);
+  // 确保解析区可见
+  var expZone = document.getElementById("challenge-explanation");
+  if (expZone && q.explanation) {
+    expZone.innerHTML = '<span class="exp-icon">&#128161;</span> 解析' + mdToHTML(q.explanation);
+    expZone.className = "explanation show";
+  }
 
   if (typeof renderMathInElement !== "undefined") {
     renderMathInElement(fb, {
@@ -377,7 +426,7 @@ function computeChallengeScore() {
 }
 
 /* ── 覆盖 saveAnswersToStorage ────────────────────────── */
-var _nativeSave = saveAnswersToStorage;
+/* 07_init.js 被跳过，saveAnswersToStorage 不存在，直接定义 */
 saveAnswersToStorage = function () {
   if (!window.localStorage) return;
   var data = {};
@@ -501,6 +550,27 @@ clearSavedAnswers = function () {
 };
 
 /* ═══════════════════════════════════════════════════════
+   工具函数（从 08_grading.js 移植，因该文件被跳过）
+   ═══════════════════════════════════════════════════════ */
+function findExamData(qid) {
+  for (var i = 0; i < EXAM_DATA.length; i++) {
+    if (EXAM_DATA[i].id == qid) return EXAM_DATA[i];
+  }
+  return null;
+}
+
+function reRenderMath(el) {
+  if (typeof renderMathInElement === "undefined") return;
+  var target = el || container;
+  renderMathInElement(target, {
+    delimiters: [
+      { left: "$$", right: "$$", display: true },
+      { left: "$",  right: "$",  display: false }
+    ]
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
    初始化
    ═══════════════════════════════════════════════════════ */
 document.addEventListener("DOMContentLoaded", function () {
@@ -514,6 +584,8 @@ document.addEventListener("DOMContentLoaded", function () {
   restoreChallengeState();
   // 重新渲染（确保恢复的状态可见）
   renderQuestions(EXAM_DATA);
+  // 渲染后填充卡片上的书签星标
+  if (typeof initBookmarks === "function") { initBookmarks(); }
 
   // 按钮绑定
   submitBtn.addEventListener("click", challengeSubmit);
@@ -697,7 +769,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /* ── 重做按钮的 reset 逻辑 ───────────────────────────── */
 /* ── 覆盖 onSubmit：倒计时到期时调用挑战结束 ────────────── */
-var _nativeSubmit = onSubmit;
+/* 07_init.js 被跳过，onSubmit 不存在，直接定义 */
 onSubmit = function () {
   if (!challengeEnded) challengeEnd();
 };

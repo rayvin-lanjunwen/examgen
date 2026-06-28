@@ -1,22 +1,54 @@
-/* ====== 闯关模式增量样式 ====== */
+/* ====== 闯关模式样式 ====== */
 
-/* --- 闯关横幅 --- */
-.challenge-mode-badge {
-  display: inline-block;
-  padding: 4px 16px;
-  border: 2px solid rgba(255,255,255,0.4);
-  border-radius: 20px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #fff;
-  margin-bottom: 10px;
-  backdrop-filter: blur(4px);
-  background: rgba(255,255,255,0.1);
+/* --- 主区域：flex 列 + 居中 --- */
+.challenge-stage {
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 24px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-.challenge-banner {
-  margin-bottom: 18px;
+/* --- 顶部信息栏 --- */
+.challenge-topbar {
+  text-align: center;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+.challenge-mode-tag {
+  display: inline-block;
+  padding: 3px 14px;
+  border: 1.5px solid var(--color-primary);
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+  background: var(--color-primary-light);
+}
+.challenge-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.challenge-meta {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  color: var(--color-text-secondary);
+  font-size: 0.82rem;
+  margin-bottom: 10px;
+}
+.challenge-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* --- 关卡进度条 --- */
@@ -24,67 +56,77 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 24px;
-  padding: 0 4px;
+  max-width: 360px;
+  margin: 0 auto;
 }
 .challenge-progress-track {
   flex: 1;
-  height: 8px;
+  height: 6px;
   background: var(--color-border);
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
 }
 .challenge-progress-fill {
   height: 100%;
   background: var(--gradient-primary);
-  border-radius: 4px;
+  border-radius: 3px;
   width: 0%;
   transition: width 0.4s ease;
 }
 .challenge-progress-label {
-  font-size: 0.82rem;
-  font-weight: 700;
+  font-size: 0.78rem;
+  font-weight: 600;
   color: var(--color-primary);
   white-space: nowrap;
-  min-width: 64px;
-  text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-/* --- 单题卡片放大 --- */
+/* --- 卡片包裹：居中撑满 --- */
+.challenge-card-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 300px;
+}
+
+/* --- 题目卡片 --- */
 #questions-container .question-card {
-  margin-bottom: 20px;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  margin-bottom: 12px;
   padding: 28px 32px;
   border-radius: var(--radius);
   box-shadow: var(--shadow-lg);
+  border: 1.5px solid var(--color-border);
+  border-left: 5px solid var(--color-border);
 }
 #questions-container .question-card:hover {
   border-color: var(--color-border);
   border-left-color: var(--color-border);
   box-shadow: var(--shadow-lg);
 }
-#questions-container .question-card[data-qtype="single"]:hover   { border-left-color: #3b82f6; }
-#questions-container .question-card[data-qtype="multiple"]:hover { border-left-color: #ec4899; }
-#questions-container .question-card[data-qtype="judge"]:hover    { border-left-color: #10b981; }
-#questions-container .question-card[data-qtype="fill"]:hover     { border-left-color: #f59e0b; }
-#questions-container .question-card[data-qtype="essay"]:hover    { border-left-color: #8b5cf6; }
 
-/* --- 提交反馈嵌入卡片底部 --- */
-.challenge-feedback {
-  margin-top: 16px;
+/* --- 答案反馈区 --- */
+.challenge-answer-zone {
+  margin-top: 8px;
+}
+.challenge-answer-zone .challenge-feedback {
   padding: 14px 18px;
   border-radius: var(--radius-sm);
   font-size: 0.9rem;
   line-height: 1.8;
   display: none;
+  margin-bottom: 8px;
 }
-.challenge-feedback.show { display: block; }
-.challenge-feedback.correct {
+.challenge-answer-zone .challenge-feedback.show { display: block; }
+.challenge-answer-zone .challenge-feedback.correct {
   background: var(--color-correct-bg);
   border-left: 3px solid var(--color-correct);
   color: #065f46;
 }
-.challenge-feedback.wrong {
+.challenge-answer-zone .challenge-feedback.wrong {
   background: var(--color-wrong-bg);
   border-left: 3px solid var(--color-wrong);
   color: #991b1b;
@@ -94,52 +136,77 @@
   margin-right: 6px;
 }
 
-/* --- 上一题/下一题导航 --- */
-.challenge-nav {
+/* 解析/参考答案在反馈后 */
+.challenge-answer-zone .explanation,
+.challenge-answer-zone .essay-reference {
+  margin-bottom: 8px;
+}
+
+/* --- 底部操作栏 --- */
+.challenge-bottombar {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 10px;
-  margin-bottom: 20px;
-  padding: 0 4px;
+  padding: 16px 0 0;
+  flex-shrink: 0;
 }
 .challenge-nav-btn {
   width: auto;
-  padding: 10px 24px;
-  font-size: 0.9rem;
+  padding: 10px 20px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.challenge-bottombar-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
 }
 .challenge-current {
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--color-text-secondary);
-  min-width: 72px;
-  text-align: center;
+  white-space: nowrap;
 }
-
-/* --- 重做题卡 --- */
-.challenge-retry-card {
-  margin-top: 16px;
-  padding: 12px 18px;
+.challenge-submit-btn {
+  width: auto;
+  padding: 10px 32px;
+}
+.btn-warning {
+  width: auto;
+  padding: 10px 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
   background: var(--color-warning-bg);
-  border-left: 3px solid var(--color-warning-border);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  font-size: 0.82rem;
   color: #92400e;
+  border: 2px solid var(--color-warning-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-warning:hover {
+  background: #fde68a;
+  border-color: #d97706;
 }
 
-/* --- 结束闯关按钮 --- */
+/* --- 成绩面板 --- */
+.challenge-stage .score-area {
+  margin-top: 20px;
+  flex-shrink: 0;
+}
 #end-btn {
-  background: var(--color-bg);
-  color: var(--color-text-secondary);
-  border: 1px solid var(--color-border);
+  background: var(--color-warning-bg);
+  color: #92400e;
+  border: 2px solid var(--color-warning-border);
 }
 #end-btn:hover {
-  background: var(--color-warning-bg);
-  border-color: var(--color-warning-border);
-  color: #92400e;
+  background: #fde68a;
+  border-color: #d97706;
 }
 
-/* --- 手机端结束闯关按钮 --- */
+/* --- 手机端结束按钮 --- */
 .mtb-challenge-end {
   padding: 6px 14px;
   border: none;
@@ -150,41 +217,73 @@
   background: var(--color-warning-border);
   color: #fff;
   flex-shrink: 0;
-  transition: opacity 0.15s;
 }
 .mtb-challenge-end.hidden { display: none; }
 
-/* --- 移动端适配 --- */
+/* --- 移动端 --- */
 @media (max-width: 900px) {
+  .challenge-stage {
+    padding: 12px 10px 24px;
+  }
+  .challenge-topbar {
+    margin-bottom: 12px;
+  }
+  .challenge-title {
+    font-size: 1.1rem;
+  }
+  .challenge-meta {
+    gap: 10px;
+    font-size: 0.76rem;
+  }
   #questions-container .question-card {
     padding: 18px 14px;
   }
+  .challenge-bottombar {
+    gap: 6px;
+    padding-top: 12px;
+  }
   .challenge-nav-btn {
-    padding: 8px 14px;
-    font-size: 0.82rem;
+    padding: 8px 12px;
+    font-size: 0.8rem;
   }
   .challenge-current {
-    font-size: 0.8rem;
-    min-width: 56px;
+    font-size: 0.78rem;
   }
-  .challenge-feedback {
+  .challenge-submit-btn {
+    padding: 8px 20px;
+    font-size: 0.85rem;
+  }
+  .challenge-answer-zone .challenge-feedback {
     padding: 10px 14px;
     font-size: 0.82rem;
   }
 }
+
 @media (max-width: 480px) {
+  .challenge-stage {
+    padding: 8px 6px 20px;
+  }
+  .challenge-title {
+    font-size: 1rem;
+  }
   #questions-container .question-card {
     padding: 14px 10px;
   }
+  .challenge-bottombar {
+    gap: 4px;
+  }
   .challenge-nav-btn {
     padding: 7px 10px;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
+  }
+  .challenge-submit-btn {
+    padding: 7px 16px;
+    font-size: 0.82rem;
   }
   .challenge-progress-bar {
-    gap: 8px;
+    gap: 6px;
   }
   .challenge-progress-label {
-    font-size: 0.75rem;
-    min-width: 48px;
+    font-size: 0.72rem;
   }
 }

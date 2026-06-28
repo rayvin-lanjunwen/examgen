@@ -110,10 +110,32 @@ Options:
   --option-shuffle / --no-option-shuffle
                              覆盖：随机打乱选项顺序
   --time INTEGER             覆盖：考试时间（分钟）
+  --theme [modern|academic|tool|green]
+                             视觉主题风格  [default: modern]
+  --mode [exam|challenge]    试卷模式  [default: exam]
   --template-dir PATH        自定义模板目录
   --version                  显示版本号
   --help                     显示帮助信息
 ```
+
+生成闯关模式试卷：
+
+```bash
+examgen generate quiz.md -o quiz.html --mode challenge --theme academic
+```
+
+## 交互模式
+
+ExamGen 支持两种试卷交互模式，在上传页面或命令行选择：
+
+| 特性 | 考试模式 | 闯关模式 |
+|------|----------|----------|
+| 题目显示 | 全部纵向排列 | 每次仅显示一道 |
+| 判分时机 | 统一提交后批量判分 | 每题提交即时判分 |
+| 简答题 | 批阅模式手动给分 | 仅显示参考答案 |
+| 可重做 | 重置全部 | 单题重做 |
+| 操作 | 底部提交按钮 | 提交 + 上一题/下一题 |
+| 适用场景 | 模拟考试、测验 | 日常练习、课后复习 |
 
 ## Web 可视化界面
 
@@ -248,9 +270,11 @@ examgen/
 │   │   ├── templates/upload.html       # 上传页面
 │   │   └── static/style.css            # Web 界面样式
 │   └── templates/default/
-│       ├── exam.html                   # Jinja2 试卷模板
+│       ├── exam.html                   # Jinja2 考试模式模板
+│       ├── challenge.html              # Jinja2 闯关模式模板
 │       └── assets/
-│           ├── style.css               # 试卷样式（内联）
+│           ├── style.css               # 试卷基础样式（内联）
+│           ├── challenge.css           # 闯关模式增量样式（内联）
 │           └── js/
 │               ├── 01_constants.js     # 常量定义
 │               ├── 02_utils.js         # HTML 转义、Markdown 渲染（公式保护）
@@ -260,12 +284,15 @@ examgen/
 │               ├── 06_countdown.js     # 倒计时 + 自动交卷
 │               ├── 07_init.js          # 页面初始化、localStorage、键盘快捷键
 │               ├── 08_grading.js       # 简答题批阅（关键词判分 + 翻题）
-│               └── 09_bookmarks.js     # 题目标记/收藏系统
+│               ├── 09_bookmarks.js     # 题目标记/收藏系统
+│               └── 10_challenge.js     # 闯关模式交互逻辑
 ├── tests/
-│   ├── test_parser.py                # 含公式保留、ParseError 测试
+│   ├── test_parser.py
 │   ├── test_normalizer.py
 │   ├── test_transformer.py
 │   └── test_generator.py
+├── scripts/
+│   └── embed_images.py
 └── docs/
     ├── spec.md                       # 题目源文件规范（Markdown）
     ├── spec-txt.txt                  # 题目源文件规范（TXT）

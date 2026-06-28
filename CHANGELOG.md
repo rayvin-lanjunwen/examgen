@@ -2,6 +2,28 @@
 
 ---
 
+## 2026-06-28 (深夜)
+
+### 闯关模式卡片化改造
+- **单题大卡片布局** — `challenge-stage` 居中主区域（max-width: 780px），`challenge-card-wrap` 垂直居中撑满
+- **答案反馈独立区** — `#challenge-feedback` + `#challenge-explanation` + `#challenge-reference` 在卡片下方固定区域
+- **底部操作栏重构** — `challenge-bottombar` 三栏布局（◀上一题 | 第N题 提交 重做 | 下一题▶）
+- **顶部信息简化** — 标题 + 科目/时间/分数行 + 进度条，去除考试模式横幅
+- **按钮可见性修复** — `.btn-secondary` 改用 `--color-btn-secondary: #ffffff` + 2px 深色边框，不再和背景融色
+- **闯关结束按钮样式** — `#end-btn` 改为暖黄色警告风格，悬停加深
+
+### Bug 修复
+- **JS 致命错误链** — `saveAnswersToStorage`/`onSubmit`/`retryBtn`/`endBtn` 等 07_init.js 中定义的符号在闯关模式中不存在，导致脚本全盘不执行。全部在 `10_challenge.js` 中自备定义
+- **`findExamData`/`reRenderMath` 缺失** — 从 08_grading.js 移植到 challenge.js，修复所有跳题/渲染调用
+- **书签星标刷到卡片** — `challengeGoTo` 和初始化末尾重新调用 `initBookmarks()`
+- **提交后同时显示答案和解析** — `showChallengeFeedback` 正确时也显示"标准答案"，并同时展开解析区
+
+### 改进
+- 收藏星标颜色提升可见度：`var(--color-text-tertiary)` → `#c4b5fd`
+- 收藏星标加 `font-size: 0` 消除额外间隙
+
+---
+
 ## 2026-06-28 (晚间)
 
 ### 闯关模式
