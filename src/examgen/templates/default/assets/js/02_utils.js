@@ -12,7 +12,6 @@ function mdToHTML(text) {
     return escapeHTML(text);
   }
 
-  // 兼容新旧版 marked API
   var opts = { breaks: true, gfm: true };
 
   // 保护 LaTeX 公式，防止 marked.js 将 _ 解析为斜体、* 解析为粗体等
@@ -29,6 +28,12 @@ function mdToHTML(text) {
     mathBlocks.push(match);
     return "\uFFF0I" + (mathBlocks.length - 1) + "I\uFFF0";
   });
+
+  // 3) 保护单个 ~（用于数字范围如 125Kb/s~1Mb/s），避免 marked 误处理
+  //    同时保留 ~~strikethrough~~ 语法
+  text = text.replace(/~~/g, "\uFFF0S");         // 占位双 ~~
+  text = text.replace(/~/g, "&#126;");           // 转换单个 ~
+  text = text.replace(/\uFFF0S/g, "~~");         // 还原 ~~
 
   // 新版 marked (v5+) 用 marked.parse(text, options)，旧版用 marked.setOptions + marked.parse
   var html;

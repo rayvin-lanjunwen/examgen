@@ -41,6 +41,19 @@
   --gradient-banner: linear-gradient(135deg, #4338ca 0%, #6366f1 40%, #818cf8 100%);
   --gradient-timer: linear-gradient(90deg, #6366f1, #a855f7);
 
+  /* 主题差异化变量 */
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+  --font-heading: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+  --font-mono: "SF Mono", "Fira Code", "Cascadia Code", Consolas, monospace;
+  --card-radius: var(--radius);
+  --card-shadow: var(--shadow);
+  --card-border-left: 4px;
+  --card-border-left-color: var(--color-border);
+  --option-radius: 50%;
+  --option-active-glow: 0 0 0 3px var(--color-primary-ring, rgba(99,102,241,0.2));
+  --banner-angle: 135deg;
+  --sidebar-divider-style: solid;
+  --nav-badge-radius: 10px;
 }
 
 
@@ -50,71 +63,118 @@ body[data-theme="academic"] {
   --color-primary-light: #ede9fe;
   --color-primary-glow: rgba(124,58,237,0.2);
   --color-sidebar-active-border: #7c3aed;
-  --color-sidebar-bg: #f8f4ed;
-  --color-sidebar-border: #e2e8f0;
-  --color-sidebar-text: #475569;
-  --color-sidebar-text-dim: #94a3b8;
-  --color-sidebar-hover: #ede9fe;
-  --color-sidebar-active: #ede9fe;
-  --color-bg: #f5f0eb;
-  --color-border: #e2e8f0;
-  --color-card: #fffdfa;
-  --color-btn-secondary: #ffffff;
-  --timer-bar-bg: rgba(124,58,237,0.10);
+  --color-sidebar-bg: #f5efe6;
+  --color-sidebar-border: #d6cec3;
+  --color-sidebar-text: #4a4035;
+  --color-sidebar-text-dim: #a09888;
+  --color-sidebar-hover: #ede0d4;
+  --color-sidebar-active: #e8ddd0;
+  --color-bg: #f4efe8;
+  --color-border: #d9d0c5;
+  --color-card: #fefdfb;
+  --color-btn-secondary: #fefdfb;
+  --color-text: #2c2416;
+  --color-text-secondary: #6b5e4e;
+  --color-text-tertiary: #a89984;
+  --timer-bar-bg: rgba(124,58,237,0.08);
   --gradient-primary: linear-gradient(135deg, #7c3aed, #a78bfa);
   --gradient-primary-hover: linear-gradient(135deg, #6d28d9, #7c3aed);
-  --gradient-banner: linear-gradient(135deg, #5b21b6 0%, #7c3aed 40%, #a78bfa 100%);
+  --gradient-banner: linear-gradient(135deg, #4c1d95 0%, #7c3aed 40%, #a78bfa 100%);
   --gradient-timer: linear-gradient(90deg, #7c3aed, #a78bfa);
+
+  --font-body: Georgia, "Noto Serif SC", "Songti SC", serif;
+  --font-heading: Georgia, "Noto Serif SC", "Songti SC", serif;
+  --card-radius: 6px;
+  --card-shadow: 0 2px 12px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.03);
+  --card-border-left: 6px;
+  --card-border-left-color: #7c3aed;
+  --option-radius: 3px;
+  --option-active-glow: 0 0 0 3px rgba(124,58,237,0.15);
+  --banner-angle: 120deg;
+  --sidebar-divider-style: dotted;
+  --nav-badge-radius: 4px;
 }
+
 body[data-theme="tool"] {
   --color-primary: #0ea5e9;
   --color-primary-hover: #0284c7;
   --color-primary-light: #e0f2fe;
   --color-primary-glow: rgba(14,165,233,0.22);
   --color-sidebar-active-border: #0ea5e9;
-  --color-sidebar-bg: #f8fafc;
-  --color-sidebar-border: #e2e8f0;
-  --color-sidebar-text: #475569;
-  --color-sidebar-text-dim: #94a3b8;
-  --color-sidebar-hover: #f1f5f9;
+  --color-sidebar-bg: #ffffff;
+  --color-sidebar-border: #d4d4d8;
+  --color-sidebar-text: #27272a;
+  --color-sidebar-text-dim: #a1a1aa;
+  --color-sidebar-hover: #f4f4f5;
   --color-sidebar-active: #e0f2fe;
-  --color-bg: #f1f5f9;
-  --color-border: #e2e8f0;
+  --color-bg: #fafafa;
+  --color-border: #e4e4e7;
   --color-card: #ffffff;
   --color-btn-secondary: #ffffff;
-  --timer-bar-bg: rgba(14,165,233,0.10);
+  --color-text: #18181b;
+  --color-text-secondary: #71717a;
+  --color-text-tertiary: #a1a1aa;
+  --timer-bar-bg: rgba(14,165,233,0.08);
   --gradient-primary: linear-gradient(135deg, #0ea5e9, #38bdf8);
   --gradient-primary-hover: linear-gradient(135deg, #0284c7, #0ea5e9);
   --gradient-banner: linear-gradient(135deg, #0369a1 0%, #0ea5e9 40%, #38bdf8 100%);
   --gradient-timer: linear-gradient(90deg, #0ea5e9, #38bdf8);
+
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-heading: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --card-radius: 2px;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  --card-border-left: 3px;
+  --card-border-left-color: var(--color-border);
+  --option-radius: 4px;
+  --option-active-glow: 0 0 0 2px rgba(14,165,233,0.2);
+  --banner-angle: 180deg;
+  --sidebar-divider-style: solid;
+  --nav-badge-radius: 6px;
 }
+
 body[data-theme="green"] {
   --color-primary: #059669;
   --color-primary-hover: #047857;
   --color-primary-light: #d1fae5;
   --color-primary-glow: rgba(5,150,105,0.22);
   --color-sidebar-active-border: #059669;
-  --color-sidebar-bg: #f0fdf4;
-  --color-sidebar-border: #d1d5db;
-  --color-sidebar-text: #475569;
-  --color-sidebar-text-dim: #94a3b8;
-  --color-sidebar-hover: #dcfce7;
-  --color-sidebar-active: #d1fae5;
+  --color-sidebar-bg: #ecfdf5;
+  --color-sidebar-border: #a7f3d0;
+  --color-sidebar-text: #065f46;
+  --color-sidebar-text-dim: #6ee7b7;
+  --color-sidebar-hover: #d1fae5;
+  --color-sidebar-active: #a7f3d0;
   --color-bg: #f0fdf4;
-  --color-border: #d1d5db;
+  --color-border: #d1fae5;
   --color-card: #ffffff;
   --color-btn-secondary: #ffffff;
+  --color-text: #064e3b;
+  --color-text-secondary: #047857;
+  --color-text-tertiary: #6ee7b7;
   --timer-bar-bg: rgba(5,150,105,0.10);
   --gradient-primary: linear-gradient(135deg, #059669, #34d399);
   --gradient-primary-hover: linear-gradient(135deg, #047857, #059669);
   --gradient-banner: linear-gradient(135deg, #065f46 0%, #059669 40%, #34d399 100%);
   --gradient-timer: linear-gradient(90deg, #059669, #34d399);
+
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-heading: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --card-radius: 14px;
+  --card-shadow: 0 4px 16px rgba(5,150,105,0.08), 0 0 0 1px rgba(5,150,105,0.04);
+  --card-border-left: 5px;
+  --card-border-left-color: #10b981;
+  --option-radius: 50%;
+  --option-active-glow: 0 0 0 4px rgba(5,150,105,0.12);
+  --banner-angle: 150deg;
+  --sidebar-divider-style: solid;
+  --nav-badge-radius: 12px;
 }
 /* 鈹€鈹€ 鍏ㄥ眬 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+  font-family: var(--font-body);
   background: var(--color-bg);
   color: var(--color-text);
   line-height: 1.7;
@@ -216,7 +276,7 @@ body {
 .sidebar-expand-btn.hidden { display: none; }
 .sidebar-progress {
   padding: 10px 18px;
-  border-bottom: 1px solid var(--color-sidebar-border);
+  border-bottom: 1px var(--sidebar-divider-style) var(--color-sidebar-border);
 }
 .progress-bar {
   height: 5px;
@@ -311,7 +371,7 @@ body {
 .nav-badge {
   font-size: 0.65rem;
   padding: 1px 6px;
-  border-radius: 10px;
+  border-radius: var(--nav-badge-radius);
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -383,6 +443,7 @@ body {
   text-align: center;
 }
 .exam-title {
+  font-family: var(--font-heading);
   font-size: 1.9rem;
   font-weight: 800;
   color: #fff;
@@ -436,9 +497,9 @@ body {
 .question-card {
   background: var(--color-card);
   border: 1px solid var(--color-border);
-  border-left: 4px solid var(--color-border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
+  border-left: var(--card-border-left) solid var(--card-border-left-color);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
   padding: 24px 28px;
   margin-bottom: 16px;
   transition: border-color var(--transition), box-shadow var(--transition);
@@ -548,7 +609,7 @@ body {
 .option-circle {
   width: 32px;
   height: 32px;
-  border-radius: 50%;
+  border-radius: var(--option-radius);
   background: var(--color-bg);
   border: 2px solid var(--color-border);
   display: flex;
@@ -564,7 +625,7 @@ body {
   background: var(--color-primary);
   border-color: var(--color-primary);
   color: #fff;
-  box-shadow: 0 0 0 4px var(--color-primary-glow);
+  box-shadow: var(--option-active-glow);
   animation: circlePop 0.3s ease;
 }
 @keyframes circlePop {

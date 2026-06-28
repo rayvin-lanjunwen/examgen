@@ -132,7 +132,9 @@ def generate_html(
         template = env.get_template("exam.html")
         style_content = _read_asset(tpl_dir / "assets" / "style.css")
         challenge_css = ""
-        script_content = _read_js_bundle(tpl_dir / "assets")
+        # 考试模式：跳过闯关专用 JS
+        exam_skip = frozenset({"10_challenge.js"})
+        script_content = _read_js_bundle(tpl_dir / "assets", skip=exam_skip)
 
     # 准备模板变量
     meta_dict = asdict(meta)

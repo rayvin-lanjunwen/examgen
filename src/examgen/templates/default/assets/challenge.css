@@ -30,6 +30,7 @@
   background: var(--color-primary-light);
 }
 .challenge-title {
+  font-family: var(--font-heading);
   font-size: 1.25rem;
   font-weight: 800;
   color: var(--color-text);
@@ -97,10 +98,10 @@
   opacity: 1 !important;
   margin-bottom: 12px;
   padding: 28px 32px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
   border: 1.5px solid var(--color-border);
-  border-left: 5px solid var(--color-border);
+  border-left: var(--card-border-left) solid var(--card-border-left-color);
 }
 #questions-container .question-card:hover {
   border-color: var(--color-border);
