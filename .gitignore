@@ -30,3 +30,15 @@ _scf_build/
 # OS
 Thumbs.db
 .DS_Store
+
+# Tauri 构建产物
+desktop/node_modules/
+desktop/src-tauri/sidecar/
+desktop/src-tauri/target/
+desktop/src-tauri/icons/*.png
+desktop/src-tauri/icons/*.icns
+desktop/src-tauri/icons/*.ico
+
+# PyInstaller 构建产物
+build/pyinstaller/
+desktop/_server_entry.py

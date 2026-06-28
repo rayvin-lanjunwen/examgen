@@ -2,6 +2,56 @@
 
 ---
 
+## 2026-06-29 (凌晨续)
+
+### Tauri 桌面版
+
+新增完整的 Tauri 桌面端打包工程：
+
+- **Rust 主程序** — `desktop/src-tauri/src/main.rs`，启动 FastAPI sidecar + 创建 WebView 窗口（1100×780）
+- **Sidecar 模式** — 发布版自动扫描多路径查找 `examgen-server.exe`，开发版直接调用 `python -m uvicorn`
+- **复用 Web 界面** — `desktop/public/index.html` 仅做 iframe 加载，上传/生成/下载/预览全部复用现有页面
+- **一键构建** — `desktop/build_release.py`（PyInstaller → npm install → tauri build）
+- **输出 .msi** — Tauri v2 bundle 生成 Windows 安装包，用户双击安装，**无需 Python/Node.js/Rust**
+- **Web 端 .exe 下载入口** — 上传页面顶部新增桌面版下载 banner
+- **pyproject.toml 配置** — 新增 `[tool.examgen.desktop]` 段记录构建参数
+
+### 文档
+- `desktop/README.md` 完整构建/分发说明
+- `.gitignore` 排除 Tauri 构建产物
+
+---
+
+## 2026-06-29 (凌晨)
+
+### Bug 修复（闯关模式）
+
+- **提交后解析不显示** — `renderQuestions` 切题时用 `exp.style.display = "none"` 清空了解析区，内联样式优先级高于 CSS class `.show`，导致后续 `className = "explanation show"` 无效。修复：改用 `exp.className = ""` 控制显隐
+- **`highlightResult` 与 `showChallengeFeedback` 双重显示** — 提交后题卡内出现冗余 `.answer-display` 与 `#challenge-feedback` 两个正确答案行，让人误以为解析区显示的是答案。修复：提交后主动移除 `.answer-display`，统一由 challenge-feedback 展示
+- **选择题提交后解析不显现** — 回退早期 `showChallengeFeedback` 中简答题的 `return` 逻辑，改为 `if/else if/else` 衔接确保解析区对所有题型都渲染
+- **考试模式只显示第一题** — `10_challenge.js` 覆盖了 `renderQuestions` 等核心函数，考试模式中误打包该文件。修复：`generator.py` 考试模式 skip `10_challenge.js`
+- **旧数据残留** — 同一标题的试卷重新生成后刷新，localStorage 旧数据导致部分题显示为"已完成"。修复：初始化时清除 localStorage
+
+### 样式增强
+
+- **四套主题差异化** — 新增 `--font-body`/`--card-radius`/`--card-shadow`/`--card-border-left`/`--option-radius`/`--option-active-glow`/`--banner-angle`/`--sidebar-divider-style`/`--nav-badge-radius` 9 个主题级变量，card/option/font/shadow 四主题各不相同：
+  - **modern**（现代）: 默认 sans-serif + 10px 圆角卡片
+  - **academic**（学术）: Georgia 衬线体 + 6px 直角卡片 + dotted 分割线
+  - **tool**（工具）: Inter 字体 + 2px 方角卡片 + 无阴影扁平风
+  - **green**（环保）: 14px 圆角 + 绿调 shadow + 全圆选项
+
+### 兼容性修复
+
+- **`~` 被误解析为删除线** — marked.js GFM 将单个 `~`（数字范围如 125Kb/s~1Mb/s）误判为下标/删除线。修复在 `mdToHTML()` 中增加保护：`~~` 占位 → `~` 转 `&#126;` → 还原 `~~`
+
+### 文档更新
+
+- **prompt-txt.txt / prompt.md**: 明确填空题 `<explanation>` 是知识点解析，不是答案的重复
+- **spec-txt.txt / spec.md**: 新增 `<explanation>` 和 `<answer>` 职责区别说明
+- 解析要求表格细化：选择题必须错误选项分析，填空/简答侧重知识点背景
+
+---
+
 ## 2026-06-28 (深夜)
 
 ### 闯关模式卡片化改造

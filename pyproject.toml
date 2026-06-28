@@ -23,6 +23,9 @@ dev = [
 [project.scripts]
 examgen = "examgen.cli:main"
 
+[project.entry-points."gui_scripts"]
+examgen-desktop = "examgen.cli:main"
+
 [build-system]
 requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
@@ -36,6 +39,29 @@ examgen = [
     "web/templates/**/*",
     "web/static/**/*",
 ]
+
+# ═══════════════════════════════════════
+#  桌面端打包 (Tauri + PyInstaller)
+# ═══════════════════════════════════════
+
+[tool.examgen.desktop]
+description = "ExamGen 桌面版打包配置"
+
+[tool.examgen.desktop.tauri]
+# Tauri 项目根目录（相对于项目根）
+project_dir = "desktop"
+# 产品名称（.exe 文件名将以此为前缀）
+product_name = "ExamGen"
+# sidecar 端口（需与 tauri.conf.json 中 main.rs 保持一致）
+server_port = 8765
+
+[tool.examgen.desktop.pyinstaller]
+# sidecar 输出文件名
+output_name = "examgen-server"
+# 输出目录
+output_dir = "desktop/src-tauri/sidecar"
+# PyInstaller 入口脚本
+entry_script = "desktop/_server_entry.py"  # 由 build_sidecar.py 自动生成
 
 [tool.ruff]
 target-version = "py39"

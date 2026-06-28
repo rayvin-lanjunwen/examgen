@@ -166,6 +166,28 @@ examgen web --host 0.0.0.0 --port 3000 --reload
 
 项目根目录已包含 `vercel.json`，直接将仓库导入 Vercel 即可部署。
 
+## 桌面版 (.exe)
+
+ExamGen 提供 Windows 桌面客户端，基于 Tauri + FastAPI，**无需安装 Python / Node.js**：
+
+```bash
+# 在 Releases 页面下载 ExamGen_*.msi
+# https://github.com/rayvin-lanjunwen/examgen/releases
+```
+
+- 双击安装 → 桌面快捷方式
+- 打开后界面和 Web 版完全一致
+- 所有功能离线运行，生成的试卷 HTML 保存到本地即可发给学生
+
+**自行构建**（需要 Rust + Node.js）：
+
+```bash
+pip install pyinstaller
+python desktop/build_release.py
+```
+
+详见 `desktop/README.md`。
+
 ## YAML 元数据
 
 | 字段 | 类型 | 必填 | 说明 |

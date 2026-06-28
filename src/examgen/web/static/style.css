@@ -393,6 +393,63 @@ body::after {
 /* ===== Footer ===== */
 .footer { text-align: center; color: var(--color-text-tertiary); font-size: 0.78rem; margin-top: 20px; letter-spacing: 0.3px; }
 
+/* ════════════════════════════════════
+   桌面版下载入口
+   ════════════════════════════════════ */
+.desktop-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 560px;
+  margin: 0 auto 28px;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border: 1px solid #bae6fd;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(14,165,233,0.10);
+  animation: fadeInUp 0.5s ease;
+}
+.desktop-banner-icon {
+  flex-shrink: 0;
+  color: #0284c7;
+  display: flex;
+  align-items: center;
+}
+.desktop-banner-text {
+  flex: 1;
+  font-size: 0.88rem;
+  color: #0c4a6e;
+  line-height: 1.4;
+}
+.desktop-banner-text strong {
+  color: #0369a1;
+}
+.desktop-banner-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: #fff;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 2px 6px rgba(14,165,233,0.25);
+}
+.desktop-banner-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(14,165,233,0.35);
+  color: #fff;
+}
+
+@media (max-width: 560px) {
+  .desktop-banner { flex-wrap: wrap; text-align: center; justify-content: center; }
+  .desktop-banner-text { flex-basis: 100%; }
+}
+
 /* ===== Utility ===== */
 .hidden { display: none !important; }
 
